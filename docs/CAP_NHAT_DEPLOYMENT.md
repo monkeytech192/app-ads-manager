@@ -34,49 +34,51 @@ package.json     →    client/package.json
 
 ---
 
-## 1️⃣ Railway Backend (Cần Setup)
+## 1️⃣ Railway Backend Setup
 
-> ⚠️ Railway VẪN CẦN cập nhật Root Directory = `server`
+> ✅ **ĐÃ FIX**: Đã tạo `railway.toml` trong commit `d98614f`. Railway sẽ tự động detect và deploy đúng!
 
-### Bước 1: Truy cập Vercel Dashboard
-1. Vào [vercel.com](https://vercel.com)
-2. Đăng nhập
-3. Click vào project: **ads-manager-brutalist**
+### Railway không có "Root Directory" - Dùng railway.toml thay thế
 
-### Bước 2: Vào Settings
-1. Click tab **Settings** (thanh menu bên trái)
-2. Scroll xuống phần **Build & Development Settings**
+**Railway đã được config trong file `railway.toml`:**
+```toml
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "server/Dockerfile"
 
-### Bước 3: Cập Nhật Root Directory
-1. Tìm mục **Root Directory**
-2. Click nút **Edit** bên cạnh
-3. Nhập: `client`
-4. Click **Save**
-
-### Bước 4: Cập Nhật Build Settings (nếu cần)
-Verify các settings sau (thường Vercel tự detect):
-
-```
-Framework Preset: Vite
-Build Command: npm run build
-Output Directory: dist
-Install Command: npm install
+[deploy]
+startCommand = "cd server && npm start"
+healthcheckPath = "/api/v1/health"
 ```
 
-### Bước 5: Redeploy
-1. Quay lại tab **Deployments**
-2. Click deployment mới nhất
-3. Click nút **Redeploy**
-4. Hoặc đợi Vercel tự động deploy từ GitHub commit
+### Bạn KHÔNG cần làm gì thêm!
 
-### ✅ Kiểm Tra
-- Vào URL: `https://app-ads.tiemtocchu3.vn`
-- Nếu thấy app hiển thị bình thường → Thành công!
-- Nếu bị lỗi → Check deployment logs
+Railway sẽ:
+1. Tự động detect `railway.toml` từ GitHub
+2. Build từ `server/Dockerfile`
+3. Run command: `cd server && npm start`
+4. Healthcheck: `/api/v1/health`
+
+### ✅ Kiểm Tra Railway Deployment
+
+1. Vào [railway.app/dashboard](https://railway.app)
+2. Click project: **app-ads-manager**
+3. Click service: **app-ads-manager**
+4. Tab **Deployments** - Xem deployment mới với commit `d98614f`
+5. Đợi build xong (2-3 phút)
+6. Check: `https://app-ads-manager-production.up.railway.app/api/v1/health`
+
+**Nếu thấy `{"status":"ok"}` → Thành công!**
 
 ---
 
-## 2️⃣ Cập Nhật Railway (Backend)
+## 2️⃣ Vercel Frontend (Đã Fix)
+
+---
+
+## 3️⃣ (Tùy Chọn) Manual Railway Setup
+
+> 💡 Nếu railway.toml không work, dùng cách manual này:
 
 ### Bước 1: Truy cập Railway Dashboard
 1. Vào [railway.app](https://railway.app)
@@ -84,29 +86,24 @@ Install Command: npm install
 3. Click vào project: **app-ads-manager**
 4. Click vào service: **app-ads-manager** (backend service)
 
-### Bước 2: Vào Settings
+### Bước 2: Cập Nhật Custom Start Command
+
+Vì Railway không có "Root Directory" option, cần thêm `cd server` vào Start Command:
+
 1. Click tab **Settings** (bên trái)
-2. Scroll xuống phần **Build & Deploy**
+2. Scroll xuống **Deploy**
+3. Tìm **Custom Start Command**
+4. Click **+ Start Command**
+5. Nhập: `cd server && npm start`
+6. Railway tự động save
 
-### Bước 3: Cập Nhật Root Directory
-1. Tìm mục **Root Directory**
-2. Nhập: `server`
-3. Railway tự động save
+### Bước 3: Verify Build Command (Optional)
 
-### Bước 4: Cập Nhật Build/Start Commands (nếu cần)
+Nếu build fail, thêm Custom Build Command:
+1. Trong Settings → **Deploy**
+2. **Custom Build Command**: `cd server && npm install && npm run build`
 
-Verify các settings sau:
-
-```
-Build Command: npm install && npm run build
-Start Command: npm start
-```
-
-**Nếu chưa có, thêm vào:**
-1. Click **+ New Variable** hoặc Edit Build Command
-2. Nhập commands ở trên
-
-### Bước 5: Trigger Redeploy
+### Bước 4: Trigger Redeploy
 Railway sẽ tự động redeploy khi detect thay đổi settings.
 
 **Hoặc manual trigger:**
@@ -121,7 +118,7 @@ Railway sẽ tự động redeploy khi detect thay đổi settings.
 
 ---
 
-## 3️⃣ Kiểm Tra Biến Môi Trường
+## 4️⃣ Kiểm Tra Biến Môi Trường
 
 ### Vercel Environment Variables
 Vào **Settings** → **Environment Variables**
@@ -150,28 +147,22 @@ JWT_REMEMBER_EXPIRE=30d
 
 ---
 
-## 4️⃣ Xử Lý Lỗi Thường Gặp
+## 5️⃣ Xử Lý Lỗi Thường Gặp
 
-### ❌ Vercel: "No package.json found"
-**Nguyên nhân:** Root Directory chưa được set thành `client`
-
-**Giải pháp:**
-1. Settings → Root Directory → `client`
-2. Redeploy
-
-### ❌ Railway: "Cannot find module"
-**Nguyên nhân:** Root Directory chưa được set thành `server`
+### ❌ Railway: "Cannot find package.json"
+**Nguyên nhân:** Railway đang tìm package.json ở root thay vì server/
 
 **Giải pháp:**
-1. Settings → Root Directory → `server`
-2. Wait for auto redeploy hoặc trigger manual
+1. Verify `railway.toml` đã commit và push
+2. Hoặc thêm Custom Start Command: `cd server && npm start`
+3. Redeploy
 
-### ❌ Vercel: Build thành công nhưng app bị lỗi 404
-**Nguyên nhân:** Output Directory sai
+### ❌ Vercel: "cd: client: No such file or directory"
+**Nguyên nhân:** Đang deploy commit cũ (trước khi fix vercel.json)
 
 **Giải pháp:**
-1. Settings → Output Directory → `dist`
-2. Redeploy
+1. Deployments tab → Redeploy với commit mới nhất
+2. Verify vercel.json không có `cd client` commands
 
 ### ❌ Railway: "Module not found: @/models/User"
 **Nguyên nhân:** Import paths sai sau khi move files
@@ -182,27 +173,26 @@ JWT_REMEMBER_EXPIRE=30d
 
 ---
 
-## 5️⃣ Checklist Hoàn Thành
+## 6️⃣ Checklist Hoàn Thành
 
 ### Vercel ✅
-- [ ] Root Directory = `client`
-- [ ] Build Command = `npm run build`
-- [ ] Output Directory = `dist`
+- [ ] Redeploy với commit mới (eac6ada trở lên)
+- [ ] Build Command = `npm run build` (không có cd client)
+- [ ] Output Directory = `dist` (không có client/dist)
 - [ ] Environment Variables đã set đầy đủ
 - [ ] Deployment thành công (green ✓)
-- [ ] App truy cập được qua domain
+- [ ] App truy cập được: https://app-ads.tiemtocchu3.vn
 
 ### Railway ✅
-- [ ] Root Directory = `server`
-- [ ] Build Command = `npm install && npm run build`
-- [ ] Start Command = `npm start`
+- [ ] `railway.toml` đã được commit (commit d98614f)
+- [ ] Hoặc Custom Start Command = `cd server && npm start`
 - [ ] Environment Variables đã set đầy đủ
 - [ ] Deployment thành công (green ✓)
-- [ ] API endpoint trả về response
+- [ ] API endpoint trả về: https://app-ads-manager-production.up.railway.app/api/v1/health
 
 ---
 
-## 6️⃣ Deployment Workflow Sau Khi Setup
+## 7️⃣ Deployment Workflow Sau Khi Setup
 
 ### Workflow Tự Động
 ```
