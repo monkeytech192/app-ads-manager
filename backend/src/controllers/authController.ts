@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import User from '../models/User';
 import Settings from '../models/Settings';
 import { AuthRequest } from '../middleware/auth';
@@ -32,10 +32,14 @@ export const register = async (req: Request, res: Response) => {
     await Settings.create({ user_id: user._id });
 
     // Generate JWT
+    const signOptions: SignOptions = {
+      expiresIn: process.env.JWT_EXPIRE || '7d'
+    };
+    
     const token = jwt.sign(
       { userId: user._id },
       process.env.JWT_SECRET!,
-      { expiresIn: (process.env.JWT_EXPIRE || '7d') as string }
+      signOptions
     );
 
     res.status(201).json({
@@ -82,14 +86,16 @@ export const login = async (req: Request, res: Response) => {
     }
 
     // Generate JWT
-    const expiresIn = remember_me 
-      ? (process.env.JWT_REMEMBER_EXPIRE || '30d') 
-      : (process.env.JWT_EXPIRE || '7d');
+    const signOptions: SignOptions = {
+      expiresIn: remember_me 
+        ? process.env.JWT_REMEMBER_EXPIRE || '30d'
+        : process.env.JWT_EXPIRE || '7d'
+    };
 
     const token = jwt.sign(
       { userId: user._id },
       process.env.JWT_SECRET!,
-      { expiresIn: expiresIn as string }
+      signOptions
     );
 
     res.json({
