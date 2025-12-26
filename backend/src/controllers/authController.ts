@@ -35,7 +35,7 @@ export const register = async (req: Request, res: Response) => {
     const token = jwt.sign(
       { userId: user._id },
       process.env.JWT_SECRET!,
-      { expiresIn: process.env.JWT_EXPIRE || '7d' }
+      { expiresIn: (process.env.JWT_EXPIRE || '7d') as string }
     );
 
     res.status(201).json({
@@ -83,13 +83,13 @@ export const login = async (req: Request, res: Response) => {
 
     // Generate JWT
     const expiresIn = remember_me 
-      ? process.env.JWT_REMEMBER_EXPIRE || '30d' 
-      : process.env.JWT_EXPIRE || '7d';
+      ? (process.env.JWT_REMEMBER_EXPIRE || '30d') 
+      : (process.env.JWT_EXPIRE || '7d');
 
     const token = jwt.sign(
       { userId: user._id },
       process.env.JWT_SECRET!,
-      { expiresIn }
+      { expiresIn: expiresIn as string }
     );
 
     res.json({
