@@ -6,6 +6,7 @@ import authRoutes from './routes/auth';
 import dashboardRoutes from './routes/dashboard';
 import managementRoutes from './routes/management';
 import settingsRoutes from './routes/settings';
+import facebookRoutes from './routes/facebook';
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.get('/health', (req, res) => {
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
+app.use('/api/v1/facebook', facebookRoutes);
 app.use('/api/v1', managementRoutes);
 app.use('/api/v1', settingsRoutes);
 

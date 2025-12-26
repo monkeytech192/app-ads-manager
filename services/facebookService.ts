@@ -1,7 +1,10 @@
 import { FacebookUserProfile } from "../types";
 
-// Replace this with your actual Facebook App ID from developers.facebook.com
-const FACEBOOK_APP_ID = '1354327065841163'; 
+// Facebook App Configuration - Get from developers.facebook.com
+const FACEBOOK_APP_ID = '1354327065841163';
+// Facebook Login for Business Configuration ID - Create in App Dashboard > Facebook Login for Business > Configurations
+const FACEBOOK_CONFIG_ID = process.env.VITE_FB_CONFIG_ID || ''; // User Access Token config
+const FACEBOOK_BUSINESS_CONFIG_ID = process.env.VITE_FB_BUSINESS_CONFIG_ID || ''; // System User Access Token config 
 
 export const initFacebookSdk = (): Promise<void> => {
     return new Promise((resolve) => {
@@ -15,7 +18,7 @@ export const initFacebookSdk = (): Promise<void> => {
                 appId      : FACEBOOK_APP_ID,
                 cookie     : true,
                 xfbml      : true,
-                version    : 'v19.0' // Use the latest API version
+                version    : 'v21.0' // Use latest API version (Dec 2024)
             });
             resolve();
         };
@@ -32,11 +35,27 @@ export const initFacebookSdk = (): Promise<void> => {
     });
 };
 
+/**
+ * Login with Facebook - User Access Token (for personal accounts)
+ * Uses Facebook Login for Business Configuration
+ */
 export const loginWithFacebook = (): Promise<any> => {
     return new Promise((resolve, reject) => {
         if (!window.FB) {
             reject("Facebook SDK not loaded");
             return;
+        }
+
+        // Use config_id for Facebook Login for Business
+        const loginOptions: any = {};
+        
+        if (FACEBOOK_CONFIG_ID) {
+            // Facebook Login for Business with Configuration ID
+            loginOptions.config_id = FACEBOOK_CONFIG_ID;
+            // Do NOT use scope when using config_id (as per Facebook documentation)
+        } else {
+            // Fallback to traditional scope-based login
+            loginOptions.scope = 'public_profile,email,ads_read,ads_management,business_management,pages_read_engagement';
         }
 
         window.FB.login((response: any) => {
@@ -45,7 +64,42 @@ export const loginWithFacebook = (): Promise<any> => {
             } else {
                 reject("User cancelled login or did not fully authorize.");
             }
-        }, { scope: 'public_profile,email' }); // Add 'ads_read,ads_management' here if your app is reviewed for it
+        }, loginOptions);
+    });
+};
+
+/**
+ * Login with Facebook for Business - System User Access Token
+ * For automated, long-term access to business assets
+ */
+export const loginWithFacebookBusiness = (): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        if (!window.FB) {
+            reject("Facebook SDK not loaded");
+            return;
+        }
+
+        if (!FACEBOOK_BUSINESS_CONFIG_ID) {
+            reject("Business configuration ID not configured");
+            return;
+        }
+
+        // System User Access Token requires authorization code grant type
+        window.FB.login(
+            (response: any) => {
+                if (response.authResponse && response.authResponse.code) {
+                    // Return authorization code to exchange for access token on backend
+                    resolve(response.authResponse.code);
+                } else {
+                    reject("User cancelled login or did not fully authorize.");
+                }
+            },
+            {
+                config_id: FACEBOOK_BUSINESS_CONFIG_ID,
+                response_type: 'code',
+                override_default_response_type: true
+            }
+        );
     });
 };
 
