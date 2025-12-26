@@ -48,7 +48,7 @@ dockerfilePath = "server/Dockerfile"
 
 [deploy]
 startCommand = "cd server && npm start"
-healthcheckPath = "/api/v1/health"
+healthcheckPath = "/health"
 ```
 
 ### Bạn KHÔNG cần làm gì thêm!
@@ -57,7 +57,7 @@ Railway sẽ:
 1. Tự động detect `railway.toml` từ GitHub
 2. Build từ `server/Dockerfile`
 3. Run command: `cd server && npm start`
-4. Healthcheck: `/api/v1/health`
+4. Healthcheck: `/health`
 
 ### ✅ Kiểm Tra Railway Deployment
 
@@ -66,7 +66,7 @@ Railway sẽ:
 3. Click service: **app-ads-manager**
 4. Tab **Deployments** - Xem deployment mới với commit `d98614f`
 5. Đợi build xong (2-3 phút)
-6. Check: `https://app-ads-manager-production.up.railway.app/api/v1/health`
+6. Check: `https://app-ads-manager-production.up.railway.app/health`
 
 **Nếu thấy `{"status":"ok"}` → Thành công!**
 
@@ -112,8 +112,8 @@ Railway sẽ tự động redeploy khi detect thay đổi settings.
 3. Chọn **Redeploy Latest**
 
 ### ✅ Kiểm Tra
-- Vào URL: `https://app-ads-manager-production.up.railway.app/api/v1/health`
-- Nếu thấy response: `{"status":"ok"}` → Thành công!
+- Vào URL: `https://app-ads-manager-production.up.railway.app/health`
+- Nếu thấy response: `{"success":true,"message":"Server is running"}` → Thành công!
 - Nếu bị lỗi → Check deployment logs
 
 ---
@@ -188,7 +188,7 @@ JWT_REMEMBER_EXPIRE=30d
 - [ ] Hoặc Custom Start Command = `cd server && npm start`
 - [ ] Environment Variables đã set đầy đủ
 - [ ] Deployment thành công (green ✓)
-- [ ] API endpoint trả về: https://app-ads-manager-production.up.railway.app/api/v1/health
+- [ ] API endpoint trả về: https://app-ads-manager-production.up.railway.app/health
 
 ---
 
