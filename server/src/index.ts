@@ -2,11 +2,11 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import authRoutes from './routes/auth';
-import dashboardRoutes from './routes/dashboard';
-import managementRoutes from './routes/management';
-import settingsRoutes from './routes/settings';
-import facebookRoutes from './routes/facebook';
+import authRoutes from './api/routes/auth';
+import dashboardRoutes from './api/routes/dashboard';
+import managementRoutes from './api/routes/management';
+import settingsRoutes from './api/routes/settings';
+import facebookRoutes from './api/routes/facebook';
 
 dotenv.config();
 

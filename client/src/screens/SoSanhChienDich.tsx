@@ -1,7 +1,7 @@
 import React from 'react';
 import { RotateCcw } from 'lucide-react';
-import { BrutalistButton, BrutalistCard, BrutalistSelect, BrutalistHeader } from './BrutalistComponents';
-import BottomNav from './BottomNav';
+import { BrutalistButton, BrutalistCard, BrutalistSelect, BrutalistHeader } from '../shared/UIComponents';
+import BottomNav from '../shared/BottomNav';
 import { ScreenView } from '../types';
 
 interface ComparisonScreenProps {

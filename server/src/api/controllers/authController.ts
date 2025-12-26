@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import User from '../models/User';
-import Settings from '../models/Settings';
-import { AuthRequest } from '../middleware/auth';
+import User from '../../database/models/User';
+import Settings from '../../database/models/Settings';
+import { AuthRequest } from '../../middleware/auth';
 
 export const register = async (req: Request, res: Response) => {
   try {

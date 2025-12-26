@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pause, Pencil, ChevronDown, Lightbulb } from 'lucide-react';
-import { BrutalistButton, BrutalistCard, BrutalistHeader } from './BrutalistComponents';
+import { BrutalistButton, BrutalistCard, BrutalistHeader } from '../shared/UIComponents';
 import { ScreenView, CampaignData } from '../types';
 
 interface CampaignDetailScreenProps {
