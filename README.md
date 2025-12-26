@@ -1,47 +1,236 @@
-# Quản Lý Ads FB - Brutalist Design System
+# Ads Manager - Facebook Ads Management Platform
 
-## 1. Tổng quan
-Đây là ứng dụng Web App (PWA) quản lý quảng cáo Facebook với phong cách thiết kế **Neo-Brutalism**. Ứng dụng tập trung vào hiệu suất, trải nghiệm người dùng trên mobile và tích hợp trợ lý ảo AI (Gemini).
+> A modern, brutalist-style Facebook Ads Manager built with React 19, TypeScript, and Node.js
 
-## 2. Công nghệ Frontend (Hiện có)
-*   **Core:** React 19, TypeScript.
-*   **Styling:** Tailwind CSS (Custom config cho Brutalist style: shadow cứng, border dày, màu tương phản cao).
-*   **Icons:** Lucide React.
-*   **AI Integration:** Google Gemini API (Client-side implementation).
-*   **PWA:** Service Worker, Manifest hỗ trợ cài đặt trên mobile.
-*   **State Management:** React Local State (Cần chuyển sang gọi API).
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-19-61dafb)](https://reactjs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-20-green)](https://nodejs.org/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## 3. Cấu trúc thư mục
+## ✨ Features
+
+- 🔐 **Facebook Login for Business** - Secure OAuth authentication
+- 📊 **Real-time Dashboard** - Monitor campaigns and performance metrics
+- 🎯 **Campaign Management** - Full CRUD operations for ad campaigns
+- 📈 **Advanced Analytics** - Detailed insights with charts and comparisons
+- 🤖 **AI Recommendations** - Google Gemini-powered optimization suggestions
+- 📱 **PWA Support** - Installable progressive web app
+- 🎨 **Brutalist UI** - Bold, minimalist design with sharp aesthetics
+- ⚡ **Fast & Responsive** - Optimized for all devices
+
+## 🛠️ Tech Stack
+
+### Frontend
+- React 19 with TypeScript
+- Vite for blazing fast builds
+- Tailwind CSS for styling
+- Lucide Icons
+- PWA capabilities
+
+### Backend
+- Node.js 20 + Express
+- MongoDB with Mongoose
+- JWT authentication
+- Axios for Facebook Graph API
+- Google Gemini AI integration
+
+### Deployment
+- **Frontend**: Vercel
+- **Backend**: Railway
+- **Database**: MongoDB Atlas
+- **Version Control**: GitHub
+
+## 📁 Project Structure
+
 ```
-.
-├── index.html          # Entry point, cấu hình PWA & Font
-├── index.tsx           # Mount App, đăng ký Service Worker
-├── App.tsx             # Main Layout (App Shell), Routing logic, Global State
-├── types.ts            # Định nghĩa Interface (Account, Campaign, User...)
-├── manifest.json       # Cấu hình PWA
-├── sw.js               # Service Worker (Offline caching)
-├── components/         # Các màn hình và UI components
-│   ├── BrutalistComponents.tsx # Button, Card, Input, Header...
+ads-manager/
+├── components/              # React components
 │   ├── DashboardScreen.tsx
 │   ├── ManagementScreen.tsx
 │   ├── CampaignDetailScreen.tsx
-│   ├── ...
-└── services/
-    └── geminiService.ts # Kết nối Google Gemini
+│   ├── ComparisonScreen.tsx
+│   ├── RecommendationsScreen.tsx
+│   ├── SettingsScreen.tsx
+│   ├── BottomNav.tsx
+│   └── BrutalistComponents.tsx
+│
+├── services/               # API services
+│   ├── facebookService.ts
+│   └── geminiService.ts
+│
+├── backend/                # Backend API
+│   ├── src/
+│   │   ├── controllers/
+│   │   ├── models/
+│   │   ├── routes/
+│   │   ├── middleware/
+│   │   └── scripts/
+│   └── Dockerfile
+│
+├── docs/                   # Documentation
+│   ├── DEPLOY_VERCEL_RAILWAY.md
+│   └── FACEBOOK_LOGIN_SETUP.md
+│
+└── ...config files
 ```
 
-## 4. Luồng người dùng (User Flow)
-1.  **Auth:** Login/Register (Email hoặc Facebook Mock) -> Lưu Token & Trạng thái "Ghi nhớ".
-2.  **Dashboard:** Xem tổng quan ngân sách, biểu đồ chi phí/lợi nhuận, hiệu suất nhóm quảng cáo.
-3.  **Management:** 
-    *   Danh sách Tài khoản quảng cáo (Active/Paused).
-    *   Danh sách Chiến dịch theo tài khoản (Search & Filter).
-    *   Bật/Tắt chiến dịch nhanh.
-4.  **Campaign Detail:** Xem chi tiết metrics, biểu đồ line chart, phân bổ giới tính.
-5.  **Comparison:** So sánh hiệu quả giữa 2 chiến dịch (A/B Testing).
-6.  **Recommendations:** Các đề xuất tối ưu từ hệ thống (Tăng ngân sách, mở rộng tệp...).
-7.  **AI Assistant:** Chat bot hỗ trợ giải đáp (Floating button luôn hiển thị).
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 20+
+- MongoDB
+- Facebook App credentials
+- Google Gemini API key (optional)
+
+### Installation
+
+```bash
+# Clone repository
+git clone https://github.com/monkeytech192/app-ads-manager.git
+cd app-ads-manager
+
+# Install frontend dependencies
+npm install
+
+# Install backend dependencies
+cd backend && npm install
+```
+
+### Environment Setup
+
+**Frontend** (`.env`)
+```env
+VITE_API_URL=http://localhost:5000/api/v1
+VITE_FB_APP_ID=your_facebook_app_id
+VITE_FB_CONFIG_ID=your_fb_config_id
+```
+
+**Backend** (`backend/.env`)
+```env
+NODE_ENV=development
+PORT=5000
+MONGODB_URI=mongodb://localhost:27017/ads-manager
+JWT_SECRET=your_secret_key
+FACEBOOK_APP_ID=your_app_id
+FACEBOOK_APP_SECRET=your_app_secret
+GEMINI_API_KEY=your_gemini_key
+```
+
+### Run Development Servers
+
+```bash
+# Terminal 1 - Frontend (http://localhost:5173)
+npm run dev
+
+# Terminal 2 - Backend (http://localhost:5000)
+cd backend && npm run dev
+```
+
+### Seed Database
+
+```bash
+cd backend
+npm run seed
+```
+
+**Default credentials:**
+- Email: `admin@example.com`
+- Password: `123456`
+
+## 📦 Deployment
+
+### Production Deployment
+
+See detailed guides:
+- [Vercel + Railway Deployment](./docs/DEPLOY_VERCEL_RAILWAY.md)
+- [Facebook Login Configuration](./docs/FACEBOOK_LOGIN_SETUP.md)
+
+**Live URLs:**
+- Frontend: https://app-ads.tiemtocchu3.vn
+- Backend: https://app-ads-manager-production.up.railway.app
+
+## 🔐 Authentication
+
+Supports two Facebook authentication modes:
+
+1. **User Access Token** - Personal Facebook account login
+2. **System User Access Token** - Business portfolio with long-term access
+
+See [Facebook Login Setup](./docs/FACEBOOK_LOGIN_SETUP.md) for configuration.
+
+## 📚 API Documentation
+
+### Base URL
+```
+Production: https://app-ads-manager-production.up.railway.app/api/v1
+Development: http://localhost:5000/api/v1
+```
+
+### Endpoints
+
+#### Authentication
+```
+POST /auth/register    - Register new user
+POST /auth/login       - User login
+GET  /auth/me          - Get current user
+```
+
+#### Facebook Integration
+```
+POST /facebook/exchange-token  - Exchange auth code for token
+POST /facebook/profile         - Get Facebook profile
+POST /facebook/adaccounts      - Get ad accounts
+POST /facebook/campaigns       - Get campaigns
+POST /facebook/insights        - Get campaign metrics
+```
+
+#### Dashboard
+```
+GET /dashboard/stats     - Dashboard statistics
+GET /dashboard/campaigns - Campaign list with metrics
+```
+
+#### Management
+```
+GET    /accounts       - List ad accounts
+POST   /accounts       - Create ad account
+GET    /campaigns      - List campaigns
+POST   /campaigns      - Create campaign
+PUT    /campaigns/:id  - Update campaign
+DELETE /campaigns/:id  - Delete campaign
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please:
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing`)
+5. Open Pull Request
+
+## 🐛 Known Issues
+
+- Facebook API rate limiting may affect data fetching
+- Mobile navigation needs optimization for small screens
+- Token refresh flow needs implementation
+
+## 📄 License
+
+MIT License - See [LICENSE](LICENSE) for details
+
+## 👤 Author
+
+**Monkey Tech**
+- GitHub: [@monkeytech192](https://github.com/monkeytech192)
+
+## 🙏 Acknowledgments
+
+- Facebook Marketing API
+- Google Gemini AI
+- React & TypeScript community
 
 ---
-**Lưu ý cho Backend Developer:**
-Frontend hiện tại đang sử dụng Mock Data (dữ liệu giả) được hardcode trong `App.tsx` và các components. Nhiệm vụ của bạn là xây dựng API để thay thế các dữ liệu này.
+
+**Built with ❤️ using React, TypeScript, and Node.js**
