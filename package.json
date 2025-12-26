@@ -11,10 +11,11 @@
     "deploy:railway": "railway up"
   },
   "dependencies": {
-    "react": "^19.2.3",
     "@google/genai": "^1.34.0",
-    "react-dom": "^19.2.3",
-    "lucide-react": "^0.562.0"
+    "axios": "^1.13.2",
+    "lucide-react": "^0.562.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
