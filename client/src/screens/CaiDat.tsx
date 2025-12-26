@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
-import { BrutalistButton, BrutalistToggle, BrutalistSlider, BrutalistHeader } from './BrutalistComponents';
-import BottomNav from './BottomNav';
+import { BrutalistButton, BrutalistToggle, BrutalistSlider, BrutalistHeader } from '../shared/UIComponents';
+import BottomNav from '../shared/BottomNav';
 import { ScreenView } from '../types';
 
 interface SettingsScreenProps {

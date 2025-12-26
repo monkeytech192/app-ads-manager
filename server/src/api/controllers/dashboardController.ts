@@ -1,8 +1,8 @@
 import { Response } from 'express';
-import { AuthRequest } from '../middleware/auth';
-import Campaign from '../models/Campaign';
-import CampaignMetric from '../models/CampaignMetric';
-import AdAccount from '../models/AdAccount';
+import { AuthRequest } from '../../middleware/auth';
+import Campaign from '../../database/models/Campaign';
+import CampaignMetric from '../../database/models/CampaignMetric';
+import AdAccount from '../../database/models/AdAccount';
 
 export const getDashboardSummary = async (req: AuthRequest, res: Response) => {
   try {

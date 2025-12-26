@@ -82,7 +82,7 @@ VITE_FB_CONFIG_ID=YOUR_USER_ACCESS_TOKEN_CONFIG_ID
 VITE_FB_BUSINESS_CONFIG_ID=YOUR_SYSTEM_USER_CONFIG_ID
 ```
 
-### Backend (.env hoặc Railway Variables)
+### server (.env hoặc Railway Variables)
 ```env
 FACEBOOK_APP_ID=1354327065841163
 FACEBOOK_APP_SECRET=your_app_secret_here
@@ -101,7 +101,7 @@ const handleLogin = async () => {
     const authResponse = await loginWithFacebook();
     console.log('Access Token:', authResponse.accessToken);
     
-    // Send to backend to save
+    // Send to server to save
     await api.post('/api/v1/facebook/profile', {
       access_token: authResponse.accessToken
     });
@@ -120,7 +120,7 @@ const handleBusinessLogin = async () => {
   try {
     const code = await loginWithFacebookBusiness();
     
-    // Exchange code for access token on backend
+    // Exchange code for access token on server
     const response = await api.post('/api/v1/facebook/exchange-token', {
       code: code
     });
@@ -193,7 +193,7 @@ Body: {
 ## 10. Security Best Practices
 
 1. **Never commit App Secret** vào git
-2. **Validate tokens** trên backend trước khi dùng
+2. **Validate tokens** trên server trước khi dùng
 3. **Store tokens securely** - encrypt trong database
 4. **Implement token refresh** - handle expired tokens
 5. **Use HTTPS** cho production

@@ -1,6 +1,6 @@
 import React from 'react';
 import { User, ArrowUpCircle, Users, Image as ImageIcon } from 'lucide-react';
-import { BrutalistCard, BrutalistButton, BrutalistHeader } from './BrutalistComponents';
+import { BrutalistCard, BrutalistButton, BrutalistHeader } from '../shared/UIComponents';
 import { ScreenView } from '../types';
 
 interface RecommendationsScreenProps {

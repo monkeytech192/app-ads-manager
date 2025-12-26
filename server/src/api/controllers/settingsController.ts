@@ -1,6 +1,6 @@
 import { Response } from 'express';
-import { AuthRequest } from '../middleware/auth';
-import Settings from '../models/Settings';
+import { AuthRequest } from '../../middleware/auth';
+import Settings from '../../database/models/Settings';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export const getSettings = async (req: AuthRequest, res: Response) => {

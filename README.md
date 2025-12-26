@@ -1,164 +1,172 @@
-# Ads Manager - Facebook Ads Management Platform
+# Ads Manager - Quản Lý Quảng Cáo Facebook
 
-> A modern, brutalist-style Facebook Ads Manager built with React 19, TypeScript, and Node.js
+> Ứng dụng quản lý quảng cáo Facebook chuyên nghiệp với giao diện Brutalist độc đáo
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-19-61dafb)](https://reactjs.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-20-green)](https://nodejs.org/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+## 🌟 Tính Năng
 
-## ✨ Features
+- 🔐 **Đăng nhập Facebook Business** - Xác thực OAuth an toàn
+- 📊 **Dashboard Thời Gian Thực** - Theo dõi hiệu suất chiến dịch 
+- 🎯 **Quản Lý Chiến Dịch** - Tạo, sửa, xóa chiến dịch quảng cáo
+- 📈 **Phân Tích Chi Tiết** - Biểu đồ và số liệu chi tiết
+- 🤖 **Đề Xuất AI** - Tối ưu bằng Google Gemini
+- 📱 **PWA** - Cài đặt như app mobile
+- 🎨 **Giao diện Brutalist** - Thiết kế táo bạo, tối giản
 
-- 🔐 **Facebook Login for Business** - Secure OAuth authentication
-- 📊 **Real-time Dashboard** - Monitor campaigns and performance metrics
-- 🎯 **Campaign Management** - Full CRUD operations for ad campaigns
-- 📈 **Advanced Analytics** - Detailed insights with charts and comparisons
-- 🤖 **AI Recommendations** - Google Gemini-powered optimization suggestions
-- 📱 **PWA Support** - Installable progressive web app
-- 🎨 **Brutalist UI** - Bold, minimalist design with sharp aesthetics
-- ⚡ **Fast & Responsive** - Optimized for all devices
-
-## 🛠️ Tech Stack
+## 🛠️ Công Nghệ
 
 ### Frontend
-- React 19 with TypeScript
-- Vite for blazing fast builds
-- Tailwind CSS for styling
+- React 19 + TypeScript
+- Vite - Build siêu nhanh
+- Tailwind CSS
 - Lucide Icons
-- PWA capabilities
+- PWA
 
-### Backend
+### server
 - Node.js 20 + Express
-- MongoDB with Mongoose
-- JWT authentication
-- Axios for Facebook Graph API
-- Google Gemini AI integration
+- MongoDB + Mongoose
+- JWT Authentication
+- Facebook Graph API
+- Google Gemini AI
 
-### Deployment
+### Deploy
 - **Frontend**: Vercel
-- **Backend**: Railway
+- **server**: Railway
 - **Database**: MongoDB Atlas
-- **Version Control**: GitHub
 
-## 📁 Project Structure
+## 📁 Cấu Trúc Dự Án
 
 ```
 ads-manager/
-├── components/              # React components
-│   ├── DashboardScreen.tsx
-│   ├── ManagementScreen.tsx
-│   ├── CampaignDetailScreen.tsx
-│   ├── ComparisonScreen.tsx
-│   ├── RecommendationsScreen.tsx
-│   ├── SettingsScreen.tsx
-│   ├── BottomNav.tsx
-│   └── BrutalistComponents.tsx
+├── src/
+│   ├── screens/           # Các màn hình chính
+│   │   ├── Dashboard.tsx
+│   │   ├── QuanLyChienDich.tsx
+│   │   ├── ChiTietChienDich.tsx
+│   │   ├── SoSanhChienDich.tsx
+│   │   ├── DeXuat.tsx
+│   │   └── CaiDat.tsx
+│   │
+│   ├── shared/            # Components dùng chung
+│   │   ├── UIComponents.tsx
+│   │   └── BottomNav.tsx
+│   │
+│   ├── services/          # API services
+│   │   ├── facebookService.ts
+│   │   └── geminiService.ts
+│   │
+│   ├── features/          # Tính năng riêng
+│   ├── hooks/             # Custom hooks
+│   ├── utils/             # Utilities
+│   ├── config/            # Cấu hình
+│   ├── App.tsx
+│   ├── main.tsx
+│   └── types.ts
 │
-├── services/               # API services
-│   ├── facebookService.ts
-│   └── geminiService.ts
+├── server/
+│   └── src/
+│       ├── api/           # API layer
+│       │   ├── controllers/
+│       │   └── routes/
+│       │
+│       ├── database/      # Database layer
+│       │   ├── models/
+│       │   └── scripts/
+│       │
+│       ├── middleware/
+│       ├── config/
+│       └── index.ts
 │
-├── backend/                # Backend API
-│   ├── src/
-│   │   ├── controllers/
-│   │   ├── models/
-│   │   ├── routes/
-│   │   ├── middleware/
-│   │   └── scripts/
-│   └── Dockerfile
+├── docs/                  # Tài liệu
+│   ├── HUONG_DAN_DEPLOY.md
+│   └── CAI_DAT_FACEBOOK.md
 │
-├── docs/                   # Documentation
-│   ├── DEPLOY_VERCEL_RAILWAY.md
-│   └── FACEBOOK_LOGIN_SETUP.md
-│
-└── ...config files
+└── ...files cấu hình
 ```
 
-## 🚀 Quick Start
+## 🚀 Bắt Đầu
 
-### Prerequisites
+### Yêu Cầu
 - Node.js 20+
 - MongoDB
-- Facebook App credentials
-- Google Gemini API key (optional)
+- Facebook App
+- Google Gemini API key (tùy chọn)
 
-### Installation
+### Cài Đặt
 
 ```bash
-# Clone repository
+# Clone repo
 git clone https://github.com/monkeytech192/app-ads-manager.git
 cd app-ads-manager
 
-# Install frontend dependencies
+# Cài dependencies
 npm install
-
-# Install backend dependencies
-cd backend && npm install
+cd server && npm install
 ```
 
-### Environment Setup
+### Cấu Hình Môi Trường
 
-**Frontend** (`.env`)
+Tạo file `.env` ở thư mục gốc:
+
 ```env
+# API
 VITE_API_URL=http://localhost:5000/api/v1
-VITE_FB_APP_ID=your_facebook_app_id
-VITE_FB_CONFIG_ID=your_fb_config_id
-```
 
-**Backend** (`backend/.env`)
-```env
+# Facebook
+VITE_FB_APP_ID=your_app_id
+VITE_FB_CONFIG_ID=your_config_id
+
+# server
 NODE_ENV=development
 PORT=5000
 MONGODB_URI=mongodb://localhost:27017/ads-manager
-JWT_SECRET=your_secret_key
+JWT_SECRET=your_secret
 FACEBOOK_APP_ID=your_app_id
-FACEBOOK_APP_SECRET=your_app_secret
-GEMINI_API_KEY=your_gemini_key
+FACEBOOK_APP_SECRET=your_secret
+GEMINI_API_KEY=your_key
 ```
 
-### Run Development Servers
+### Chạy Development
 
 ```bash
-# Terminal 1 - Frontend (http://localhost:5173)
+# Terminal 1 - Frontend
 npm run dev
+# Mở http://localhost:5173
 
-# Terminal 2 - Backend (http://localhost:5000)
-cd backend && npm run dev
+# Terminal 2 - server
+cd server
+npm run dev
+# Server chạy ở http://localhost:5000
 ```
 
 ### Seed Database
 
 ```bash
-cd backend
+cd server
 npm run seed
 ```
 
-**Default credentials:**
+**Tài khoản mặc định:**
 - Email: `admin@example.com`
 - Password: `123456`
 
-## 📦 Deployment
+## 📦 Deploy Production
 
-### Production Deployment
+Xem hướng dẫn chi tiết tại:
+- [Hướng Dẫn Deploy](./docs/HUONG_DAN_DEPLOY.md)
+- [Cài Đặt Facebook Login](./docs/CAI_DAT_FACEBOOK.md)
 
-See detailed guides:
-- [Vercel + Railway Deployment](./docs/DEPLOY_VERCEL_RAILWAY.md)
-- [Facebook Login Configuration](./docs/FACEBOOK_LOGIN_SETUP.md)
-
-**Live URLs:**
+**Địa chỉ production:**
 - Frontend: https://app-ads.tiemtocchu3.vn
-- Backend: https://app-ads-manager-production.up.railway.app
+- server: https://app-ads-manager-production.up.railway.app
 
-## 🔐 Authentication
+## 🔐 Xác Thực
 
-Supports two Facebook authentication modes:
+Hỗ trợ 2 loại đăng nhập Facebook:
 
-1. **User Access Token** - Personal Facebook account login
-2. **System User Access Token** - Business portfolio with long-term access
+1. **User Access Token** - Đăng nhập tài khoản cá nhân
+2. **System User Access Token** - Đăng nhập business portfolio (dài hạn)
 
-See [Facebook Login Setup](./docs/FACEBOOK_LOGIN_SETUP.md) for configuration.
-
-## 📚 API Documentation
+## 📚 API Endpoints
 
 ### Base URL
 ```
@@ -166,71 +174,63 @@ Production: https://app-ads-manager-production.up.railway.app/api/v1
 Development: http://localhost:5000/api/v1
 ```
 
-### Endpoints
-
-#### Authentication
+### Auth
 ```
-POST /auth/register    - Register new user
-POST /auth/login       - User login
-GET  /auth/me          - Get current user
+POST /auth/register    - Đăng ký
+POST /auth/login       - Đăng nhập
+GET  /auth/me          - Lấy thông tin user
 ```
 
-#### Facebook Integration
+### Facebook
 ```
-POST /facebook/exchange-token  - Exchange auth code for token
-POST /facebook/profile         - Get Facebook profile
-POST /facebook/adaccounts      - Get ad accounts
-POST /facebook/campaigns       - Get campaigns
-POST /facebook/insights        - Get campaign metrics
-```
-
-#### Dashboard
-```
-GET /dashboard/stats     - Dashboard statistics
-GET /dashboard/campaigns - Campaign list with metrics
+POST /facebook/exchange-token  - Đổi code lấy token
+POST /facebook/profile         - Lấy profile
+POST /facebook/adaccounts      - Lấy ad accounts
+POST /facebook/campaigns       - Lấy campaigns
+POST /facebook/insights        - Lấy metrics
 ```
 
-#### Management
+### Dashboard
 ```
-GET    /accounts       - List ad accounts
-POST   /accounts       - Create ad account
-GET    /campaigns      - List campaigns
-POST   /campaigns      - Create campaign
-PUT    /campaigns/:id  - Update campaign
-DELETE /campaigns/:id  - Delete campaign
+GET /dashboard/stats     - Thống kê tổng quan
+GET /dashboard/campaigns - Danh sách campaigns
 ```
 
-## 🤝 Contributing
+### Quản Lý
+```
+GET    /accounts       - DS tài khoản quảng cáo
+POST   /accounts       - Tạo tài khoản
+GET    /campaigns      - DS chiến dịch
+POST   /campaigns      - Tạo chiến dịch
+PUT    /campaigns/:id  - Sửa chiến dịch
+DELETE /campaigns/:id  - Xóa chiến dịch
+```
 
-Contributions are welcome! Please:
+## 🤝 Đóng Góp
 
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing`)
-5. Open Pull Request
+Mọi đóng góp đều được chào đón! Xem [CONTRIBUTING.md](./CONTRIBUTING.md) để biết thêm chi tiết.
 
-## 🐛 Known Issues
+### Quy Trình:
+1. Fork repo
+2. Tạo branch (`git checkout -b feature/tinh-nang-moi`)
+3. Commit (`git commit -m 'Thêm tính năng mới'`)
+4. Push (`git push origin feature/tinh-nang-moi`)
+5. Tạo Pull Request
 
-- Facebook API rate limiting may affect data fetching
-- Mobile navigation needs optimization for small screens
-- Token refresh flow needs implementation
+## 📝 License
 
-## 📄 License
+MIT License - Xem file [LICENSE.md](./LICENSE.md)
 
-MIT License - See [LICENSE](LICENSE) for details
-
-## 👤 Author
+## 👤 Tác Giả
 
 **Monkey Tech**
 - GitHub: [@monkeytech192](https://github.com/monkeytech192)
 
-## 🙏 Acknowledgments
+## 📞 Hỗ Trợ
 
-- Facebook Marketing API
-- Google Gemini AI
-- React & TypeScript community
+- Issues: [GitHub Issues](https://github.com/monkeytech192/app-ads-manager/issues)
+- Email: support@example.com
 
 ---
 
-**Built with ❤️ using React, TypeScript, and Node.js**
+**Được xây dựng với ❤️ bởi Monkey Tech**

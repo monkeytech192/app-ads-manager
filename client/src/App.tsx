@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Facebook, Globe, MessageCircleQuestion, X, UserPlus, LogIn, CheckSquare, Square } from 'lucide-react';
-import { BrutalistCard, BrutalistButton, BrutalistInput, TextureOverlay } from './components/BrutalistComponents';
+import { BrutalistCard, BrutalistButton, BrutalistInput, TextureOverlay } from './shared/UIComponents';
 import { askAssistant } from './services/geminiService';
 import { initFacebookSdk, loginWithFacebook, getFacebookUserProfile } from './services/facebookService';
-import DashboardScreen from './components/DashboardScreen';
-import ManagementScreen from './components/ManagementScreen';
-import ComparisonScreen from './components/ComparisonScreen';
-import SettingsScreen from './components/SettingsScreen';
-import RecommendationsScreen from './components/RecommendationsScreen';
-import CampaignDetailScreen from './components/CampaignDetailScreen';
+import DashboardScreen from './screens/Dashboard';
+import ManagementScreen from './screens/QuanLyChienDich';
+import ComparisonScreen from './screens/SoSanhChienDich';
+import SettingsScreen from './screens/CaiDat';
+import RecommendationsScreen from './screens/DeXuat';
+import CampaignDetailScreen from './screens/ChiTietChienDich';
 import { ScreenView, CampaignData, AccountData, FacebookUserProfile } from './types';
 
 const App = () => {

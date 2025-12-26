@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Filter, Menu, Target, Facebook, Check } from 'lucide-react';
-import { BrutalistButton, BrutalistCard, BrutalistToggle, BrutalistHeader } from './BrutalistComponents';
-import BottomNav from './BottomNav';
+import { BrutalistButton, BrutalistCard, BrutalistToggle, BrutalistHeader } from '../shared/UIComponents';
+import BottomNav from '../shared/BottomNav';
 import { ScreenView, CampaignData, AccountData } from '../types';
 
 interface ManagementScreenProps {

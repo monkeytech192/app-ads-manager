@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { DollarSign, Eye, MousePointer2, TrendingUp, Activity, LogOut } from 'lucide-react';
-import { BrutalistCard, BrutalistHeader } from './BrutalistComponents';
-import BottomNav from './BottomNav';
+import { BrutalistCard, BrutalistHeader } from '../shared/UIComponents';
+import BottomNav from '../shared/BottomNav';
 import { ScreenView, FacebookUserProfile } from '../types';
 
 interface DashboardScreenProps {

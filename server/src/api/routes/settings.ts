@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { getSettings, updateSettings, getRecommendations, chatWithAI } from '../controllers/settingsController';
-import { authMiddleware } from '../middleware/auth';
+import { authMiddleware } from '../../middleware/auth';
 
 const router = Router();
 

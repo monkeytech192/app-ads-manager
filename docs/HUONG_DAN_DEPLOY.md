@@ -2,7 +2,7 @@
 
 ## 💰 CHI PHÍ: **$0 - $5/THÁNG**
 - **Vercel**: FREE (frontend)
-- **Railway**: $0-5/tháng (backend - dùng $5 credit FREE)
+- **Railway**: $0-5/tháng (server - dùng $5 credit FREE)
 - **MongoDB Atlas**: FREE (database)
 
 **Tổng: $0-2/tháng** (6-12 tháng đầu hoàn toàn FREE!)
@@ -92,7 +92,7 @@ git push -u origin main
 
 ---
 
-## Bước 3️⃣: Deploy Backend lên Railway
+## Bước 3️⃣: Deploy server lên Railway
 
 ### 3.1. Tạo Project trên Railway
 1. Đăng nhập Railway: https://railway.app
@@ -124,7 +124,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 
 ### 3.3. Configure Build Settings
 1. Tab **Settings** → **Build**
-2. **Root Directory**: `backend`
+2. **Root Directory**: `server`
 3. **Build Command**: `npm install && npm run build`
 4. **Start Command**: `npm start`
 5. Click **Save**
@@ -166,16 +166,16 @@ Kết quả phải trả về:
 1. Trong Railway project, click **New** → **Empty Service**
 2. Rename thành `seed-runner`
 3. **Settings** → **Source** → Connect to same GitHub repo
-4. **Variables**: Copy tất cả variables từ backend service
-5. **Build Command**: `cd backend && npm install`
-6. **Start Command**: `cd backend && npm run seed`
+4. **Variables**: Copy tất cả variables từ server service
+5. **Build Command**: `cd server && npm install`
+6. **Start Command**: `cd server && npm run seed`
 7. Click **Deploy**
 
 Seed sẽ chạy một lần, sau đó bạn có thể xóa service `seed-runner`.
 
 ### 4.2. Hoặc seed local (nếu có MongoDB Atlas access)
 ```powershell
-cd backend
+cd server
 
 # Tạo file .env
 copy .env.example .env
@@ -252,7 +252,7 @@ VITE_API_URL = https://your-app-name.up.railway.app/api/v1
 5. Chờ 5-60 phút propagate
 6. Vercel tự động issue SSL
 
-### 6.2. Domain cho Backend (Railway)
+### 6.2. Domain cho server (Railway)
 1. Railway Dashboard → Service → **Settings** → **Domains**
 2. Click **Custom Domain**
 3. Add: `api.yourdomain.com`
@@ -299,11 +299,11 @@ Login:
 ## 🎉 KẾT QUẢ
 
 ✅ **Frontend**: `https://yourdomain.com` (Vercel)
-✅ **Backend**: `https://api.yourdomain.com` (Railway)
+✅ **server**: `https://api.yourdomain.com` (Railway)
 ✅ **Database**: MongoDB Atlas Singapore (FREE)
 ✅ **SSL**: Tự động, miễn phí
 ✅ **Auto Deploy**: Git push → Auto deploy
-✅ **Sleep Mode**: Backend ngủ sau 15 phút → Tiết kiệm credit
+✅ **Sleep Mode**: server ngủ sau 15 phút → Tiết kiệm credit
 
 ---
 
@@ -334,10 +334,10 @@ git push
 ```
 → Vercel tự động deploy
 
-### Update Backend:
+### Update server:
 ```powershell
 git add .
-git commit -m "Update backend"
+git commit -m "Update server"
 git push
 ```
 → Railway tự động deploy

@@ -1,8 +1,8 @@
 import { Response } from 'express';
-import { AuthRequest } from '../middleware/auth';
-import AdAccount from '../models/AdAccount';
-import Campaign from '../models/Campaign';
-import CampaignMetric from '../models/CampaignMetric';
+import { AuthRequest } from '../../middleware/auth';
+import AdAccount from '../../database/models/AdAccount';
+import Campaign from '../../database/models/Campaign';
+import CampaignMetric from '../../database/models/CampaignMetric';
 import mongoose from 'mongoose';
 
 export const getAccounts = async (req: AuthRequest, res: Response) => {

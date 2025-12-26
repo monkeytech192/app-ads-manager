@@ -1,50 +1,77 @@
-# Changelog
+# Lịch Sử Thay Đổi
 
-All notable changes to this project will be documented in this file.
+Tất cả thay đổi quan trọng của dự án sẽ được ghi lại trong file này.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.1.0] - 2025-12-26
+
+### ✨ Thêm Mới
+- Tổ chức lại cấu trúc dự án theo chuẩn client/server
+- Chia tách rõ ràng: client/ (Frontend), server/ (Backend)
+- Cấu trúc chuyên nghiệp như các ứng dụng lớn
+- Thêm docs/ folder cho tài liệu
+- Thêm các file chuẩn: LICENSE, CHANGELOG
+- Tài liệu tiếng Việt đầy đủ
+
+### 🔄 Thay Đổi
+- Đổi tên file rõ ràng hơn (Dashboard.tsx, QuanLyChienDich.tsx...)
+- Frontend: src/ → client/src/
+- Backend: backend/ → server/
+- Cải thiện cấu trúc: client/src/screens/, client/src/shared/
+- Backend: server/src/api/, server/src/database/
+- Gom gọn environment variables
+- Tối ưu imports và dependencies
+
+### 🗑️ Xóa
+- Loại bỏ folders trống và duplicate
+- Xóa config files không dùng
+- Xóa deployment docs duplicate
 
 ## [1.0.0] - 2025-12-26
 
-### Added
-- Facebook Login for Business integration
-- User Access Token authentication
-- System User Access Token for business portfolios
-- Backend API for Facebook Graph API integration
-- Dashboard with real-time metrics
-- Campaign management (CRUD operations)
-- Campaign detail view with charts
-- Campaign comparison feature
-- AI-powered recommendations using Google Gemini
-- Settings screen with theme and language options
-- MongoDB database with Mongoose ODM
+### ✨ Tính Năng Chính
+- Tích hợp Facebook Login for Business
+- Xác thực User Access Token
+- System User Access Token cho business portfolios
+- Backend API cho Facebook Graph API
+- Dashboard với metrics thời gian thực
+- Quản lý chiến dịch (CRUD)
+- Xem chi tiết chiến dịch với biểu đồ
+- So sánh chiến dịch
+- Đề xuất AI với Google Gemini
+- Màn hình cài đặt với theme/ngôn ngữ
+- MongoDB database với Mongoose
 - JWT authentication
-- PWA support
-- Brutalist UI design system
-- Responsive mobile-first layout
-- Bottom navigation for mobile
-- Deployment to Vercel (frontend) and Railway (backend)
+- Hỗ trợ PWA
+- Giao diện Brutalist design
+- Responsive mobile-first
+- Bottom navigation cho mobile
+- Deploy lên Vercel (frontend) và Railway (backend)
 
-### Changed
-- Migrated from mock data to real API integration
-- Updated React to version 19
-- Updated to latest Facebook Graph API v21.0
-- Improved TypeScript type safety
+### 🔧 Kỹ Thuật
+- React 19 với TypeScript
+- Vite build tool
+- Node.js 20 + Express
+- MongoDB Atlas
+- Facebook Graph API v21.0
+- Google Gemini AI API
+- Tailwind CSS
+- Lucide Icons
 
-### Fixed
+### 🐛 Sửa Lỗi
 - JWT token signing type errors
-- Facebook SDK initialization issues
+- Facebook SDK initialization
 - MongoDB connection handling
 - CORS configuration
+- TypeScript compilation errors
 
 ## [0.1.0] - 2025-12-20
 
-### Added
-- Initial project setup
-- React 19 with TypeScript
-- Vite build configuration
-- Tailwind CSS with custom brutalist theme
-- Basic component structure
-- Mock data for development
-- Service Worker for offline support
+### ✨ Khởi Tạo
+- Setup project với React 19
+- Cấu hình TypeScript
+- Cấu hình Vite
+- Tailwind CSS với brutalist theme
+- Component structure cơ bản
+- Mock data cho development
+- Service Worker cho offline support
+- PWA manifest
