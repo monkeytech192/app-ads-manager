@@ -164,21 +164,21 @@ export const BrutalistHeader: React.FC<BrutalistHeaderProps> = ({ title, onBack,
   const currentStyle = styles[variant];
 
   return (
-    <div className={`${currentStyle.container} border-b-4 p-3 md:p-4 flex justify-between items-center sticky top-0 z-50 transition-colors min-h-[60px] md:min-h-[72px]`}>
+    <div className={`${currentStyle.container} border-b-4 p-3 flex justify-between items-center sticky top-0 z-50 transition-colors`}>
       {showBack && onBack ? (
-        <button onClick={onBack} className={`border-2 p-1 md:p-2 transition-all active:scale-95 ${currentStyle.btn}`}>
-            <ArrowLeft size={24} strokeWidth={3} className="md:w-7 md:h-7" />
+        <button onClick={onBack} className={`border-2 p-1 transition-all active:scale-95 ${currentStyle.btn}`}>
+            <ArrowLeft size={24} strokeWidth={3} />
         </button>
       ) : (
-        <div className="w-9 md:w-12" /> /* Spacer if no back button */
+        <div className="w-9" /> /* Spacer if no back button */
       )}
       
-      <h1 className="font-display font-bold text-xl sm:text-2xl md:text-3xl lg:text-4xl uppercase tracking-tighter mx-2 text-center flex-1 leading-none truncate">
+      <h1 className="font-display font-bold text-xl sm:text-2xl uppercase tracking-tighter mx-2 text-center flex-1 leading-none truncate">
         {title}
       </h1>
       
-      <div className="w-9 md:w-12 flex justify-center items-center">
-        {rightElement || <div className="w-8 md:w-10" />} 
+      <div className="w-9 flex justify-center items-center">
+        {rightElement || <div className="w-8" />} 
       </div>
     </div>
   );
