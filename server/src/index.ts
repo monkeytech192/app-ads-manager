@@ -31,6 +31,14 @@ app.get('/health', (req, res) => {
   res.json({ success: true, message: 'Server is running' });
 });
 
+app.get('/api/v1/health', (req, res) => {
+  res.json({ 
+    success: true, 
+    message: 'API is healthy',
+    timestamp: new Date().toISOString()
+  });
+});
+
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/facebook', facebookRoutes);
