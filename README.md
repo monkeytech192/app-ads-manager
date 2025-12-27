@@ -2,13 +2,15 @@
 
 > Ứng dụng quản lý quảng cáo Facebook chuyên nghiệp với giao diện Brutalist độc đáo
 
+> 📌 **LƯU Ý:** Docs này dùng **placeholders** như `your-app.vercel.app`. Thay bằng domain thật của bạn sau khi deploy! Xem [docs/DOMAIN_GUIDE.md](docs/DOMAIN_GUIDE.md)
+
 ## 🌟 Tính Năng
 
-- 🔐 **Đăng nhập Facebook Business** - Xác thực OAuth an toàn
+- 🔐 **Đăng nhập Facebook** - Hỗ trợ cả Business và Personal Account
 - 📊 **Dashboard Thời Gian Thực** - Theo dõi hiệu suất chiến dịch 
 - 🎯 **Quản Lý Chiến Dịch** - Tạo, sửa, xóa chiến dịch quảng cáo
 - 📈 **Phân Tích Chi Tiết** - Biểu đồ và số liệu chi tiết
-- 🤖 **Đề Xuất AI** - Tối ưu bằng Google Gemini
+- 🤖 **Đề Xuất AI** - Tối ưu bằng Google Gemini (optional)
 - 📱 **PWA** - Cài đặt như app mobile
 - 🎨 **Giao diện Brutalist** - Thiết kế táo bạo, tối giản
 
@@ -21,216 +23,153 @@
 - Lucide Icons
 - PWA
 
-### server
+### Backend
 - Node.js 20 + Express
 - MongoDB + Mongoose
 - JWT Authentication
-- Facebook Graph API
-- Google Gemini AI
+- Facebook Marketing API
+- Google Gemini AI (optional)
 
 ### Deploy
-- **Frontend**: Vercel
-- **server**: Railway
-- **Database**: MongoDB Atlas
+- **Frontend & Backend**: Vercel / Railway / Netlify
+- **Database**: MongoDB Atlas (FREE tier)
 
-## 📁 Cấu Trúc Dự Án
+---
 
-```
-ads-manager/
-├── src/
-│   ├── screens/           # Các màn hình chính
-│   │   ├── Dashboard.tsx
-│   │   ├── QuanLyChienDich.tsx
-│   │   ├── ChiTietChienDich.tsx
-│   │   ├── SoSanhChienDich.tsx
-│   │   ├── DeXuat.tsx
-│   │   └── CaiDat.tsx
-│   │
-│   ├── shared/            # Components dùng chung
-│   │   ├── UIComponents.tsx
-│   │   └── BottomNav.tsx
-│   │
-│   ├── services/          # API services
-│   │   ├── facebookService.ts
-│   │   └── geminiService.ts
-│   │
-│   ├── features/          # Tính năng riêng
-│   ├── hooks/             # Custom hooks
-│   ├── utils/             # Utilities
-│   ├── config/            # Cấu hình
-│   ├── App.tsx
-│   ├── main.tsx
-│   └── types.ts
-│
-├── server/
-│   └── src/
-│       ├── api/           # API layer
-│       │   ├── controllers/
-│       │   └── routes/
-│       │
-│       ├── database/      # Database layer
-│       │   ├── models/
-│       │   └── scripts/
-│       │
-│       ├── middleware/
-│       ├── config/
-│       └── index.ts
-│
-├── docs/                  # Tài liệu
-│   ├── HUONG_DAN_DEPLOY.md
-│   └── CAI_DAT_FACEBOOK.md
-│
-└── ...files cấu hình
-```
+## 🚀 Deploy Nhanh (15 phút)
 
-## 🚀 Bắt Đầu
+> ⚠️ **QUAN TRỌNG:** App cần deploy lên server thật vì Facebook không hỗ trợ localhost.
 
-### Yêu Cầu
-- Node.js 20+
-- MongoDB
-- Facebook App
-- Google Gemini API key (tùy chọn)
+### 5 Bước Deploy
 
-### Cài Đặt
+1. **Deploy Backend** (Railway) → Lấy domain API
+2. **Setup MongoDB** (Atlas FREE) → Lấy connection string  
+3. **Tạo Facebook App** → Lấy App ID & Secret
+4. **Deploy Frontend** (Vercel) → Config biến môi trường
+5. **Hoàn thành!** → Truy cập app
 
-```bash
-# Clone repo
-git clone https://github.com/monkeytech192/app-ads-manager.git
-cd app-ads-manager
+### 📖 Hướng Dẫn Chi Tiết
 
-# Cài dependencies
-npm install
-cd server && npm install
-```
+- **[DEPLOY.md](DEPLOY.md)** - Hướng dẫn deploy từng bước (15 phút)
+- **[.env.example](.env.example)** - 5 biến môi trường BẮT BUỘC
+- **[docs/DOMAIN_GUIDE.md](docs/DOMAIN_GUIDE.md)** - Về placeholders và domain
 
-### Cấu Hình Môi Trường
+### ⚡ Quick Reference
 
-Tạo file `.env` ở thư mục gốc:
+| Cần | Lấy Từ Đâu |
+|-----|------------|
+| Backend URL | Railway Dashboard → Domain |
+| MongoDB URI | MongoDB Atlas → Connect → Drivers |
+| Facebook App ID | developers.facebook.com/apps |
+| Facebook App Secret | Facebook App → Settings → Basic |
+| JWT Secret | `openssl rand -base64 32` |
+
+---
+
+## 📋 Biến Môi Trường
+
+**CHỈ 5 BIẾN BẮT BUỘC:**
 
 ```env
-# API
-VITE_API_URL=http://localhost:5000/api/v1
-
-# Facebook
-VITE_FB_APP_ID=your_app_id
-VITE_FB_CONFIG_ID=your_config_id
-
-# server
-NODE_ENV=development
-PORT=5000
-MONGODB_URI=mongodb://localhost:27017/ads-manager
-JWT_SECRET=your_secret
-FACEBOOK_APP_ID=your_app_id
-FACEBOOK_APP_SECRET=your_secret
-GEMINI_API_KEY=your_key
+VITE_API_URL=https://your-railway-domain.up.railway.app/api/v1
+VITE_FB_APP_ID=your_facebook_app_id
+MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/ads-manager
+JWT_SECRET=random_32_chars_minimum
+FACEBOOK_APP_SECRET=your_facebook_app_secret
 ```
 
-### Chạy Development
+📖 **Chi tiết:** [.env.example](.env.example)
 
-```bash
-# Terminal 1 - Frontend
-npm run dev
-# Mở http://localhost:5173
+**LƯU Ý:** 
+- Development local: Copy `.env.example` thành `.env` và điền giá trị
+- Production: Nhập biến vào Railway/Vercel Dashboard (KHÔNG cần file .env)
 
-# Terminal 2 - server
-cd server
-npm run dev
-# Server chạy ở http://localhost:5000
-```
+---
 
-### Seed Database
+## 📖 Tài Liệu
 
-```bash
-cd server
-npm run seed
-```
+| File | Mục Đích |
+|------|----------|
+| **[DEPLOY.md](DEPLOY.md)** | 📦 Hướng dẫn deploy chi tiết từng bước |
+| **[.env.example](.env.example)** | ⚙️ Template biến môi trường + giải thích |
+| **[docs/DOMAIN_GUIDE.md](docs/DOMAIN_GUIDE.md)** | 🌐 Về placeholders và domain của bạn |
+| **[docs/FACEBOOK_LOGIN.md](docs/FACEBOOK_LOGIN.md)** | 🔐 Setup Facebook Login (Standard & Business) |
+| **[docs/REDIRECT_URI.md](docs/REDIRECT_URI.md)** | 🔗 Về OAuth Redirect URIs |
 
-**Tài khoản mặc định:**
-- Email: `admin@example.com`
-- Password: `123456`
+---
 
-## 📦 Deploy Production
+## 📱 Sử Dụng
 
-Xem hướng dẫn chi tiết tại:
-- [Hướng Dẫn Deploy](./docs/HUONG_DAN_DEPLOY.md)
-- [Cài Đặt Facebook Login](./docs/CAI_DAT_FACEBOOK.md)
+### 1. Đăng Nhập Facebook
+- Click "Login with Facebook"
+- Cấp quyền truy cập Ad Accounts
+- App hỗ trợ cả Personal và Business accounts
 
-**Địa chỉ production:**
-- Frontend: https://app-ads.tiemtocchu3.vn
-- server: https://app-ads-manager-production.up.railway.app
+### 2. Dashboard
+- Xem tổng quan hiệu suất campaigns
+- Biểu đồ real-time
+- Metrics: Impressions, Clicks, CTR, CPC, Conversions
 
-## 🔐 Xác Thực
+### 3. Quản Lý Chiến Dịch
+- Tạo/sửa/xóa campaigns
+- Chỉnh budget, schedule
+- Pause/Resume campaigns
+- Chi tiết metrics từng campaign
 
-Hỗ trợ 2 loại đăng nhập Facebook:
+### 4. Đề Xuất AI (Optional)
+- Suggestions từ Google Gemini
+- Tối ưu targeting & bidding
+- Cải thiện ad creative
 
-1. **User Access Token** - Đăng nhập tài khoản cá nhân
-2. **System User Access Token** - Đăng nhập business portfolio (dài hạn)
+---
 
-## 📚 API Endpoints
+## 💰 Chi Phí Deploy
 
-### Base URL
-```
-Production: https://app-ads-manager-production.up.railway.app/api/v1
-Development: http://localhost:5000/api/v1
-```
+- **Railway**: $5 FREE credit/tháng (~500 giờ)
+- **Vercel**: FREE (Hobby plan)
+- **MongoDB Atlas**: FREE (M0 - 512MB)
+- **Tổng: $0-5/tháng** (6-12 tháng đầu FREE)
 
-### Auth
-```
-POST /auth/register    - Đăng ký
-POST /auth/login       - Đăng nhập
-GET  /auth/me          - Lấy thông tin user
-```
+---
 
-### Facebook
-```
-POST /facebook/exchange-token  - Đổi code lấy token
-POST /facebook/profile         - Lấy profile
-POST /facebook/adaccounts      - Lấy ad accounts
-POST /facebook/campaigns       - Lấy campaigns
-POST /facebook/insights        - Lấy metrics
-```
+## 🔒 Bảo Mật
 
-### Dashboard
-```
-GET /dashboard/stats     - Thống kê tổng quan
-GET /dashboard/campaigns - Danh sách campaigns
-```
+- ✅ Không commit file `.env` lên Git
+- ✅ JWT Secret tối thiểu 32 ký tự
+- ✅ HTTPS cho production domain
+- ✅ App Secret chỉ ở server, không expose ra client
+- ✅ MongoDB whitelist phù hợp với environment
 
-### Quản Lý
-```
-GET    /accounts       - DS tài khoản quảng cáo
-POST   /accounts       - Tạo tài khoản
-GET    /campaigns      - DS chiến dịch
-POST   /campaigns      - Tạo chiến dịch
-PUT    /campaigns/:id  - Sửa chiến dịch
-DELETE /campaigns/:id  - Xóa chiến dịch
-```
+---
 
 ## 🤝 Đóng Góp
 
-Mọi đóng góp đều được chào đón! Xem [CONTRIBUTING.md](./CONTRIBUTING.md) để biết thêm chi tiết.
+Mọi đóng góp đều được chào đón!
 
-### Quy Trình:
 1. Fork repo
-2. Tạo branch (`git checkout -b feature/tinh-nang-moi`)
-3. Commit (`git commit -m 'Thêm tính năng mới'`)
-4. Push (`git push origin feature/tinh-nang-moi`)
+2. Tạo branch (`git checkout -b feature/amazing-feature`)
+3. Commit (`git commit -m 'Add amazing feature'`)
+4. Push (`git push origin feature/amazing-feature`)
 5. Tạo Pull Request
+
+---
 
 ## 📝 License
 
-MIT License - Xem file [LICENSE.md](./LICENSE.md)
+MIT License - Xem file [LICENSE.md](LICENSE.md)
+
+---
 
 ## 👤 Tác Giả
 
 **Monkey Tech**
-- GitHub: [@monkeytech192](https://github.com/monkeytech192)
-
-## 📞 Hỗ Trợ
-
-- Issues: [GitHub Issues](https://github.com/monkeytech192/app-ads-manager/issues)
-- Email: support@example.com
 
 ---
 
-**Được xây dựng với ❤️ bởi Monkey Tech**
+## 📞 Hỗ Trợ
+
+Gặp vấn đề? Tạo [issue trên GitHub](../../issues)
+
+---
+
+**Được xây dựng với ❤️ bằng React + Node.js**
