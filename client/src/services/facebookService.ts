@@ -1,10 +1,10 @@
 import { FacebookUserProfile } from "../types";
 
 // Facebook App Configuration - Get from developers.facebook.com
-const FACEBOOK_APP_ID = '1354327065841163';
+const FACEBOOK_APP_ID = import.meta.env.VITE_FB_APP_ID || '';
 // Facebook Login for Business Configuration ID - Create in App Dashboard > Facebook Login for Business > Configurations
-const FACEBOOK_CONFIG_ID = process.env.VITE_FB_CONFIG_ID || ''; // User Access Token config
-const FACEBOOK_BUSINESS_CONFIG_ID = process.env.VITE_FB_BUSINESS_CONFIG_ID || ''; // System User Access Token config 
+const FACEBOOK_CONFIG_ID = import.meta.env.VITE_FB_CONFIG_ID || ''; // User Access Token config
+const FACEBOOK_BUSINESS_CONFIG_ID = import.meta.env.VITE_FB_BUSINESS_CONFIG_ID || ''; // System User Access Token config 
 
 export const initFacebookSdk = (): Promise<void> => {
     return new Promise((resolve) => {
@@ -36,8 +36,9 @@ export const initFacebookSdk = (): Promise<void> => {
 };
 
 /**
- * Login with Facebook - User Access Token (for personal accounts)
- * Uses Facebook Login for Business Configuration
+ * Login with Facebook - Standard Login (for ALL users)
+ * Works for both Business and Personal accounts
+ * Automatically uses config_id if available, otherwise fallback to scope-based
  */
 export const loginWithFacebook = (): Promise<any> => {
     return new Promise((resolve, reject) => {
@@ -46,16 +47,17 @@ export const loginWithFacebook = (): Promise<any> => {
             return;
         }
 
-        // Use config_id for Facebook Login for Business
+        // Build login options
         const loginOptions: any = {};
         
         if (FACEBOOK_CONFIG_ID) {
-            // Facebook Login for Business with Configuration ID
+            // Facebook Login for Business with Configuration ID (nếu có Business)
             loginOptions.config_id = FACEBOOK_CONFIG_ID;
             // Do NOT use scope when using config_id (as per Facebook documentation)
         } else {
-            // Fallback to traditional scope-based login
-            loginOptions.scope = 'public_profile,email,ads_read,ads_management,business_management,pages_read_engagement';
+            // Standard Facebook Login với scope (cho tất cả users)
+            // Permissions: đọc profile, quản lý ads
+            loginOptions.scope = 'public_profile,email,ads_read,ads_management,business_management';
         }
 
         window.FB.login((response: any) => {
@@ -65,6 +67,31 @@ export const loginWithFacebook = (): Promise<any> => {
                 reject("User cancelled login or did not fully authorize.");
             }
         }, loginOptions);
+    });
+};
+
+/**
+ * Login with Standard Facebook Login (KHÔNG cần Business Account)
+ * Dùng scope-based permissions - hoạt động cho mọi user
+ */
+export const loginWithFacebookPersonal = (): Promise<any> => {
+    return new Promise((resolve, reject) => {
+        if (!window.FB) {
+            reject("Facebook SDK not loaded");
+            return;
+        }
+
+        // Standard Login với scope - KHÔNG dùng config_id
+        window.FB.login((response: any) => {
+            if (response.authResponse) {
+                resolve(response.authResponse);
+            } else {
+                reject("User cancelled login or did not fully authorize.");
+            }
+        }, {
+            scope: 'public_profile,email,ads_read,ads_management,business_management',
+            auth_type: 'rerequest' // Force permission dialog nếu đã login trước
+        });
     });
 };
 

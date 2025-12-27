@@ -288,6 +288,11 @@ const App = () => {
                 <h2 className="font-display font-bold text-5xl sm:text-6xl uppercase leading-[0.9] tracking-tight mb-4">
                     Kết nối dữ liệu <br/> quảng cáo.
                 </h2>
+                <p className="text-sm mb-4 border-l-4 border-black pl-3 py-2 bg-gray-100">
+                    <strong>Hỗ trợ cả 2 loại tài khoản:</strong><br/>
+                    ✓ Facebook cá nhân có Ads Manager<br/>
+                    ✓ Facebook Business Account
+                </p>
                 <BrutalistButton variant="facebook" fullWidth onClick={handleFacebookLogin} disabled={isLoading}>
                     <Facebook fill="white" size={24} />
                     {isLoading ? 'Đang kết nối...' : 'Kết nối với Facebook'}

@@ -22,14 +22,14 @@ const seedDatabase = async () => {
     console.log('🗑️  Cleared existing data');
 
     // Create admin user
-    const adminPassword = await bcrypt.hash('123456', 10);
+    const adminPassword = await bcrypt.hash('Admin@12345', 10);
     const adminUser = await User.create({
       name: 'Admin User',
       email: 'admin@example.com',
       password_hash: adminPassword,
       avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Admin'
     });
-    console.log('👤 Created admin user: admin@example.com / 123456');
+    console.log('👤 Created admin user (check seed.ts for credentials)');
 
     // Create settings for admin
     await Settings.create({
