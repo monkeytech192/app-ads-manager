@@ -1,16 +1,16 @@
 FROM node:20-alpine
 
-WORKDIR /app
+WORKDIR /app/server
 
 # Copy package files
-COPY package*.json ./
-COPY tsconfig.json ./
+COPY server/package*.json ./
+COPY server/tsconfig.json ./
 
 # Install dependencies
 RUN npm ci --only=production
 
 # Copy source code
-COPY src ./src
+COPY server/src ./src
 
 # Build TypeScript
 RUN npm run build
