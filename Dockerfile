@@ -6,14 +6,17 @@ WORKDIR /app/server
 COPY server/package*.json ./
 COPY server/tsconfig.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install ALL dependencies (including devDependencies for build)
+RUN npm ci
 
 # Copy source code
 COPY server/src ./src
 
 # Build TypeScript
 RUN npm run build
+
+# Remove devDependencies after build
+RUN npm prune --production
 
 # Expose port
 EXPOSE 5000
