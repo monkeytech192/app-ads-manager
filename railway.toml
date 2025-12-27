@@ -4,5 +4,7 @@ watchPaths = ["server/**"]
 
 [deploy]
 startCommand = "npm start"
+healthcheckPath = "/api/v1/health"
+healthcheckTimeout = 100
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 10
