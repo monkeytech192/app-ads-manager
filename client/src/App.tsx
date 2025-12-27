@@ -197,8 +197,8 @@ const App = () => {
          {/* Background pattern for the desktop area */}
          <div className="absolute inset-0 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/dark-concrete.png')] opacity-30 z-0"></div>
          
-         {/* Main App Shell - Fixed Size, Scroll happens INSIDE components */}
-         <div className="relative z-10 w-full max-w-xl h-[100dvh] bg-[#d6d3d1] shadow-[0_0_50px_rgba(0,0,0,0.5)] border-x-4 border-black flex flex-col overflow-hidden">
+         {/* Main App Shell - Responsive max-width, safe-area padding for tablet/desktop */}
+         <div className="relative z-10 w-full max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-5xl h-[100dvh] bg-[#d6d3d1] shadow-[0_0_50px_rgba(0,0,0,0.5)] md:border-x-8 border-x-4 border-black flex flex-col overflow-hidden">
              {/* Inner texture for the app area */}
              <div className="absolute inset-0 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/concrete-wall.png')] opacity-50 z-0 mix-blend-multiply h-full"></div>
              
