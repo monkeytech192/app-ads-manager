@@ -36,7 +36,7 @@ export const initFacebookSdk = (): Promise<void> => {
                 appId      : FACEBOOK_APP_ID,
                 cookie     : true,
                 xfbml      : true,
-                version    : 'v21.0' // Use latest API version (Dec 2024)
+                version    : 'v24.0' // Use latest API version (Dec 2024)
             });
             resolve();
         };

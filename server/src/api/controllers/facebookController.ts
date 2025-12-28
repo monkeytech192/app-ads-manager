@@ -49,7 +49,7 @@ export const exchangeCodeForToken = async (req: Request, res: Response) => {
     }
 
     // Exchange code for access token
-    const tokenUrl = `https://graph.facebook.com/v21.0/oauth/access_token`;
+    const tokenUrl = `https://graph.facebook.com/v24.0/oauth/access_token`;
     const params = {
       client_id: FACEBOOK_APP_ID,
       client_secret: FACEBOOK_APP_SECRET,
@@ -62,7 +62,7 @@ export const exchangeCodeForToken = async (req: Request, res: Response) => {
     const { access_token, token_type, expires_in } = response.data;
 
     // Get client business ID from the token
-    const meResponse = await axios.get(`https://graph.facebook.com/v21.0/me`, {
+    const meResponse = await axios.get(`https://graph.facebook.com/v24.0/me`, {
       params: {
         fields: 'client_business_id',
         access_token: access_token
@@ -106,7 +106,7 @@ export const getUserProfile = async (req: Request, res: Response) => {
       });
     }
 
-    const response = await axios.get(`https://graph.facebook.com/v21.0/me`, {
+    const response = await axios.get(`https://graph.facebook.com/v24.0/me`, {
       params: {
         fields: 'id,name,email,picture.width(400).height(400)',
         access_token: access_token
@@ -143,7 +143,7 @@ export const getAdAccounts = async (req: Request, res: Response) => {
       });
     }
 
-    const response = await axios.get(`https://graph.facebook.com/v21.0/me/adaccounts`, {
+    const response = await axios.get(`https://graph.facebook.com/v24.0/me/adaccounts`, {
       params: {
         fields: 'id,name,account_id,account_status,currency,timezone_name,business',
         access_token: FACEBOOK_ACCESS_TOKEN // Dùng token từ .env
@@ -190,7 +190,7 @@ export const getCampaigns = async (req: Request, res: Response) => {
     }
 
     const response = await axios.get(
-      `https://graph.facebook.com/v21.0/${ad_account_id}/campaigns`,
+      `https://graph.facebook.com/v24.0/${ad_account_id}/campaigns`,
       {
         params: {
           fields: 'id,name,objective,status,daily_budget,lifetime_budget,start_time,stop_time,created_time,updated_time',
@@ -239,7 +239,7 @@ export const getCampaignInsights = async (req: Request, res: Response) => {
     }
 
     const response = await axios.get(
-      `https://graph.facebook.com/v21.0/${campaign_id}/insights`,
+      `https://graph.facebook.com/v24.0/${campaign_id}/insights`,
       {
         params: {
           fields: 'impressions,clicks,spend,reach,frequency,ctr,cpc,cpm,conversions,cost_per_conversion',

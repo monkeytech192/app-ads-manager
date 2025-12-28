@@ -294,7 +294,7 @@ Access Token dài hạn cần thiết để backend truy xuất dữ liệu qu�
 **Option B: Dùng API Request**
 
 ```bash
-curl -i -X GET "https://graph.facebook.com/v21.0/oauth/access_token?grant_type=fb_exchange_token&client_id=YOUR_APP_ID&client_secret=YOUR_APP_SECRET&fb_exchange_token=YOUR_SHORT_LIVED_TOKEN"
+curl -i -X GET "https://graph.facebook.com/v24.0/oauth/access_token?grant_type=fb_exchange_token&client_id=YOUR_APP_ID&client_secret=YOUR_APP_SECRET&fb_exchange_token=YOUR_SHORT_LIVED_TOKEN"
 ```
 
 Thay:
@@ -316,7 +316,7 @@ Response:
 Kiểm tra token có đúng permissions không:
 
 ```bash
-curl -i -X GET "https://graph.facebook.com/v21.0/me?fields=id,name&access_token=YOUR_LONG_LIVED_TOKEN"
+curl -i -X GET "https://graph.facebook.com/v24.0/me?fields=id,name&access_token=YOUR_LONG_LIVED_TOKEN"
 ```
 
 Hoặc dùng [Access Token Debugger](https://developers.facebook.com/tools/debug/accesstoken/):

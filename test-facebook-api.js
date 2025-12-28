@@ -1,5 +1,12 @@
 // Test script để kiểm tra Facebook API
-const FACEBOOK_ACCESS_TOKEN = 'EAATPwNerTgsBQROZCGLEGoQdOKnyM6WgqEL8yJCqZAZAcbft2omGV0kFZCgZCnLfZBGd7CKZApURT4WgwULoziAfxTB5CqZB3Ivpm4ZBpbOmykmQi9HFELnyM38PRuaXwBeuLbyBGvozEHua7WnywhdZCfFZA8bwaarrZCyQuDbo1ZCsaHDd4oNrmDxBzQKBlGgnv8mptA2U2OcmjzT7sjWU1hZCeqLVog';
+require('dotenv').config();
+
+const FACEBOOK_ACCESS_TOKEN = process.env.FACEBOOK_ACCESS_TOKEN;
+
+if (!FACEBOOK_ACCESS_TOKEN) {
+  console.error('❌ FACEBOOK_ACCESS_TOKEN không tìm thấy trong file .env');
+  process.exit(1);
+}
 
 async function testFacebookAPI() {
   try {
@@ -7,7 +14,7 @@ async function testFacebookAPI() {
     
     // Test 1: Get Ad Accounts
     console.log('1. Fetching Ad Accounts...');
-    const accountsResponse = await fetch(`https://graph.facebook.com/v21.0/me/adaccounts?fields=id,name,account_id,account_status&access_token=${FACEBOOK_ACCESS_TOKEN}`);
+    const accountsResponse = await fetch(`https://graph.facebook.com/v24.0/me/adaccounts?fields=id,name,account_id,account_status&access_token=${FACEBOOK_ACCESS_TOKEN}`);
     
     if (!accountsResponse.ok) {
       throw new Error(`HTTP error! status: ${accountsResponse.status}`);
@@ -21,7 +28,7 @@ async function testFacebookAPI() {
       const firstAccountId = accountsData.data[0].id;
       console.log(`\n2. Fetching Campaigns for account ${firstAccountId}...`);
       
-      const campaignsResponse = await fetch(`https://graph.facebook.com/v21.0/${firstAccountId}/campaigns?fields=id,name,status&access_token=${FACEBOOK_ACCESS_TOKEN}`);
+      const campaignsResponse = await fetch(`https://graph.facebook.com/v24.0/${firstAccountId}/campaigns?fields=id,name,status&access_token=${FACEBOOK_ACCESS_TOKEN}`);
       const campaignsData = await campaignsResponse.json();
       console.log('✅ Campaigns:', JSON.stringify(campaignsData, null, 2));
     }

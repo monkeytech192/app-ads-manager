@@ -52,7 +52,7 @@ Tất cả thay đổi quan trọng của dự án sẽ được ghi lại trong
 - Vite build tool
 - Node.js 20 + Express
 - MongoDB Atlas
-- Facebook Graph API v21.0
+- Facebook Graph API v24.0
 - Google Gemini AI API
 - Tailwind CSS
 - Lucide Icons
