@@ -3,7 +3,6 @@ import { GoogleGenAI } from "@google/genai";
 const getClient = () => {
   const apiKey = process.env.API_KEY;
   if (!apiKey) {
-    console.warn("API_KEY not found in environment variables");
     return null;
   }
   return new GoogleGenAI({ apiKey });

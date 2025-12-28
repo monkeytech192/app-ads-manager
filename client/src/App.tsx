@@ -51,9 +51,7 @@ const App = () => {
 
   // Init Facebook SDK on mount
   useEffect(() => {
-    initFacebookSdk().then(() => {
-        console.log("FB SDK Initialized");
-    });
+    initFacebookSdk();
   }, []);
 
   // Fetch accounts ONCE when management screen is opened (if not already loaded)

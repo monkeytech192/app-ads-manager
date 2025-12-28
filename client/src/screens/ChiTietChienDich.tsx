@@ -211,7 +211,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
   const renderOverviewTab = () => (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
-        <StatCard label="Đã chi tiêu" value={spend} highlight />
+        <StatCard label={`Chi tiêu (${selectedDateLabel})`} value={spend} highlight />
         <StatCard label="Lượt hiển thị" value={impressions} />
         <StatCard label="Số lần nhấp" value={clicks} />
         <StatCard label="Chi phí/click" value={cpc} />
@@ -433,7 +433,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
             </div>
 
             <div className="flex justify-between items-center py-3 border-b-2 border-white/10">
-              <span className="text-gray-400 uppercase text-sm">Đã chi tiêu</span>
+              <span className="text-gray-400 uppercase text-sm">Đã chi tiêu (Trọn đời)</span>
               <span className="font-bold text-xl text-green-400">
                 {currencySettings.currency === 'VND'
                   ? `${budgetProgress.spent.toLocaleString('vi-VN')} ₫`
