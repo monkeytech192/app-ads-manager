@@ -4,6 +4,7 @@ import { BrutalistCard, BrutalistHeader } from '../shared/UIComponents';
 import { CampaignData } from '../types';
 import { getCampaignInsights, getDemographicInsights, formatNumber, type CampaignInsights, type DemographicData } from '../services/apiService';
 import { formatCurrencyWithSettings, getCurrencySettings } from '../utils/currency';
+import { useTranslation } from '../services/i18n';
 
 interface CampaignDetailScreenProps {
   onBack: () => void;
@@ -31,22 +32,23 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
   const [datePreset, setDatePreset] = useState<string>('last_7d');
   const [showDateDropdown, setShowDateDropdown] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('overview');
+  const { t, lang } = useTranslation();
   
   const dateOptions = [
-    { value: 'last_7d', label: '7 ngày qua' },
-    { value: 'last_14d', label: '14 ngày qua' },
-    { value: 'last_30d', label: '30 ngày qua' },
-    { value: 'this_month', label: 'Tháng này' },
-    { value: 'last_month', label: 'Tháng trước' },
+    { value: 'last_7d', label: t('detail.last7days') },
+    { value: 'last_14d', label: t('detail.last14days') },
+    { value: 'last_30d', label: t('detail.last30days') },
+    { value: 'this_month', label: t('detail.thisMonth') },
+    { value: 'last_month', label: t('detail.lastMonth') },
   ];
   
-  const selectedDateLabel = dateOptions.find(opt => opt.value === datePreset)?.label || '7 ngày qua';
+  const selectedDateLabel = dateOptions.find(opt => opt.value === datePreset)?.label || t('detail.last7days');
 
   const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
-    { id: 'overview', label: 'TỔNG QUAN', icon: <BarChart3 size={16} /> },
-    { id: 'performance', label: 'HIỆU QUẢ', icon: <TrendingUp size={16} /> },
-    { id: 'audience', label: 'ĐỐI TƯỢNG', icon: <Users size={16} /> },
-    { id: 'budget', label: 'NGÂN SÁCH', icon: <Wallet size={16} /> },
+    { id: 'overview', label: t('detail.overview'), icon: <BarChart3 size={16} /> },
+    { id: 'performance', label: t('detail.performance'), icon: <TrendingUp size={16} /> },
+    { id: 'audience', label: t('detail.audience'), icon: <Users size={16} /> },
+    { id: 'budget', label: t('detail.budgetTab'), icon: <Wallet size={16} /> },
   ];
 
   // Fetch campaign insights for selected date range
@@ -182,7 +184,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
     const ageMap = new Map<string, { impressions: number; clicks: number; spend: number }>();
     
     demographics.forEach(d => {
-      const genderKey = d.gender === 'male' ? 'Nam' : d.gender === 'female' ? 'Nữ' : d.gender;
+      const genderKey = d.gender === 'male' ? (lang === 'vi' ? 'Nam' : 'Male') : d.gender === 'female' ? (lang === 'vi' ? 'Nữ' : 'Female') : d.gender;
       const existing = genderMap.get(genderKey) || { impressions: 0, clicks: 0, spend: 0 };
       genderMap.set(genderKey, {
         impressions: existing.impressions + parseInt(d.impressions || '0'),
@@ -251,30 +253,30 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <StatCard label={`Chi tiêu (${selectedDateLabel})`} value={spend} highlight />
-        <StatCard label="Lượt hiển thị" value={impressions} />
-        <StatCard label="Số lần nhấp" value={clicks} />
-        <StatCard label="Chi phí/click" value={cpc} />
+        <StatCard label={`${t('dashboard.spend')} (${selectedDateLabel})`} value={spend} highlight />
+        <StatCard label={t('dashboard.impressions')} value={impressions} />
+        <StatCard label={t('dashboard.clicks')} value={clicks} />
+        <StatCard label={t('dashboard.cpc')} value={cpc} />
       </div>
 
       {insights && (
         <div className="border-4 border-black bg-[#1e293b] p-4 shadow-hard">
-          <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-brutal-yellow">Metrics Bổ Sung</h3>
+          <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-brutal-yellow">{lang === 'vi' ? 'Metrics Bổ Sung' : 'Additional Metrics'}</h3>
           <div className="grid grid-cols-2 gap-3">
             <div className="border-2 border-white/20 p-3 bg-black/20">
-              <span className="text-gray-400 text-xs uppercase">Reach</span>
+              <span className="text-gray-400 text-xs uppercase">{t('dashboard.reach')}</span>
               <div className="font-bold text-xl">{reach}</div>
             </div>
             <div className="border-2 border-white/20 p-3 bg-black/20">
-              <span className="text-gray-400 text-xs uppercase">Frequency</span>
+              <span className="text-gray-400 text-xs uppercase">{t('detail.frequency')}</span>
               <div className="font-bold text-xl">{frequency}</div>
             </div>
             <div className="border-2 border-white/20 p-3 bg-black/20">
-              <span className="text-gray-400 text-xs uppercase">CTR</span>
+              <span className="text-gray-400 text-xs uppercase">{t('dashboard.ctr')}</span>
               <div className="font-bold text-xl">{ctr}</div>
             </div>
             <div className="border-2 border-white/20 p-3 bg-black/20">
-              <span className="text-gray-400 text-xs uppercase">CPM</span>
+              <span className="text-gray-400 text-xs uppercase">{t('detail.cpm')}</span>
               <div className="font-bold text-xl">{cpm}</div>
             </div>
           </div>
@@ -282,7 +284,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
           {/* Show actual date range from API */}
           {insights.date_start && insights.date_stop && (
             <div className="mt-4 pt-3 border-t-2 border-white/10 text-center text-xs text-gray-500">
-              Dữ liệu thực tế: {new Date(insights.date_start).toLocaleDateString('vi-VN')} - {new Date(insights.date_stop).toLocaleDateString('vi-VN')}
+              {lang === 'vi' ? 'Dữ liệu thực tế' : 'Actual data'}: {new Date(insights.date_start).toLocaleDateString(lang === 'vi' ? 'vi-VN' : 'en-US')} - {new Date(insights.date_stop).toLocaleDateString(lang === 'vi' ? 'vi-VN' : 'en-US')}
             </div>
           )}
         </div>
@@ -294,7 +296,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
     <div className="space-y-4">
       <div className="border-4 border-black bg-[#1e293b] p-4 shadow-hard">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold text-lg uppercase tracking-wide text-brutal-yellow">Chi Tiết Hiệu Quả</h3>
+          <h3 className="font-bold text-lg uppercase tracking-wide text-brutal-yellow">{lang === 'vi' ? 'Chi Tiết Hiệu Quả' : 'Performance Details'}</h3>
           {renderDateDropdown()}
         </div>
 
@@ -303,25 +305,25 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
             <div className="grid grid-cols-3 gap-2">
               <div className="border-2 border-blue-500 bg-blue-500/10 p-3 text-center">
                 <div className="text-2xl font-bold text-blue-400">{impressions}</div>
-                <div className="text-xs text-gray-400 uppercase">Hiển thị</div>
+                <div className="text-xs text-gray-400 uppercase">{t('dashboard.impressions')}</div>
               </div>
               <div className="border-2 border-green-500 bg-green-500/10 p-3 text-center">
                 <div className="text-2xl font-bold text-green-400">{clicks}</div>
-                <div className="text-xs text-gray-400 uppercase">Clicks</div>
+                <div className="text-xs text-gray-400 uppercase">{t('dashboard.clicks')}</div>
               </div>
               <div className="border-2 border-yellow-500 bg-yellow-500/10 p-3 text-center">
                 <div className="text-2xl font-bold text-yellow-400">{reach}</div>
-                <div className="text-xs text-gray-400 uppercase">Reach</div>
+                <div className="text-xs text-gray-400 uppercase">{t('dashboard.reach')}</div>
               </div>
             </div>
 
             <div className="space-y-2 mt-4">
               {[
-                { label: 'Tỷ lệ nhấp (CTR)', value: ctr },
-                { label: 'Chi phí mỗi click (CPC)', value: cpc },
-                { label: 'Chi phí 1000 hiển thị (CPM)', value: cpm },
-                { label: 'Tần suất (Frequency)', value: frequency },
-                { label: 'Tổng chi tiêu', value: spend, highlight: true },
+                { label: lang === 'vi' ? 'Tỷ lệ nhấp (CTR)' : 'Click-through Rate (CTR)', value: ctr },
+                { label: lang === 'vi' ? 'Chi phí mỗi click (CPC)' : 'Cost per Click (CPC)', value: cpc },
+                { label: lang === 'vi' ? 'Chi phí 1000 hiển thị (CPM)' : 'Cost per 1000 Impressions (CPM)', value: cpm },
+                { label: lang === 'vi' ? 'Tần suất (Frequency)' : 'Frequency', value: frequency },
+                { label: lang === 'vi' ? 'Tổng chi tiêu' : 'Total Spend', value: spend, highlight: true },
               ].map((item, i) => (
                 <div key={i} className="flex justify-between items-center py-2 border-b-2 border-white/10">
                   <span className="text-gray-400 uppercase text-sm">{item.label}</span>
@@ -332,13 +334,13 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
 
             {insights.date_start && insights.date_stop && (
               <div className="text-center text-xs text-gray-500 mt-4 pt-3 border-t-2 border-white/10 uppercase">
-                Dữ liệu: {new Date(insights.date_start).toLocaleDateString('vi-VN')} - {new Date(insights.date_stop).toLocaleDateString('vi-VN')}
+                {lang === 'vi' ? 'Dữ liệu' : 'Data'}: {new Date(insights.date_start).toLocaleDateString(lang === 'vi' ? 'vi-VN' : 'en-US')} - {new Date(insights.date_stop).toLocaleDateString(lang === 'vi' ? 'vi-VN' : 'en-US')}
               </div>
             )}
           </div>
         ) : (
           <div className="text-center py-8 text-gray-500 uppercase font-bold">
-            Không có dữ liệu
+            {t('common.noData')}
           </div>
         )}
       </div>
@@ -353,13 +355,13 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
             <div className="h-4 bg-white/20 w-3/4 mx-auto"></div>
             <div className="h-4 bg-white/20 w-1/2 mx-auto"></div>
           </div>
-          <p className="mt-3 font-bold uppercase">Đang tải...</p>
+          <p className="mt-3 font-bold uppercase">{t('common.loading')}</p>
         </div>
       ) : demographics.length > 0 ? (
         <>
           {/* Gender Distribution */}
           <div className="border-4 border-black bg-[#1e293b] p-4 shadow-hard">
-            <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-brutal-yellow">Phân Bổ Giới Tính</h3>
+            <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-brutal-yellow">{lang === 'vi' ? 'Phân Bổ Giới Tính' : 'Gender Distribution'}</h3>
             <div className="space-y-4">
               {processedDemographics.byGender.map((g) => {
                 const percentage = totalImpressions > 0 ? (g.impressions / totalImpressions * 100) : 0;
@@ -371,7 +373,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
                     </div>
                     <div className="h-4 bg-black border-2 border-white/20 overflow-hidden">
                       <div 
-                        className={`h-full ${g.gender === 'Nam' ? 'bg-blue-500' : 'bg-pink-500'}`}
+                        className={`h-full ${g.gender === (lang === 'vi' ? 'Nam' : 'Male') ? 'bg-blue-500' : 'bg-pink-500'}`}
                         style={{ width: `${percentage}%` }}
                       />
                     </div>
@@ -386,7 +388,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
 
           {/* Age Distribution */}
           <div className="border-4 border-black bg-[#1e293b] p-4 shadow-hard">
-            <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-brutal-yellow">Phân Bổ Độ Tuổi</h3>
+            <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-brutal-yellow">{lang === 'vi' ? 'Phân Bổ Độ Tuổi' : 'Age Distribution'}</h3>
             <div className="space-y-3">
               {processedDemographics.byAge.map((a) => {
                 const percentage = totalImpressions > 0 ? (a.impressions / totalImpressions * 100) : 0;
@@ -416,7 +418,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
           <Users size={48} className="mx-auto text-gray-600 mb-3" />
           <h3 className="font-bold text-lg mb-2 uppercase">Chưa Có Dữ Liệu</h3>
           <p className="text-gray-400 text-sm">
-            Dữ liệu demographic sẽ hiển thị khi chiến dịch có đủ lượt hiển thị.
+            {lang === 'vi' ? 'Dữ liệu demographic sẽ hiển thị khi chiến dịch có đủ lượt hiển thị.' : 'Demographic data will be displayed when the campaign has enough impressions.'}
           </p>
         </div>
       )}
@@ -431,16 +433,16 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
     return (
       <div className="space-y-4">
         <div className="border-4 border-black bg-[#1e293b] p-4 shadow-hard">
-          <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-brutal-yellow">Thông Tin Ngân Sách</h3>
+          <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-brutal-yellow">{lang === 'vi' ? 'Thông Tin Ngân Sách' : 'Budget Information'}</h3>
           
           <div className="space-y-3">
             <div className="flex justify-between items-center py-3 border-b-2 border-white/10">
-              <span className="text-gray-400 uppercase text-sm">Loại ngân sách</span>
-              <span className="font-bold">{lifetimeBudget ? 'Trọn đời' : dailyBudget ? 'Hàng ngày' : 'N/A'}</span>
+              <span className="text-gray-400 uppercase text-sm">{lang === 'vi' ? 'Loại ngân sách' : 'Budget Type'}</span>
+              <span className="font-bold">{lifetimeBudget ? t('detail.lifetime') : dailyBudget ? t('detail.daily') : 'N/A'}</span>
             </div>
 
             <div className="flex justify-between items-center py-3 border-b-2 border-white/10">
-              <span className="text-gray-400 uppercase text-sm">Ngân sách</span>
+              <span className="text-gray-400 uppercase text-sm">{t('detail.budgetTotal')}</span>
               <span className="font-bold text-xl">
                 {currencySettings.currency === 'VND' 
                   ? `${budgetProgress.budget.toLocaleString('vi-VN')} ₫`
@@ -450,7 +452,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
             </div>
 
             <div className="flex justify-between items-center py-3 border-b-2 border-white/10">
-              <span className="text-gray-400 uppercase text-sm">Đã chi tiêu (Trọn đời)</span>
+              <span className="text-gray-400 uppercase text-sm">{t('detail.spentTotal')} ({t('detail.lifetime')})</span>
               <span className="font-bold text-xl text-green-400">
                 {currencySettings.currency === 'VND'
                   ? `${budgetProgress.spent.toLocaleString('vi-VN')} ₫`
@@ -461,7 +463,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
 
             {lifetimeBudget && (
               <div className="flex justify-between items-center py-3 border-b-2 border-white/10">
-                <span className="text-gray-400 uppercase text-sm">Còn lại</span>
+                <span className="text-gray-400 uppercase text-sm">{t('detail.remaining')}</span>
                 <span className="font-bold text-xl text-blue-400">
                   {currencySettings.currency === 'VND'
                     ? `${budgetProgress.remaining.toLocaleString('vi-VN')} ₫`
@@ -475,7 +477,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
             {lifetimeBudget && (
               <div className="mt-4 pt-2">
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-gray-400 uppercase">Tiến độ chi tiêu</span>
+                  <span className="text-gray-400 uppercase">{lang === 'vi' ? 'Tiến độ chi tiêu' : 'Spend Progress'}</span>
                   <span className="font-bold">{budgetProgress.percentage}%</span>
                 </div>
                 <div className="h-6 bg-black border-4 border-white/30 overflow-hidden">
@@ -494,16 +496,16 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
 
         {/* Campaign Info */}
         <div className="border-4 border-black bg-[#1e293b] p-4 shadow-hard">
-          <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-brutal-yellow">Thông Tin Chiến Dịch</h3>
+          <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-brutal-yellow">{lang === 'vi' ? 'Thông Tin Chiến Dịch' : 'Campaign Info'}</h3>
           <div className="space-y-3">
             <div className="flex justify-between py-3 border-b-2 border-white/10">
-              <span className="text-gray-400 uppercase text-sm">Trạng thái</span>
+              <span className="text-gray-400 uppercase text-sm">{t('management.status')}</span>
               <span className={`font-bold ${isPaused ? 'text-orange-400' : 'text-green-400'}`}>
-                {isPaused ? 'TẠM DỪNG' : 'HOẠT ĐỘNG'}
+                {isPaused ? t('status.paused') : t('status.active')}
               </span>
             </div>
             <div className="flex justify-between py-3 border-b-2 border-white/10">
-              <span className="text-gray-400 uppercase text-sm">Mục tiêu</span>
+              <span className="text-gray-400 uppercase text-sm">{lang === 'vi' ? 'Mục tiêu' : 'Objective'}</span>
               <span className="font-bold">{displayCampaign.objective}</span>
             </div>
           </div>
@@ -516,7 +518,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
     <div className="flex flex-col h-full w-full bg-[#0f172a] text-white font-sans">
       
       <BrutalistHeader 
-        title="CHI TIẾT CHIẾN DỊCH" 
+        title={t('detail.title')} 
         onBack={onBack}
         variant="dark"
       />
@@ -529,7 +531,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
               <div className="h-4 bg-white/20 w-3/4 mx-auto"></div>
               <div className="h-4 bg-white/20 w-1/2 mx-auto"></div>
             </div>
-            <p className="mt-3 font-bold uppercase">Đang tải insights...</p>
+            <p className="mt-3 font-bold uppercase">{t('common.loading')}</p>
           </div>
         )}
 
@@ -538,13 +540,13 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
             <div className="flex items-start gap-3">
               <AlertCircle size={24} className="text-red-400 shrink-0" />
               <div>
-                <h3 className="font-bold text-lg text-red-400 mb-2 uppercase">Lỗi Tải Insights</h3>
+                <h3 className="font-bold text-lg text-red-400 mb-2 uppercase">{t('error.loadFailed')}</h3>
                 <p className="text-sm text-gray-300 mb-3">{error}</p>
                 <button 
                   onClick={() => window.location.reload()}
                   className="bg-red-600 text-white border-4 border-black font-bold px-4 py-2 uppercase shadow-hard active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
                 >
-                  Thử Lại
+                  {lang === 'vi' ? 'Thử Lại' : 'Retry'}
                 </button>
               </div>
             </div>
@@ -559,7 +561,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
               <div className="flex items-center gap-2 text-sm">
                 <span className={`w-3 h-3 ${isPaused ? 'bg-orange-500' : 'bg-green-500'}`}></span>
                 <span className={`font-bold uppercase ${isPaused ? 'text-orange-500' : 'text-green-500'}`}>
-                    {isPaused ? 'Đang tạm dừng' : 'Đang hoạt động'}
+                    {isPaused ? t('status.paused') : t('status.active')}
                 </span>
                 <span className="text-gray-500">•</span>
                 <span className="text-gray-400 uppercase">{displayCampaign.objective}</span>

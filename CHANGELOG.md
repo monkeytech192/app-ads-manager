@@ -2,6 +2,31 @@
 
 Tất cả thay đổi quan trọng của dự án sẽ được ghi lại trong file này.
 
+## [1.2.0] - 2025-06-27
+
+### ✨ Thêm Mới
+- **Đa ngôn ngữ (i18n)**: Hỗ trợ Tiếng Việt và English
+- Thêm service i18n.ts với ~150 translation keys
+- Thêm hook useTranslation() cho React components
+- Selector ngôn ngữ trong Settings với cờ quốc gia (🇻🇳 🇺🇸)
+- Lưu ngôn ngữ vào localStorage
+
+### 🔄 Thay Đổi
+- Cập nhật tất cả màn hình với translations:
+  - Dashboard.tsx
+  - QuanLyChienDich.tsx (Campaign Management)
+  - ChiTietChienDich.tsx (Campaign Detail)
+  - SoSanhChienDich.tsx (Comparison)
+  - DeXuat.tsx (Recommendations)
+  - CaiDat.tsx (Settings)
+  - BottomNav.tsx (Navigation)
+
+### 🐛 Sửa Lỗi
+- Xóa debug console logs từ API service
+- Tối ưu API caching với 60s TTL
+
+---
+
 ## [1.1.0] - 2025-12-26
 
 ### ✨ Thêm Mới

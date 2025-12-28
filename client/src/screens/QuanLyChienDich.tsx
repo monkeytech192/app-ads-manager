@@ -4,6 +4,7 @@ import { BrutalistButton, BrutalistCard, BrutalistToggle, BrutalistHeader } from
 import BottomNav from '../shared/BottomNav';
 import { ScreenView, CampaignData, AccountData } from '../types';
 import { formatCurrency } from '../services/apiService';
+import { useTranslation } from '../services/i18n';
 
 interface ManagementScreenProps {
   onBack: () => void;
@@ -78,14 +79,16 @@ const ManagementScreen: React.FC<ManagementScreenProps> = ({
     a.name.toLowerCase().includes(appliedSearch.toLowerCase())
   );
 
+  const { t, lang } = useTranslation();
+
   return (
     <div className="flex flex-col h-full w-full bg-[#e5e5e5]">
       
       <BrutalistHeader 
-        title="Quản Lý Tài Khoản & CD" 
+        title={lang === 'vi' ? 'Quản Lý Tài Khoản & CD' : 'Account & Campaign Mgmt'} 
         onBack={onBack}
         rightElement={
-          <button className="p-1">
+          <button className="p-1" title="Menu">
             <Menu size={28} strokeWidth={3} />
           </button>
         }
@@ -100,7 +103,7 @@ const ManagementScreen: React.FC<ManagementScreenProps> = ({
              <Search size={20} className="mr-2" />
              <input 
                 type="text" 
-                placeholder="Nhập tên..." 
+                placeholder={lang === 'vi' ? 'Nhập tên...' : 'Enter name...'} 
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleApplyFilter()}
@@ -117,7 +120,7 @@ const ManagementScreen: React.FC<ManagementScreenProps> = ({
             `}
           >
              <Filter size={18} />
-             LỌC
+             {lang === 'vi' ? 'LỌC' : 'FILTER'}
           </button>
         </div>
 
@@ -127,13 +130,13 @@ const ManagementScreen: React.FC<ManagementScreenProps> = ({
             onClick={() => setActiveTab('accounts')}
             className={`py-3 font-display font-bold text-lg uppercase transition-colors ${activeTab === 'accounts' ? 'bg-brutal-yellow text-black' : 'bg-black text-white'}`}
           >
-            Tài Khoản
+            {t('management.accounts')}
           </button>
           <button 
             onClick={() => setActiveTab('campaigns')}
             className={`relative py-3 font-display font-bold text-lg uppercase transition-colors border-l-4 border-black ${activeTab === 'campaigns' ? 'bg-brutal-yellow text-black' : 'bg-black text-white'}`}
           >
-            Chiến Dịch
+            {t('management.campaigns')}
             {selectedAccountIds.length > 0 && (
                 <span className="absolute top-2 right-2 bg-red-600 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border border-white">
                     {selectedAccountIds.length}
@@ -152,7 +155,7 @@ const ManagementScreen: React.FC<ManagementScreenProps> = ({
                 <div className="h-4 bg-gray-300 rounded w-3/4 mx-auto"></div>
                 <div className="h-4 bg-gray-300 rounded w-1/2 mx-auto"></div>
               </div>
-              <p className="mt-3 font-bold">ĐANG TẢI TÀI KHOẢN...</p>
+              <p className="mt-3 font-bold">{lang === 'vi' ? 'ĐANG TẢI TÀI KHOẢN...' : 'LOADING ACCOUNTS...'}</p>
             </div>
           )}
 
@@ -162,7 +165,7 @@ const ManagementScreen: React.FC<ManagementScreenProps> = ({
                 <div className="h-4 bg-gray-300 rounded w-3/4 mx-auto"></div>
                 <div className="h-4 bg-gray-300 rounded w-1/2 mx-auto"></div>
               </div>
-              <p className="mt-3 font-bold">ĐANG TẢI CHIẾN DỊCH...</p>
+              <p className="mt-3 font-bold">{lang === 'vi' ? 'ĐANG TẢI CHIẾN DỊCH...' : 'LOADING CAMPAIGNS...'}</p>
             </div>
           )}
           
@@ -170,7 +173,7 @@ const ManagementScreen: React.FC<ManagementScreenProps> = ({
             <>
               {filteredAccounts.length === 0 ? (
                 <div className="text-center py-10 opacity-50 font-bold text-xl border-4 border-black border-dashed">
-                  KHÔNG TÌM THẤY TÀI KHOẢN
+                  {lang === 'vi' ? 'KHÔNG TÌM THẤY TÀI KHOẢN' : 'NO ACCOUNTS FOUND'}
                 </div>
               ) : (
                 filteredAccounts.map((acc) => (
@@ -182,7 +185,7 @@ const ManagementScreen: React.FC<ManagementScreenProps> = ({
                         <div className="flex flex-col gap-1">
                             <h3 className="font-bold text-white text-lg leading-none">{acc.name}</h3>
                             <span className={`${acc.status === 'active' ? 'bg-[#22c55e]' : 'bg-brutal-yellow'} text-black text-xs font-bold px-1 py-0.5 w-fit`}>
-                                TRẠNG THÁI: {acc.status === 'active' ? 'HOẠT ĐỘNG' : 'TẠM DỪNG'}
+                                {lang === 'vi' ? 'TRẠNG THÁI' : 'STATUS'}: {acc.status === 'active' ? t('status.active') : t('status.paused')}
                             </span>
                         </div>
                     </div>
@@ -200,7 +203,7 @@ const ManagementScreen: React.FC<ManagementScreenProps> = ({
                     >
                         {acc.isSelected ? (
                             <Check size={20} strokeWidth={4} />
-                        ) : 'CHỌN'}
+                        ) : t('common.select')}
                     </BrutalistButton>
                   </div>
                 ))
@@ -212,13 +215,13 @@ const ManagementScreen: React.FC<ManagementScreenProps> = ({
             <>
                {selectedAccountIds.length === 0 ? (
                    <div className="text-center py-10 opacity-50 font-bold text-xl border-4 border-black border-dashed">
-                       VUI LÒNG CHỌN TÀI KHOẢN <br/> ĐỂ XEM CHIẾN DỊCH
+                       {lang === 'vi' ? 'VUI LÒNG CHỌN TÀI KHOẢN' : 'PLEASE SELECT AN ACCOUNT'} <br/> {lang === 'vi' ? 'ĐỂ XEM CHIẾN DỊCH' : 'TO VIEW CAMPAIGNS'}
                    </div>
                ) : (
                    <>
                        {filteredCampaigns.length === 0 ? (
                             <div className="text-center py-10 opacity-50 font-bold border-4 border-black border-dashed">
-                                KHÔNG TÌM THẤY CHIẾN DỊCH
+                                {lang === 'vi' ? 'KHÔNG TÌM THẤY CHIẾN DỊCH' : 'NO CAMPAIGNS FOUND'}
                             </div>
                        ) : (
                            filteredCampaigns.map((camp) => (
@@ -231,9 +234,9 @@ const ManagementScreen: React.FC<ManagementScreenProps> = ({
                                          <div className="flex flex-col">
                                             <h3 className="font-display font-bold text-xl uppercase leading-tight mb-1">{camp.title}</h3>
                                             <span className={`${camp.status === 'active' ? 'bg-[#3B82F6] text-white' : 'bg-brutal-yellow text-black'} px-1 text-sm font-bold block w-fit mb-1`}>
-                                                MỤC TIÊU: {camp.objective}
+                                                {lang === 'vi' ? 'MỤC TIÊU' : 'OBJECTIVE'}: {camp.objective}
                                             </span>
-                                            <p className="font-bold text-sm text-gray-600">NGÂN SÁCH: {camp.budget}</p>
+                                            <p className="font-bold text-sm text-gray-600">{lang === 'vi' ? 'NGÂN SÁCH' : 'BUDGET'}: {camp.budget}</p>
                                          </div>
                                       </div>
                                       
@@ -255,9 +258,9 @@ const ManagementScreen: React.FC<ManagementScreenProps> = ({
                                           ></div>
                                       </div>
                                       <div className="flex justify-between items-center">
-                                          <span className="font-bold text-sm">{camp.progress}% ĐÃ CHI / NGÂN SÁCH</span>
+                                          <span className="font-bold text-sm">{camp.progress}% {lang === 'vi' ? 'ĐÃ CHI / NGÂN SÁCH' : 'SPENT / BUDGET'}</span>
                                           <BrutalistButton onClick={() => onSelectCampaign(camp)} variant="yellow" className="!text-sm !py-1 !border-2">
-                                             XEM CHI TIẾT
+                                             {t('dashboard.viewDetails')}
                                           </BrutalistButton>
                                       </div>
                                   </div>

@@ -9,28 +9,6 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/
 const apiCache = new Map<string, { data: any; timestamp: number }>();
 const CACHE_DURATION = 60000; // 1 minute cache
 
-// Debug: Track all API calls
-const apiCallLog: { endpoint: string; time: string; cached: boolean; stack: string }[] = [];
-(window as any).__apiCallLog = apiCallLog;
-(window as any).__apiCache = apiCache;
-
-function logApiCall(endpoint: string, cached: boolean) {
-  const stack = new Error().stack?.split('\n').slice(2, 5).join(' <- ') || '';
-  const entry = {
-    endpoint,
-    time: new Date().toISOString().substr(11, 12),
-    cached,
-    stack: stack.replace(/\s+/g, ' ').substring(0, 200)
-  };
-  apiCallLog.push(entry);
-  console.log(
-    `%c[API ${cached ? 'CACHE' : 'FETCH'}]%c ${endpoint}`,
-    cached ? 'background: #22c55e; color: white; padding: 2px 6px;' : 'background: #ef4444; color: white; padding: 2px 6px;',
-    'color: inherit',
-    '\n  Stack:', stack.substring(0, 150)
-  );
-}
-
 function getCached<T>(key: string): T | null {
   const cached = apiCache.get(key);
   if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
@@ -156,12 +134,8 @@ export interface CampaignInsights {
 export async function getAdAccounts(): Promise<AdAccount[]> {
   const cacheKey = 'adaccounts';
   const cached = getCached<AdAccount[]>(cacheKey);
-  if (cached) {
-    logApiCall('/facebook/adaccounts', true);
-    return cached;
-  }
+  if (cached) return cached;
 
-  logApiCall('/facebook/adaccounts', false);
   const data = await fetchApi<AdAccount[]>('/facebook/adaccounts', {
     method: 'POST',
     body: JSON.stringify({}),
@@ -176,12 +150,8 @@ export async function getAdAccounts(): Promise<AdAccount[]> {
 export async function getCampaigns(adAccountId: string): Promise<Campaign[]> {
   const cacheKey = `campaigns-${adAccountId}`;
   const cached = getCached<Campaign[]>(cacheKey);
-  if (cached) {
-    logApiCall(`/facebook/campaigns [${adAccountId}]`, true);
-    return cached;
-  }
+  if (cached) return cached;
 
-  logApiCall(`/facebook/campaigns [${adAccountId}]`, false);
   const data = await fetchApi<Campaign[]>('/facebook/campaigns', {
     method: 'POST',
     body: JSON.stringify({
@@ -201,12 +171,8 @@ export async function getCampaignInsights(
 ): Promise<CampaignInsights> {
   const cacheKey = `insights-${campaignId}-${datePreset}`;
   const cached = getCached<CampaignInsights>(cacheKey);
-  if (cached) {
-    logApiCall(`/facebook/insights [${campaignId}] ${datePreset}`, true);
-    return cached;
-  }
+  if (cached) return cached;
 
-  logApiCall(`/facebook/insights [${campaignId}] ${datePreset}`, false);
   const data = await fetchApi<CampaignInsights>('/facebook/insights', {
     method: 'POST',
     body: JSON.stringify({

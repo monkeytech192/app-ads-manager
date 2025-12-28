@@ -4,6 +4,7 @@ import { BrutalistButton, BrutalistToggle, BrutalistSlider, BrutalistHeader } fr
 import BottomNav from '../shared/BottomNav';
 import { ScreenView } from '../types';
 import { useToast } from '../shared/Toast';
+import { useTranslation, type Language } from '../services/i18n';
 
 interface SettingsScreenProps {
   onBack: () => void;
@@ -13,6 +14,7 @@ interface SettingsScreenProps {
 const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, onNavigate }) => {
   const [alerts, setAlerts] = useState({ cost: true, ctr: false });
   const { showToast } = useToast();
+  const { t, lang, setLang } = useTranslation();
   
   // Currency settings
   const [currency, setCurrency] = useState(() => {
@@ -31,30 +33,64 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, onNavigate }) =
       rate: exchangeRate
     };
     localStorage.setItem('currencySettings', JSON.stringify(settings));
-    showToast('Đã lưu cài đặt tiền tệ!', 'success');
+    showToast(t('settings.savedCurrency'), 'success');
+  };
+
+  // Handle language change
+  const handleLanguageChange = (newLang: Language) => {
+    setLang(newLang);
+    showToast(t('settings.savedLanguage'), 'success');
   };
 
   return (
     <div className="flex flex-col h-full w-full bg-[#f5f5f4] bg-[url('https://www.transparenttextures.com/patterns/dust.png')]">
       
       <BrutalistHeader 
-        title="Cài đặt & Ngân sách" 
+        title={t('settings.title')} 
         onBack={onBack} 
       />
 
       {/* Content Area */}
       <div className="flex-1 overflow-y-auto no-scrollbar p-4 space-y-8">
         
-        {/* Section 1: Alerts */}
+        {/* Section 1: Language */}
         <div>
-            <h2 className="font-display font-bold text-2xl uppercase mb-4">THIẾT LẬP CẢNH BÁO</h2>
+            <h2 className="font-display font-bold text-2xl uppercase mb-4">{t('settings.language')}</h2>
+            <div>
+                <label className="font-bold text-lg block mb-2">{t('settings.selectLanguage')}</label>
+                <div className="grid grid-cols-2 gap-3">
+                    <button
+                        onClick={() => handleLanguageChange('vi')}
+                        className={`border-4 border-black py-3 font-bold shadow-hard transition-all flex items-center justify-center gap-2 ${
+                            lang === 'vi' ? 'bg-brutal-yellow' : 'bg-white hover:bg-gray-50'
+                        }`}
+                    >
+                        🇻🇳 {t('settings.vietnamese')}
+                    </button>
+                    <button
+                        onClick={() => handleLanguageChange('en')}
+                        className={`border-4 border-black py-3 font-bold shadow-hard transition-all flex items-center justify-center gap-2 ${
+                            lang === 'en' ? 'bg-brutal-yellow' : 'bg-white hover:bg-gray-50'
+                        }`}
+                    >
+                        🇺🇸 {t('settings.english')}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <hr className="border-2 border-black" />
+
+        {/* Section 2: Alerts */}
+        <div>
+            <h2 className="font-display font-bold text-2xl uppercase mb-4">{t('settings.alerts')}</h2>
             <div className="space-y-4">
                 <div className="flex items-center gap-4">
                     <BrutalistToggle 
                         checked={alerts.cost} 
                         onChange={() => setAlerts(prev => ({...prev, cost: !prev.cost}))} 
                     />
-                    <span className="font-bold text-lg leading-tight">Chi phí tăng đột biến ({'>'}20%)</span>
+                    <span className="font-bold text-lg leading-tight">{t('settings.costSpike')}</span>
                 </div>
                 <div className="flex items-center gap-4">
                     <BrutalistToggle 
@@ -63,25 +99,25 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, onNavigate }) =
                         labelOn="ON"
                         labelOff="OFF"
                     />
-                    <span className="font-bold text-lg leading-tight">CTR giảm ({'<'}1%)</span>
+                    <span className="font-bold text-lg leading-tight">{t('settings.ctrDrop')}</span>
                 </div>
             </div>
 
             <button className="mt-6 w-full border-4 border-black bg-white py-3 flex items-center justify-center gap-2 font-bold shadow-hard hover:bg-gray-50 active:translate-y-0.5 active:shadow-none transition-all">
                 <Plus size={24} strokeWidth={3} />
-                THÊM CẢNH BÁO TÙY CHỈNH
+                {t('settings.addCustomAlert')}
             </button>
         </div>
 
         <hr className="border-2 border-black" />
 
-        {/* Section 2: Currency */}
+        {/* Section 3: Currency */}
         <div>
-            <h2 className="font-display font-bold text-2xl uppercase mb-4">CÀI ĐẶT TIỀN TỆ</h2>
+            <h2 className="font-display font-bold text-2xl uppercase mb-4">{t('settings.currency')}</h2>
             
             <div className="space-y-4">
                 <div>
-                    <label className="font-bold text-lg block mb-2">Đơn vị tiền tệ hiển thị</label>
+                    <label className="font-bold text-lg block mb-2">{t('settings.displayCurrency')}</label>
                     <div className="grid grid-cols-2 gap-3">
                         <button
                             onClick={() => setCurrency('VND')}
@@ -104,7 +140,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, onNavigate }) =
 
                 {currency === 'VND' && (
                     <div>
-                        <label className="font-bold text-lg block mb-2">Tỷ giá quy đổi (1 USD = ? VNĐ)</label>
+                        <label className="font-bold text-lg block mb-2">{t('settings.exchangeRate')}</label>
                         <div className="flex gap-2 items-center">
                             <div className="flex-1 border-4 border-black bg-white px-3 py-2">
                                 <input
@@ -120,7 +156,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, onNavigate }) =
                             <span className="font-bold">VNĐ</span>
                         </div>
                         <p className="text-sm mt-1 text-gray-700">
-                            <strong>Ví dụ:</strong> Facebook hiển thị $61 → Sẽ hiển thị {(61 * exchangeRate).toLocaleString('vi-VN')} VNĐ
+                            <strong>{t('settings.example')}:</strong> Facebook {lang === 'vi' ? 'hiển thị' : 'shows'} $61 → {lang === 'vi' ? 'Sẽ hiển thị' : 'Will display'} {(61 * exchangeRate).toLocaleString('vi-VN')} VNĐ
                         </p>
                     </div>
                 )}
@@ -130,7 +166,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, onNavigate }) =
                     fullWidth
                     onClick={saveCurrencySettings}
                 >
-                    LƯU CÀI ĐẶT TIỀN TỆ
+                    {t('settings.saveCurrency')}
                 </BrutalistButton>
             </div>
         </div>

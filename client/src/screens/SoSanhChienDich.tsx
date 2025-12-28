@@ -4,6 +4,7 @@ import { BrutalistButton, BrutalistCard, BrutalistSelect, BrutalistHeader } from
 import BottomNav from '../shared/BottomNav';
 import { ScreenView } from '../types';
 import { getCampaigns, getAdSets, getAdSetInsights, type Campaign, type AdSet, type CampaignInsights } from '../services/apiService';
+import { useTranslation } from '../services/i18n';
 
 interface ComparisonScreenProps {
   onBack: () => void;
@@ -12,6 +13,8 @@ interface ComparisonScreenProps {
 }
 
 const ComparisonScreen: React.FC<ComparisonScreenProps> = ({ onBack, onNavigate, selectedAccountIds }) => {
+  const { t, lang } = useTranslation();
+  
   // State for campaigns and ad sets
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [campaignA, setCampaignA] = useState<string>('');
@@ -31,7 +34,7 @@ const ComparisonScreen: React.FC<ComparisonScreenProps> = ({ onBack, onNavigate,
   useEffect(() => {
     const fetchCampaigns = async () => {
       if (!selectedAccountIds || selectedAccountIds.length === 0) {
-        setError('Vui lòng chọn tài khoản quảng cáo trước');
+        setError(t('comparison.selectAccountFirst'));
         return;
       }
 
@@ -101,7 +104,7 @@ const ComparisonScreen: React.FC<ComparisonScreenProps> = ({ onBack, onNavigate,
   // Fetch insights for both ad sets
   const fetchComparison = async () => {
     if (!adSetA || !adSetB) {
-      setError('Vui lòng chọn nhóm quảng cáo cho cả hai bên');
+      setError(t('comparison.selectAdSetBothSides'));
       return;
     }
 
@@ -162,7 +165,7 @@ const ComparisonScreen: React.FC<ComparisonScreenProps> = ({ onBack, onNavigate,
     <div className="flex flex-col h-full w-full bg-[url('https://www.transparenttextures.com/patterns/graphy.png')]">
       
       <BrutalistHeader 
-        title="SO SÁNH NHÓM QC" 
+        title={t('comparison.title')} 
         onBack={onBack} 
       />
 
@@ -178,33 +181,33 @@ const ComparisonScreen: React.FC<ComparisonScreenProps> = ({ onBack, onNavigate,
 
         {/* Campaign & Ad Set Selectors */}
         <div className="bg-[#dedcdb] border-4 border-black p-3 shadow-hard space-y-3">
-          <h3 className="font-bold uppercase">Chọn chiến dịch và nhóm</h3>
+          <h3 className="font-bold uppercase">{t('comparison.selectCampaignAndGroup')}</h3>
           
           {/* Side A */}
           <div className="border-2 border-black p-2 bg-blue-50">
-            <label className="font-bold text-xs block mb-1 text-blue-700">BÊN A</label>
+            <label className="font-bold text-xs block mb-1 text-blue-700">{t('comparison.sideA')}</label>
             <div className="space-y-2">
               <div>
-                <label className="text-xs font-bold block mb-1">Chiến dịch</label>
+                <label className="text-xs font-bold block mb-1">{t('comparison.campaign')}</label>
                 <BrutalistSelect 
                   value={campaignA} 
                   onChange={(e) => setCampaignA(e.target.value)}
                   disabled={loading || campaigns.length === 0}
                 >
-                  <option value="">-- Chọn chiến dịch --</option>
+                  <option value="">{t('comparison.selectCampaign')}</option>
                   {campaigns.map(c => (
                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
                 </BrutalistSelect>
               </div>
               <div>
-                <label className="text-xs font-bold block mb-1">Nhóm quảng cáo</label>
+                <label className="text-xs font-bold block mb-1">{t('comparison.adSet')}</label>
                 <BrutalistSelect 
                   value={adSetA} 
                   onChange={(e) => setAdSetA(e.target.value)}
                   disabled={loading || adSetsA.length === 0}
                 >
-                  <option value="">-- Chọn nhóm --</option>
+                  <option value="">{t('comparison.selectAdSet')}</option>
                   {adSetsA.map(a => (
                     <option key={a.id} value={a.id}>{a.name}</option>
                   ))}
@@ -215,29 +218,29 @@ const ComparisonScreen: React.FC<ComparisonScreenProps> = ({ onBack, onNavigate,
 
           {/* Side B */}
           <div className="border-2 border-black p-2 bg-orange-50">
-            <label className="font-bold text-xs block mb-1 text-orange-700">BÊN B</label>
+            <label className="font-bold text-xs block mb-1 text-orange-700">{t('comparison.sideB')}</label>
             <div className="space-y-2">
               <div>
-                <label className="text-xs font-bold block mb-1">Chiến dịch</label>
+                <label className="text-xs font-bold block mb-1">{t('comparison.campaign')}</label>
                 <BrutalistSelect 
                   value={campaignB} 
                   onChange={(e) => setCampaignB(e.target.value)}
                   disabled={loading || campaigns.length === 0}
                 >
-                  <option value="">-- Chọn chiến dịch --</option>
+                  <option value="">{t('comparison.selectCampaign')}</option>
                   {campaigns.map(c => (
                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
                 </BrutalistSelect>
               </div>
               <div>
-                <label className="text-xs font-bold block mb-1">Nhóm quảng cáo</label>
+                <label className="text-xs font-bold block mb-1">{t('comparison.adSet')}</label>
                 <BrutalistSelect 
                   value={adSetB} 
                   onChange={(e) => setAdSetB(e.target.value)}
                   disabled={loading || adSetsB.length === 0}
                 >
-                  <option value="">-- Chọn nhóm --</option>
+                  <option value="">{t('comparison.selectAdSet')}</option>
                   {adSetsB.map(a => (
                     <option key={a.id} value={a.id}>{a.name}</option>
                   ))}
@@ -258,22 +261,22 @@ const ComparisonScreen: React.FC<ComparisonScreenProps> = ({ onBack, onNavigate,
 
             <div className="border-4 border-black bg-[#e5e5e5]">
               <div className="grid grid-cols-3 border-b-4 border-black bg-[#d6d3d1]">
-                  <div className="p-2 font-bold text-xs sm:text-sm border-r-2 border-black">METRIC</div>
-                  <div className="p-2 font-bold text-xs sm:text-sm border-r-2 border-black text-center text-blue-700">BÊN A</div>
-                  <div className="p-2 font-bold text-xs sm:text-sm text-center text-orange-600">BÊN B</div>
+                  <div className="p-2 font-bold text-xs sm:text-sm border-r-2 border-black">{t('comparison.metric')}</div>
+                  <div className="p-2 font-bold text-xs sm:text-sm border-r-2 border-black text-center text-blue-700">{t('comparison.sideA')}</div>
+                  <div className="p-2 font-bold text-xs sm:text-sm text-center text-orange-600">{t('comparison.sideB')}</div>
               </div>
               
               {[
-                  { label: 'CHI TIÊU', a: formatValue(insightsA.spend, true), b: formatValue(insightsB.spend, true) },
-                  { label: 'LƯỢT HIỂN THỊ', a: formatValue(insightsA.impressions), b: formatValue(insightsB.impressions) },
-                  { label: 'NHẤP CHUỘT', a: formatValue(insightsA.clicks), b: formatValue(insightsB.clicks) },
-                  { label: 'TẦM TIẾP CẬN', a: formatValue(insightsA.reach), b: formatValue(insightsB.reach) },
-                  { label: 'TẦN SUẤT', a: insightsA.frequency || '0', b: insightsB.frequency || '0' },
+                  { label: t('comparison.spend'), a: formatValue(insightsA.spend, true), b: formatValue(insightsB.spend, true) },
+                  { label: t('comparison.impressions'), a: formatValue(insightsA.impressions), b: formatValue(insightsB.impressions) },
+                  { label: t('comparison.clicks'), a: formatValue(insightsA.clicks), b: formatValue(insightsB.clicks) },
+                  { label: t('comparison.reach'), a: formatValue(insightsA.reach), b: formatValue(insightsB.reach) },
+                  { label: t('comparison.frequency'), a: insightsA.frequency || '0', b: insightsB.frequency || '0' },
                   { label: 'CTR', a: formatPercent(insightsA.ctr), b: formatPercent(insightsB.ctr) },
                   { label: 'CPC', a: formatValue(insightsA.cpc, true), b: formatValue(insightsB.cpc, true) },
                   { label: 'CPM', a: formatValue(insightsA.cpm, true), b: formatValue(insightsB.cpm, true) },
-                  { label: 'CHUYỂN ĐỔI', a: formatValue(insightsA.conversions), b: formatValue(insightsB.conversions) },
-                  { label: 'CHI PHÍ/CHUYỂN ĐỔI', a: formatValue(insightsA.cost_per_conversion, true), b: formatValue(insightsB.cost_per_conversion, true) },
+                  { label: t('comparison.conversions'), a: formatValue(insightsA.conversions), b: formatValue(insightsB.conversions) },
+                  { label: t('comparison.costPerConversion'), a: formatValue(insightsA.cost_per_conversion, true), b: formatValue(insightsB.cost_per_conversion, true) },
               ].map((row, idx) => (
                   <div key={idx} className="grid grid-cols-3 border-b-2 border-black last:border-b-0">
                       <div className="p-2 font-bold text-xs sm:text-sm border-r-2 border-black uppercase">{row.label}</div>
@@ -288,7 +291,7 @@ const ComparisonScreen: React.FC<ComparisonScreenProps> = ({ onBack, onNavigate,
         {loading && (
           <div className="text-center py-8">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-black border-t-transparent"></div>
-            <p className="mt-2 font-bold">Đang tải dữ liệu...</p>
+            <p className="mt-2 font-bold">{t('comparison.loading')}</p>
           </div>
         )}
 
@@ -299,7 +302,7 @@ const ComparisonScreen: React.FC<ComparisonScreenProps> = ({ onBack, onNavigate,
           onClick={fetchComparison}
           disabled={loading || !adSetA || !adSetB}
         >
-          LÀM MỚI SO SÁNH <RotateCcw size={20} />
+          {t('comparison.refresh')} <RotateCcw size={20} />
         </BrutalistButton>
 
       </div>

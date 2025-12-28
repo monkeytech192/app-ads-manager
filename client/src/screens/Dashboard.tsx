@@ -5,6 +5,7 @@ import BottomNav from '../shared/BottomNav';
 import { ScreenView, FacebookUserProfile } from '../types';
 import { getDashboardMetrics, formatNumber, formatPercentage, type DashboardMetrics } from '../services/apiService';
 import { formatCurrencyWithSettings } from '../utils/currency';
+import { useTranslation } from '../services/i18n';
 
 interface DashboardScreenProps {
   onBack: () => void; // Used for logout
@@ -94,6 +95,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ onBack, onNavigate, u
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { t, lang } = useTranslation();
 
   // Fetch dashboard metrics on mount - ONLY ONCE
   useEffect(() => {
@@ -105,7 +107,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ onBack, onNavigate, u
         setMetrics(data);
       } catch (err: any) {
         console.error('Error fetching dashboard metrics:', err);
-        setError(err.message || 'Không thể tải dữ liệu. Vui lòng kiểm tra Access Token trong .env');
+        setError(err.message || t('error.loadFailed'));
       } finally {
         setLoading(false);
       }
@@ -140,7 +142,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ onBack, onNavigate, u
                 ></div>
                 <div className="absolute right-0 top-12 z-50 w-56 bg-white border-4 border-black shadow-hard p-1 animate-in fade-in zoom-in-95 duration-100">
                     <div className="px-4 py-2 border-b-2 border-black mb-1">
-                        <p className="text-xs font-bold text-gray-500">ĐĂNG NHẬP LÀ</p>
+                        <p className="text-xs font-bold text-gray-500">{lang === 'vi' ? 'ĐĂNG NHẬP LÀ' : 'LOGGED IN AS'}</p>
                         <p className="font-display font-bold text-lg truncate">{userName}</p>
                     </div>
                     <button 
@@ -148,7 +150,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ onBack, onNavigate, u
                         className="w-full text-left px-4 py-2 font-bold hover:bg-red-50 hover:text-red-600 flex items-center gap-2 transition-colors"
                     >
                         <LogOut size={18} />
-                        ĐĂNG XUẤT
+                        {lang === 'vi' ? 'ĐĂNG XUẤT' : 'LOGOUT'}
                     </button>
                 </div>
             </>
@@ -160,7 +162,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ onBack, onNavigate, u
     <div className="flex flex-col h-full w-full"> 
       
       <BrutalistHeader 
-        title="Tổng quan Chiến dịch" 
+        title={lang === 'vi' ? 'Tổng quan Chiến dịch' : 'Campaign Overview'} 
         onBack={() => {}} 
         showBack={false} 
         rightElement={<UserAvatar />}
@@ -176,7 +178,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ onBack, onNavigate, u
               <div className="h-4 bg-gray-300 rounded w-1/2 mx-auto"></div>
               <div className="h-4 bg-gray-300 rounded w-2/3 mx-auto"></div>
             </div>
-            <p className="mt-4 font-bold text-lg">Đang tải dữ liệu...</p>
+            <p className="mt-4 font-bold text-lg">{t('common.loading')}</p>
           </BrutalistCard>
         )}
 
@@ -186,13 +188,13 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ onBack, onNavigate, u
             <div className="flex items-start gap-3">
               <AlertCircle size={24} className="text-red-600 shrink-0 mt-1" />
               <div>
-                <h3 className="font-bold text-lg text-red-600 mb-2">LỖI TẢI DỮ LIỆU</h3>
+                <h3 className="font-bold text-lg text-red-600 mb-2">{t('error.loadFailed')}</h3>
                 <p className="text-sm mb-3">{error}</p>
                 <button 
                   onClick={() => window.location.reload()}
                   className="bg-red-600 text-white border-2 border-black font-bold px-4 py-2 shadow-hard-sm hover:bg-red-700 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
                 >
-                  THỬ LẠI
+                  {lang === 'vi' ? 'THỬ LẠI' : 'RETRY'}
                 </button>
               </div>
             </div>
@@ -206,20 +208,20 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ onBack, onNavigate, u
               <div className="absolute top-0 right-0 w-16 h-16 bg-[repeating-linear-gradient(45deg,black,black_10px,yellow_10px,yellow_20px)] border-l-4 border-b-4 border-black z-0 opacity-20"></div>
               
               <h2 className="font-display font-bold text-xl mb-3 border-b-4 border-black inline-block bg-white px-2">
-                HIỆU SUẤT CHÍNH
+                {lang === 'vi' ? 'HIỆU SUẤT CHÍNH' : 'KEY PERFORMANCE'}
               </h2>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="col-span-2 sm:col-span-1">
                     <StatBox 
-                        label="Tổng Chi phí:" 
+                        label={lang === 'vi' ? 'Tổng Chi phí:' : 'Total Spend:'} 
                         value={formatCurrencyWithSettings(metrics.totalSpend)} 
                         icon={DollarSign} 
                     />
                 </div>
                 <div className="col-span-2 sm:col-span-1">
                     <StatBox 
-                        label="Số lượt hiển thị:" 
+                        label={lang === 'vi' ? 'Số lượt hiển thị:' : 'Impressions:'} 
                         value={formatNumber(metrics.totalImpressions)} 
                         icon={Eye} 
                     />
@@ -227,7 +229,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ onBack, onNavigate, u
                 
                 <div className="col-span-2 grid grid-cols-3 gap-3">
                     <StatBox 
-                      label="Số lần nhấp:" 
+                      label={lang === 'vi' ? 'Số lần nhấp:' : 'Clicks:'} 
                       value={formatNumber(metrics.totalClicks)} 
                       icon={MousePointer2} 
                     />
@@ -237,7 +239,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ onBack, onNavigate, u
                       icon={TrendingUp} 
                     />
                     <StatBox 
-                      label="Hoạt động:" 
+                      label={lang === 'vi' ? 'Hoạt động:' : 'Active:'} 
                       value={`${metrics.activeCampaigns}/${metrics.activeCampaigns + metrics.pausedCampaigns}`} 
                       icon={Activity} 
                     />
@@ -247,26 +249,26 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ onBack, onNavigate, u
 
             <BrutalistCard variant="white" className="!p-3 sm:!p-5">
               <h2 className="font-display font-bold text-xl mb-1 border-b-4 border-black inline-block bg-[#e5e5e5] px-2">
-                CHI PHÍ QUẢNG CÁO THEO THÁNG
+                {lang === 'vi' ? 'CHI PHÍ QUẢNG CÁO THEO THÁNG' : 'MONTHLY AD SPEND'}
               </h2>
               <BarChart />
               <p className="text-xs text-gray-500 mt-2 text-center italic">
-                * Dữ liệu demo - Sẽ được cập nhật với insights thực tế
+                * {lang === 'vi' ? 'Dữ liệu demo - Sẽ được cập nhật với insights thực tế' : 'Demo data - Will be updated with real insights'}
               </p>
             </BrutalistCard>
 
             <div>
                 <h2 className="font-display font-bold text-xl mb-3 uppercase pl-1">
-                    Tổng quan chiến dịch
+                    {lang === 'vi' ? 'Tổng quan chiến dịch' : 'Campaign Overview'}
                 </h2>
                 <BrutalistCard variant="white" className="!p-6">
                   <div className="grid grid-cols-2 gap-4 text-center">
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">CHIẾN DỊCH HOẠT ĐỘNG</p>
+                      <p className="text-sm text-gray-500 mb-1">{lang === 'vi' ? 'CHIẾN DỊCH HOẠT ĐỘNG' : 'ACTIVE CAMPAIGNS'}</p>
                       <p className="font-display font-bold text-4xl text-green-600">{metrics.activeCampaigns}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">CHIẾN DỊCH TẠM DỪNG</p>
+                      <p className="text-sm text-gray-500 mb-1">{lang === 'vi' ? 'CHIẾN DỊCH TẠM DỪNG' : 'PAUSED CAMPAIGNS'}</p>
                       <p className="font-display font-bold text-4xl text-yellow-600">{metrics.pausedCampaigns}</p>
                     </div>
                   </div>

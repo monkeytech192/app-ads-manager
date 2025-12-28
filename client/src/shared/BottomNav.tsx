@@ -1,6 +1,7 @@
 import React from 'react';
 import { Home, Megaphone, TrendingUp, Settings } from 'lucide-react';
 import { ScreenView } from '../types';
+import { useTranslation } from '../services/i18n';
 
 interface BottomNavProps {
   currentView: ScreenView;
@@ -8,11 +9,13 @@ interface BottomNavProps {
 }
 
 const BottomNav: React.FC<BottomNavProps> = ({ currentView, onNavigate }) => {
+  const { t } = useTranslation();
+  
   const navItems = [
-    { id: 'dashboard', label: 'Trang chủ', icon: Home },
-    { id: 'management', label: 'Chiến dịch', icon: Megaphone },
-    { id: 'comparison', label: 'Báo cáo', icon: TrendingUp },
-    { id: 'settings', label: 'Cài đặt', icon: Settings },
+    { id: 'dashboard', labelKey: 'nav.dashboard' as const, icon: Home },
+    { id: 'management', labelKey: 'nav.management' as const, icon: Megaphone },
+    { id: 'comparison', labelKey: 'nav.comparison' as const, icon: TrendingUp },
+    { id: 'settings', labelKey: 'nav.settings' as const, icon: Settings },
   ];
 
   return (
@@ -35,7 +38,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentView, onNavigate }) => {
             ) : (
                <Icon size={24} />
             )}
-            <span className="font-bold text-xs uppercase">{item.label}</span>
+            <span className="font-bold text-xs uppercase">{t(item.labelKey)}</span>
           </button>
         );
       })}
