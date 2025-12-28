@@ -6,6 +6,7 @@ import { initFacebookSdk, loginWithFacebook, getFacebookUserProfile } from './se
 import { getAdAccounts, getCampaigns, getCampaignInsights } from './services/apiService';
 import { AdAccount, Campaign } from './services/apiService';
 import { getCurrencySettings } from './utils/currency';
+import { useToast } from './shared/Toast';
 import DashboardScreen from './screens/Dashboard';
 import ManagementScreen from './screens/QuanLyChienDich';
 import ComparisonScreen from './screens/SoSanhChienDich';
@@ -81,19 +82,25 @@ const App = () => {
     }
   }, [currentView, accountsLoaded]);
 
-  // Fetch campaigns when accounts are selected
+  // Fetch campaigns when accounts are selected - use selectedAccountIds to prevent duplicate calls
+  const selectedAccountIds = accounts.filter(a => a.isSelected).map(a => a.id).join(',');
+  
   useEffect(() => {
-    const selectedAccounts = accounts.filter(a => a.isSelected);
-    if (selectedAccounts.length === 0) {
+    if (!selectedAccountIds) {
       setCampaigns([]);
       return;
     }
+
+    const selectedAccounts = accounts.filter(a => a.isSelected);
+    let isCancelled = false;
 
     const fetchCampaigns = async () => {
       try {
         const campaignsPromises = selectedAccounts.map(acc => getCampaigns(acc.id));
         const campaignsArrays = await Promise.all(campaignsPromises);
         const allCampaigns = campaignsArrays.flat();
+
+        if (isCancelled) return;
 
         // Fetch insights for each campaign to get spend data
         const campaignsWithInsights = await Promise.all(
@@ -108,6 +115,8 @@ const App = () => {
             }
           })
         );
+
+        if (isCancelled) return;
 
         // Transform API data to CampaignData format
         const transformedCampaigns: CampaignData[] = campaignsWithInsights.map((camp: Campaign & { insights: any }) => {
@@ -191,7 +200,12 @@ const App = () => {
     };
 
     fetchCampaigns();
-  }, [accounts]);
+
+    // Cleanup function to prevent state updates on unmounted component
+    return () => {
+      isCancelled = true;
+    };
+  }, [selectedAccountIds]); // Only re-run when selected account IDs change
 
   const handleToggleAccount = (id: string) => {
     setAccounts(prev => prev.map(acc => 
@@ -231,6 +245,8 @@ const App = () => {
     setCurrentView('dashboard');
   };
 
+  const { showToast } = useToast();
+
   const handleFacebookLogin = async () => {
     setIsLoading(true);
     try {
@@ -238,9 +254,10 @@ const App = () => {
         const profile = await getFacebookUserProfile();
         setUserProfile(profile);
         setCurrentView('dashboard');
+        showToast('Đăng nhập thành công!', 'success');
     } catch (error) {
         console.error("Facebook Login Error:", error);
-        alert("Đăng nhập Facebook thất bại hoặc đã bị hủy.");
+        showToast('Đăng nhập Facebook thất bại hoặc đã bị hủy.', 'error');
     } finally {
         setIsLoading(false);
     }
@@ -249,7 +266,7 @@ const App = () => {
   const handleRegister = () => {
      // In a real app, perform registration logic here
      if(regPassword !== regConfirmPassword) {
-         alert("Mật khẩu không khớp!");
+         showToast('Mật khẩu không khớp!', 'error');
          return;
      }
      setCurrentView('dashboard');

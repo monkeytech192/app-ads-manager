@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react';
 import { BrutalistButton, BrutalistToggle, BrutalistSlider, BrutalistHeader } from '../shared/UIComponents';
 import BottomNav from '../shared/BottomNav';
 import { ScreenView } from '../types';
+import { useToast } from '../shared/Toast';
 
 interface SettingsScreenProps {
   onBack: () => void;
@@ -11,6 +12,7 @@ interface SettingsScreenProps {
 
 const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, onNavigate }) => {
   const [alerts, setAlerts] = useState({ cost: true, ctr: false });
+  const { showToast } = useToast();
   
   // Currency settings
   const [currency, setCurrency] = useState(() => {
@@ -29,7 +31,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, onNavigate }) =
       rate: exchangeRate
     };
     localStorage.setItem('currencySettings', JSON.stringify(settings));
-    alert('Đã lưu cài đặt tiền tệ!');
+    showToast('Đã lưu cài đặt tiền tệ!', 'success');
   };
 
   return (
