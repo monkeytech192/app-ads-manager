@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Facebook, Globe, MessageCircleQuestion, X, UserPlus, LogIn, CheckSquare, Square } from 'lucide-react';
+import { Facebook, Globe, MessageCircleQuestion, X, UserPlus, LogIn, CheckSquare, Square, ChevronDown } from 'lucide-react';
 import { BrutalistCard, BrutalistButton, BrutalistInput, TextureOverlay } from './shared/UIComponents';
 import { askAssistant } from './services/geminiService';
+import { useTranslation, type Language } from './services/i18n';
 import { initFacebookSdk, loginWithFacebook, getFacebookUserProfile } from './services/facebookService';
 import { getAdAccounts, getCampaigns, getCampaignInsights } from './services/apiService';
 import { AdAccount, Campaign } from './services/apiService';
@@ -23,6 +24,8 @@ const formatCurrency = (value: number): string => {
 };
 
 const App = () => {
+  const { t, lang, setLang } = useTranslation();
+  const [showLangMenu, setShowLangMenu] = useState(false);
   const [currentView, setCurrentView] = useState<ScreenView>('login');
   const [selectedCampaign, setSelectedCampaign] = useState<CampaignData | null>(null);
 
@@ -254,10 +257,10 @@ const App = () => {
         const profile = await getFacebookUserProfile();
         setUserProfile(profile);
         setCurrentView('dashboard');
-        showToast('Đăng nhập thành công!', 'success');
+        showToast(lang === 'vi' ? 'Đăng nhập thành công!' : 'Login successful!', 'success');
     } catch (error) {
         console.error("Facebook Login Error:", error);
-        showToast('Đăng nhập Facebook thất bại hoặc đã bị hủy.', 'error');
+        showToast(lang === 'vi' ? 'Đăng nhập Facebook thất bại hoặc đã bị hủy.' : 'Facebook login failed or was cancelled.', 'error');
     } finally {
         setIsLoading(false);
     }
@@ -266,7 +269,7 @@ const App = () => {
   const handleRegister = () => {
      // In a real app, perform registration logic here
      if(regPassword !== regConfirmPassword) {
-         showToast('Mật khẩu không khớp!', 'error');
+         showToast(lang === 'vi' ? 'Mật khẩu không khớp!' : 'Passwords do not match!', 'error');
          return;
      }
      setCurrentView('dashboard');
@@ -367,12 +370,12 @@ const App = () => {
                     >
                       <X size={24} />
                     </button>
-                    <h3 className="font-display font-bold text-2xl mb-4 uppercase">Trợ lý AI</h3>
+                    <h3 className="font-display font-bold text-2xl mb-4 uppercase">{t('assistant.title')}</h3>
                     <div className="bg-gray-100 border-2 border-black p-3 h-48 overflow-y-auto mb-4 font-mono text-sm">
                       {response ? (
                         <p>{response}</p>
                       ) : (
-                        <p className="text-gray-500 italic">Tôi có thể giúp gì cho bạn?</p>
+                        <p className="text-gray-500 italic">{lang === 'vi' ? 'Tôi có thể giúp gì cho bạn?' : 'How can I help you?'}</p>
                       )}
                     </div>
                     <div className="flex gap-2">
@@ -380,7 +383,7 @@ const App = () => {
                         type="text"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
-                        placeholder="Hỏi trợ lý..."
+                        placeholder={lang === 'vi' ? 'Hỏi trợ lý...' : 'Ask assistant...'}
                         className="flex-1 border-2 border-black p-2 font-mono text-sm focus:outline-none focus:bg-yellow-50"
                         onKeyDown={(e) => e.key === 'Enter' && handleAiAsk()}
                       />
@@ -389,7 +392,7 @@ const App = () => {
                         disabled={loading}
                         className="bg-brutal-yellow border-2 border-black px-4 font-bold uppercase text-sm hover:bg-yellow-400 disabled:opacity-50"
                       >
-                        {loading ? '...' : 'Gửi'}
+                        {loading ? '...' : (lang === 'vi' ? 'Gửi' : 'Send')}
                       </button>
                     </div>
                   </div>
@@ -412,12 +415,34 @@ const App = () => {
         <div className="flex justify-between items-stretch border-4 border-black bg-[#a8a29e] p-2 sm:p-3 relative z-20">
           <div className="flex items-center">
             <h1 className="font-display font-bold text-3xl sm:text-4xl tracking-tighter uppercase leading-none mt-1">
-              Quản Lý Ads FB
+              {lang === 'vi' ? 'Quản Lý Ads FB' : 'FB Ads Manager'}
             </h1>
           </div>
-          <div className="bg-brutal-yellow border-2 border-black px-2 flex items-center gap-1 font-bold text-sm sm:text-base shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer hover:translate-y-0.5 hover:shadow-none transition-all">
-            <span>Tiếng Việt</span>
-            <Globe size={16} />
+          {/* Language Selector Dropdown */}
+          <div className="relative">
+            <button 
+              onClick={() => setShowLangMenu(!showLangMenu)}
+              className="bg-brutal-yellow border-2 border-black px-2 py-1 flex items-center gap-1 font-bold text-sm sm:text-base shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0.5 hover:shadow-none transition-all"
+            >
+              <span>{lang === 'vi' ? '🇻🇳 VI' : '🇺🇸 EN'}</span>
+              <ChevronDown size={16} />
+            </button>
+            {showLangMenu && (
+              <div className="absolute top-full right-0 mt-1 bg-white border-2 border-black shadow-hard z-50 min-w-[120px]">
+                <button
+                  onClick={() => { setLang('vi'); setShowLangMenu(false); }}
+                  className={`w-full px-3 py-2 text-left font-bold text-sm flex items-center gap-2 hover:bg-gray-100 ${lang === 'vi' ? 'bg-brutal-yellow' : ''}`}
+                >
+                  🇻🇳 Tiếng Việt
+                </button>
+                <button
+                  onClick={() => { setLang('en'); setShowLangMenu(false); }}
+                  className={`w-full px-3 py-2 text-left font-bold text-sm flex items-center gap-2 hover:bg-gray-100 ${lang === 'en' ? 'bg-brutal-yellow' : ''}`}
+                >
+                  🇺🇸 English
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -426,29 +451,29 @@ const App = () => {
             <>
                 <BrutalistCard variant="white" className="relative group z-20">
                 <h2 className="font-display font-bold text-5xl sm:text-6xl uppercase leading-[0.9] tracking-tight mb-4">
-                    Kết nối dữ liệu <br/> quảng cáo.
+                    {lang === 'vi' ? <>Kết nối dữ liệu <br/> quảng cáo.</> : <>Connect your <br/> ad data.</>}
                 </h2>
                 <p className="text-sm mb-4 border-l-4 border-black pl-3 py-2 bg-gray-100">
-                    <strong>Hỗ trợ cả 2 loại tài khoản:</strong><br/>
-                    ✓ Facebook cá nhân có Ads Manager<br/>
-                    ✓ Facebook Business Account
+                    <strong>{lang === 'vi' ? 'Hỗ trợ cả 2 loại tài khoản:' : 'Support both account types:'}</strong><br/>
+                    ✓ {lang === 'vi' ? 'Facebook cá nhân có Ads Manager' : 'Personal Facebook with Ads Manager'}<br/>
+                    ✓ {lang === 'vi' ? 'Facebook Business Account' : 'Facebook Business Account'}
                 </p>
                 <BrutalistButton variant="facebook" fullWidth onClick={handleFacebookLogin} disabled={isLoading}>
                     <Facebook fill="white" size={24} />
-                    {isLoading ? 'Đang kết nối...' : 'Kết nối với Facebook'}
+                    {isLoading ? (lang === 'vi' ? 'Đang kết nối...' : 'Connecting...') : (lang === 'vi' ? 'Kết nối với Facebook' : 'Connect with Facebook')}
                 </BrutalistButton>
                 </BrutalistCard>
 
                 <BrutalistCard variant="gray" className="space-y-4 relative z-20">
                     <div className="space-y-4 pt-2">
                         <BrutalistInput 
-                            placeholder="Email hoặc số điện thoại" 
+                            placeholder={lang === 'vi' ? 'Email hoặc số điện thoại' : 'Email or phone number'} 
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
                         <BrutalistInput 
                             type="password"
-                            placeholder="Mật khẩu" 
+                            placeholder={lang === 'vi' ? 'Mật khẩu' : 'Password'} 
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
@@ -461,21 +486,21 @@ const App = () => {
                             <div className="relative">
                                 {rememberMe ? <CheckSquare size={24} strokeWidth={2.5} /> : <Square size={24} strokeWidth={2.5} />}
                             </div>
-                            <span className="font-bold text-sm uppercase select-none">Ghi nhớ đăng nhập</span>
+                            <span className="font-bold text-sm uppercase select-none">{lang === 'vi' ? 'Ghi nhớ đăng nhập' : 'Remember me'}</span>
                         </div>
                     </div>
 
                     <div className="pt-2 flex flex-col gap-3 justify-center">
                         <BrutalistButton variant="black" fullWidth onClick={handleEmailLogin}>
-                           Đăng nhập Email
+                           {lang === 'vi' ? 'Đăng nhập Email' : 'Login with Email'}
                         </BrutalistButton>
                         <div className="text-center">
-                             <span className="font-bold text-sm">Chưa có tài khoản? </span>
+                             <span className="font-bold text-sm">{lang === 'vi' ? 'Chưa có tài khoản? ' : "Don't have an account? "}</span>
                              <button 
                                 onClick={() => setCurrentView('register')}
                                 className="font-bold text-sm underline hover:text-blue-600 uppercase"
                              >
-                                Đăng ký thủ công
+                                {lang === 'vi' ? 'Đăng ký thủ công' : 'Register'}
                              </button>
                         </div>
                     </div>
@@ -486,38 +511,38 @@ const App = () => {
             <>
                 <BrutalistCard variant="yellow" className="relative group z-20">
                     <h2 className="font-display font-bold text-4xl sm:text-5xl uppercase leading-[0.9] tracking-tight mb-2">
-                        Đăng ký tài khoản
+                        {lang === 'vi' ? 'Đăng ký tài khoản' : 'Create Account'}
                     </h2>
                     <p className="font-medium text-base mb-4">
-                        Tạo tài khoản mới để quản lý chiến dịch hiệu quả hơn.
+                        {lang === 'vi' ? 'Tạo tài khoản mới để quản lý chiến dịch hiệu quả hơn.' : 'Create a new account to manage campaigns more effectively.'}
                     </p>
                     <BrutalistButton variant="facebook" fullWidth onClick={handleFacebookLogin} disabled={isLoading} className="!text-sm sm:!text-base">
                         <Facebook fill="white" size={20} />
-                         {isLoading ? 'Đang kết nối...' : 'Đăng ký bằng Facebook'}
+                         {isLoading ? (lang === 'vi' ? 'Đang kết nối...' : 'Connecting...') : (lang === 'vi' ? 'Đăng ký bằng Facebook' : 'Register with Facebook')}
                     </BrutalistButton>
                 </BrutalistCard>
 
                 <BrutalistCard variant="gray" className="space-y-4 relative z-20">
                     <div className="space-y-3 pt-2">
                          <BrutalistInput 
-                            placeholder="Họ và tên" 
+                            placeholder={lang === 'vi' ? 'Họ và tên' : 'Full name'} 
                             value={regName}
                             onChange={(e) => setRegName(e.target.value)}
                         />
                         <BrutalistInput 
-                            placeholder="Email của bạn" 
+                            placeholder={lang === 'vi' ? 'Email của bạn' : 'Your email'} 
                             value={regEmail}
                             onChange={(e) => setRegEmail(e.target.value)}
                         />
                         <BrutalistInput 
                             type="password"
-                            placeholder="Mật khẩu" 
+                            placeholder={lang === 'vi' ? 'Mật khẩu' : 'Password'} 
                             value={regPassword}
                             onChange={(e) => setRegPassword(e.target.value)}
                         />
                          <BrutalistInput 
                             type="password"
-                            placeholder="Xác nhận mật khẩu" 
+                            placeholder={lang === 'vi' ? 'Xác nhận mật khẩu' : 'Confirm password'} 
                             value={regConfirmPassword}
                             onChange={(e) => setRegConfirmPassword(e.target.value)}
                         />
@@ -525,15 +550,15 @@ const App = () => {
 
                     <div className="pt-2 flex flex-col gap-3 justify-center">
                         <BrutalistButton variant="black" fullWidth onClick={handleRegister}>
-                           <UserPlus size={20} /> Đăng ký ngay
+                           <UserPlus size={20} /> {lang === 'vi' ? 'Đăng ký ngay' : 'Register Now'}
                         </BrutalistButton>
                          <div className="text-center">
-                             <span className="font-bold text-sm">Đã có tài khoản? </span>
+                             <span className="font-bold text-sm">{lang === 'vi' ? 'Đã có tài khoản? ' : 'Already have an account? '}</span>
                              <button 
                                 onClick={() => setCurrentView('login')}
                                 className="font-bold text-sm underline hover:text-blue-600 uppercase"
                              >
-                                Đăng nhập
+                                {lang === 'vi' ? 'Đăng nhập' : 'Login'}
                              </button>
                         </div>
                     </div>
@@ -543,7 +568,9 @@ const App = () => {
 
         {/* Footer Disclaimer */}
         <BrutalistCard variant="white" className="py-3 px-4 text-sm font-medium border-4 border-black z-20">
-            Bằng cách tiếp tục, bạn đồng ý với <a href="#" className="underline decoration-2">Điều khoản</a> & <a href="#" className="underline decoration-2">Chính sách</a>.
+            {lang === 'vi' 
+              ? <>Bằng cách tiếp tục, bạn đồng ý với <a href="#" className="underline decoration-2">Điều khoản</a> & <a href="#" className="underline decoration-2">Chính sách</a>.</>
+              : <>By continuing, you agree to our <a href="#" className="underline decoration-2">Terms</a> & <a href="#" className="underline decoration-2">Privacy Policy</a>.</>}
         </BrutalistCard>
 
       </div>
@@ -569,13 +596,13 @@ const App = () => {
               <X size={24} />
             </button>
             
-            <h3 className="font-display font-bold text-2xl mb-4 uppercase">Trợ lý AI</h3>
+            <h3 className="font-display font-bold text-2xl mb-4 uppercase">{t('assistant.title')}</h3>
             
             <div className="bg-gray-100 border-2 border-black p-3 h-48 overflow-y-auto mb-4 font-mono text-sm">
               {response ? (
                 <p>{response}</p>
               ) : (
-                <p className="text-gray-500 italic">Tôi có thể giúp gì cho bạn về việc đăng nhập hoặc kết nối?</p>
+                <p className="text-gray-500 italic">{lang === 'vi' ? 'Tôi có thể giúp gì cho bạn về việc đăng nhập hoặc kết nối?' : 'How can I help you with login or connection?'}</p>
               )}
             </div>
 
@@ -584,7 +611,7 @@ const App = () => {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Hỏi trợ lý..."
+                placeholder={lang === 'vi' ? 'Hỏi trợ lý...' : 'Ask assistant...'}
                 className="flex-1 border-2 border-black p-2 font-mono text-sm focus:outline-none focus:bg-yellow-50"
                 onKeyDown={(e) => e.key === 'Enter' && handleAiAsk()}
               />
@@ -593,7 +620,7 @@ const App = () => {
                 disabled={loading}
                 className="bg-brutal-yellow border-2 border-black px-4 font-bold uppercase text-sm hover:bg-yellow-400 disabled:opacity-50"
               >
-                {loading ? '...' : 'Gửi'}
+                {loading ? '...' : (lang === 'vi' ? 'Gửi' : 'Send')}
               </button>
             </div>
           </div>
