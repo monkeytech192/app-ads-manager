@@ -278,6 +278,13 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
               <div className="font-bold text-xl">{cpm}</div>
             </div>
           </div>
+          
+          {/* Show actual date range from API */}
+          {insights.date_start && insights.date_stop && (
+            <div className="mt-4 pt-3 border-t-2 border-white/10 text-center text-xs text-gray-500">
+              Dữ liệu thực tế: {new Date(insights.date_start).toLocaleDateString('vi-VN')} - {new Date(insights.date_stop).toLocaleDateString('vi-VN')}
+            </div>
+          )}
         </div>
       )}
     </div>
