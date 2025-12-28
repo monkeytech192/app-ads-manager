@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Pause, Pencil, ChevronDown, Lightbulb, AlertCircle } from 'lucide-react';
 import { BrutalistButton, BrutalistCard, BrutalistHeader } from '../shared/UIComponents';
 import { ScreenView, CampaignData } from '../types';
-import { getCampaignInsights, formatCurrency, formatNumber, type CampaignInsights } from '../services/apiService';
+import { getCampaignInsights, formatNumber, type CampaignInsights } from '../services/apiService';
+import { formatCurrencyWithSettings, formatCurrencyShort } from '../utils/currency';
 
 interface CampaignDetailScreenProps {
   onBack: () => void;
@@ -66,10 +67,14 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
   const isPaused = displayCampaign.status === 'paused';
 
   // Get real data from insights or fallback to campaign data
-  const spend = insights?.spend ? formatCurrency(parseFloat(insights.spend)) : displayCampaign.spent;
+  const spend = insights?.spend ? formatCurrencyWithSettings(parseFloat(insights.spend)) : displayCampaign.spent;
   const impressions = insights?.impressions ? formatNumber(parseInt(insights.impressions)) : displayCampaign.impressions;
   const clicks = insights?.clicks ? formatNumber(parseInt(insights.clicks)) : displayCampaign.results;
-  const cpc = insights?.cpc ? formatCurrency(parseFloat(insights.cpc)) : displayCampaign.costPerResult;
+  const cpc = insights?.cpc ? formatCurrencyWithSettings(parseFloat(insights.cpc), 2) : displayCampaign.costPerResult;
+  const reach = insights?.reach ? formatNumber(parseInt(insights.reach)) : '0';
+  const frequency = insights?.frequency ? parseFloat(insights.frequency).toFixed(2) : '0';
+  const ctr = insights?.ctr ? `${parseFloat(insights.ctr).toFixed(2)}%` : '0%';
+  const cpm = insights?.cpm ? formatCurrencyWithSettings(parseFloat(insights.cpm), 2) : '0';
 
   return (
     <div className="flex flex-col h-full w-full bg-[#0f172a] text-white font-sans">
@@ -152,30 +157,22 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
           <BrutalistCard variant="dark" className="!p-4">
             <h3 className="font-bold text-lg mb-3">Thêm Metrics</h3>
             <div className="grid grid-cols-2 gap-2 text-sm">
-              {insights.reach && (
-                <div className="flex justify-between border-b border-white/10 pb-2">
-                  <span className="text-gray-400">Reach:</span>
-                  <span className="font-bold">{formatNumber(parseInt(insights.reach))}</span>
-                </div>
-              )}
-              {insights.frequency && (
-                <div className="flex justify-between border-b border-white/10 pb-2">
-                  <span className="text-gray-400">Frequency:</span>
-                  <span className="font-bold">{parseFloat(insights.frequency).toFixed(2)}</span>
-                </div>
-              )}
-              {insights.ctr && (
-                <div className="flex justify-between border-b border-white/10 pb-2">
-                  <span className="text-gray-400">CTR:</span>
-                  <span className="font-bold">{parseFloat(insights.ctr).toFixed(2)}%</span>
-                </div>
-              )}
-              {insights.cpm && (
-                <div className="flex justify-between border-b border-white/10 pb-2">
-                  <span className="text-gray-400">CPM:</span>
-                  <span className="font-bold">{formatCurrency(parseFloat(insights.cpm))}</span>
-                </div>
-              )}
+              <div className="flex justify-between border-b border-white/10 pb-2">
+                <span className="text-gray-400">Reach:</span>
+                <span className="font-bold">{reach}</span>
+              </div>
+              <div className="flex justify-between border-b border-white/10 pb-2">
+                <span className="text-gray-400">Frequency:</span>
+                <span className="font-bold">{frequency}</span>
+              </div>
+              <div className="flex justify-between border-b border-white/10 pb-2">
+                <span className="text-gray-400">CTR:</span>
+                <span className="font-bold">{ctr}</span>
+              </div>
+              <div className="flex justify-between border-b border-white/10 pb-2">
+                <span className="text-gray-400">CPM:</span>
+                <span className="font-bold">{cpm}</span>
+              </div>
             </div>
           </BrutalistCard>
         )}

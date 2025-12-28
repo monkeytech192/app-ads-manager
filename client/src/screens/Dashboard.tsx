@@ -3,7 +3,8 @@ import { DollarSign, Eye, MousePointer2, TrendingUp, Activity, LogOut, AlertCirc
 import { BrutalistCard, BrutalistHeader } from '../shared/UIComponents';
 import BottomNav from '../shared/BottomNav';
 import { ScreenView, FacebookUserProfile } from '../types';
-import { getDashboardMetrics, formatCurrency, formatNumber, formatPercentage, type DashboardMetrics } from '../services/apiService';
+import { getDashboardMetrics, formatNumber, formatPercentage, type DashboardMetrics } from '../services/apiService';
+import { formatCurrencyWithSettings } from '../utils/currency';
 
 interface DashboardScreenProps {
   onBack: () => void; // Used for logout
@@ -224,7 +225,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ onBack, onNavigate, u
                 <div className="col-span-2 sm:col-span-1">
                     <StatBox 
                         label="Tổng Chi phí:" 
-                        value={formatCurrency(metrics.totalSpend)} 
+                        value={formatCurrencyWithSettings(metrics.totalSpend)} 
                         icon={DollarSign} 
                     />
                 </div>
