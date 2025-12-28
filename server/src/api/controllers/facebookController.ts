@@ -242,7 +242,7 @@ export const getCampaignInsights = async (req: Request, res: Response) => {
       `https://graph.facebook.com/v24.0/${campaign_id}/insights`,
       {
         params: {
-          fields: 'impressions,clicks,spend,reach,frequency,ctr,cpc,cpm,conversions,cost_per_conversion',
+          fields: 'impressions,clicks,spend,reach,frequency,ctr,cpc,cpm,conversions,cost_per_conversion,date_start,date_stop',
           date_preset: date_preset || 'last_7d',
           access_token: FACEBOOK_ACCESS_TOKEN // Dùng token từ .env
         }
