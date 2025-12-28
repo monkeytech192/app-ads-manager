@@ -76,6 +76,21 @@ export interface Campaign {
   updated_time: string;
 }
 
+export interface AdSet {
+  id: string;
+  name: string;
+  status: 'ACTIVE' | 'PAUSED' | 'DELETED' | 'ARCHIVED';
+  daily_budget?: string;
+  lifetime_budget?: string;
+  start_time?: string;
+  end_time?: string;
+  targeting?: any;
+  billing_event?: string;
+  optimization_goal?: string;
+  created_time: string;
+  updated_time: string;
+}
+
 export interface CampaignInsights {
   impressions?: string;
   clicks?: string;
@@ -122,6 +137,34 @@ export async function getCampaignInsights(
     method: 'POST',
     body: JSON.stringify({
       campaign_id: campaignId,
+      date_preset: datePreset,
+    }),
+  });
+}
+
+/**
+ * Get ad sets for a specific campaign
+ */
+export async function getAdSets(campaignId: string): Promise<AdSet[]> {
+  return fetchApi<AdSet[]>('/facebook/adsets', {
+    method: 'POST',
+    body: JSON.stringify({
+      campaign_id: campaignId,
+    }),
+  });
+}
+
+/**
+ * Get insights/metrics for a specific ad set
+ */
+export async function getAdSetInsights(
+  adsetId: string,
+  datePreset: string = 'last_7d'
+): Promise<CampaignInsights> {
+  return fetchApi<CampaignInsights>('/facebook/adset-insights', {
+    method: 'POST',
+    body: JSON.stringify({
+      adset_id: adsetId,
       date_preset: datePreset,
     }),
   });

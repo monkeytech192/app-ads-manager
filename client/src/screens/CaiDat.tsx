@@ -13,6 +13,26 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, onNavigate }) =
   const [alerts, setAlerts] = useState({ cost: true, ctr: false });
   const [dailyBudget, setDailyBudget] = useState(500000);
   const [lifetimeBudget, setLifetimeBudget] = useState(15000000);
+  
+  // Currency settings
+  const [currency, setCurrency] = useState(() => {
+    const saved = localStorage.getItem('currencySettings');
+    return saved ? JSON.parse(saved).currency : 'VND';
+  });
+  const [exchangeRate, setExchangeRate] = useState(() => {
+    const saved = localStorage.getItem('currencySettings');
+    return saved ? JSON.parse(saved).rate : 25000;
+  });
+
+  // Save currency settings to localStorage
+  const saveCurrencySettings = () => {
+    const settings = {
+      currency,
+      rate: exchangeRate
+    };
+    localStorage.setItem('currencySettings', JSON.stringify(settings));
+    alert('Đã lưu cài đặt tiền tệ!');
+  };
 
   return (
     <div className="flex flex-col h-full w-full bg-[#f5f5f4] bg-[url('https://www.transparenttextures.com/patterns/dust.png')]">
@@ -55,7 +75,69 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, onNavigate }) =
 
         <hr className="border-2 border-black" />
 
-        {/* Section 2: Budget */}
+        {/* Section 2: Currency */}
+        <div>
+            <h2 className="font-display font-bold text-2xl uppercase mb-4">CÀI ĐẶT TIỀN TỆ</h2>
+            
+            <div className="space-y-4">
+                <div>
+                    <label className="font-bold text-lg block mb-2">Đơn vị tiền tệ hiển thị</label>
+                    <div className="grid grid-cols-2 gap-3">
+                        <button
+                            onClick={() => setCurrency('VND')}
+                            className={`border-4 border-black py-3 font-bold shadow-hard transition-all ${
+                                currency === 'VND' ? 'bg-brutal-yellow' : 'bg-white hover:bg-gray-50'
+                            }`}
+                        >
+                            VNĐ (₫)
+                        </button>
+                        <button
+                            onClick={() => setCurrency('USD')}
+                            className={`border-4 border-black py-3 font-bold shadow-hard transition-all ${
+                                currency === 'USD' ? 'bg-brutal-yellow' : 'bg-white hover:bg-gray-50'
+                            }`}
+                        >
+                            USD ($)
+                        </button>
+                    </div>
+                </div>
+
+                {currency === 'VND' && (
+                    <div>
+                        <label className="font-bold text-lg block mb-2">Tỷ giá quy đổi (1 USD = ? VNĐ)</label>
+                        <div className="flex gap-2 items-center">
+                            <div className="flex-1 border-4 border-black bg-white px-3 py-2">
+                                <input
+                                    type="number"
+                                    value={exchangeRate}
+                                    onChange={(e) => setExchangeRate(Number(e.target.value))}
+                                    className="w-full font-mono font-bold text-lg focus:outline-none"
+                                    min="1000"
+                                    max="50000"
+                                    step="100"
+                                />
+                            </div>
+                            <span className="font-bold">VNĐ</span>
+                        </div>
+                        <p className="text-sm mt-1 text-gray-700">
+                            <strong>Ví dụ:</strong> Facebook hiển thị $61 → Sẽ hiển thị {(61 * exchangeRate).toLocaleString('vi-VN')} VNĐ
+                        </p>
+                    </div>
+                )}
+
+                <BrutalistButton 
+                    variant="green" 
+                    fullWidth
+                    onClick={saveCurrencySettings}
+                >
+                    LƯU CÀI ĐẶT TIỀN TỆ
+                </BrutalistButton>
+            </div>
+        </div>
+
+        <hr className="border-2 border-black" />
+
+        {/* Section 3: Budget */}
         <div>
             <h2 className="font-display font-bold text-2xl uppercase mb-4">QUẢN LÝ NGÂN SÁCH</h2>
             

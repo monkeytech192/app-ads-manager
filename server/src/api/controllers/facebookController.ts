@@ -262,3 +262,103 @@ export const getCampaignInsights = async (req: Request, res: Response) => {
     });
   }
 };
+
+/**
+ * Get ad sets for a campaign
+ * 
+ * MỤC ĐÍCH: Lấy danh sách nhóm quảng cáo (ad sets) trong chiến dịch
+ * SỬ DỤNG: FACEBOOK_ACCESS_TOKEN từ .env (long-lived token)
+ */
+export const getAdSets = async (req: Request, res: Response) => {
+  try {
+    const { campaign_id } = req.body;
+
+    // Kiểm tra FACEBOOK_ACCESS_TOKEN có được config không
+    if (!FACEBOOK_ACCESS_TOKEN) {
+      return res.status(500).json({
+        success: false,
+        message: 'FACEBOOK_ACCESS_TOKEN chưa được cấu hình trong .env. Vui lòng thêm token vào biến môi trường.'
+      });
+    }
+
+    if (!campaign_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Campaign ID is required'
+      });
+    }
+
+    const response = await axios.get(
+      `https://graph.facebook.com/v24.0/${campaign_id}/adsets`,
+      {
+        params: {
+          fields: 'id,name,status,daily_budget,lifetime_budget,start_time,end_time,targeting,billing_event,optimization_goal,created_time,updated_time',
+          access_token: FACEBOOK_ACCESS_TOKEN // Dùng token từ .env
+        }
+      }
+    );
+
+    res.json({
+      success: true,
+      data: response.data.data,
+      message: 'Ad sets retrieved successfully'
+    });
+  } catch (error: any) {
+    console.error('Ad sets fetch error:', error.response?.data || error.message);
+    res.status(500).json({
+      success: false,
+      message: error.response?.data?.error?.message || error.message
+    });
+  }
+};
+
+/**
+ * Get insights for an ad set
+ * 
+ * MỤC ĐÍCH: Lấy số liệu phân tích của nhóm quảng cáo
+ * SỬ DỤNG: FACEBOOK_ACCESS_TOKEN từ .env (long-lived token)
+ */
+export const getAdSetInsights = async (req: Request, res: Response) => {
+  try {
+    const { adset_id, date_preset } = req.body;
+
+    // Kiểm tra FACEBOOK_ACCESS_TOKEN có được config không
+    if (!FACEBOOK_ACCESS_TOKEN) {
+      return res.status(500).json({
+        success: false,
+        message: 'FACEBOOK_ACCESS_TOKEN chưa được cấu hình trong .env. Vui lòng thêm token vào biến môi trường.'
+      });
+    }
+
+    if (!adset_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Ad set ID is required'
+      });
+    }
+
+    const response = await axios.get(
+      `https://graph.facebook.com/v24.0/${adset_id}/insights`,
+      {
+        params: {
+          fields: 'impressions,clicks,spend,reach,frequency,ctr,cpc,cpm,conversions,cost_per_conversion',
+          date_preset: date_preset || 'last_7d',
+          access_token: FACEBOOK_ACCESS_TOKEN // Dùng token từ .env
+        }
+      }
+    );
+
+    res.json({
+      success: true,
+      data: response.data.data[0] || {},
+      message: 'Ad set insights retrieved successfully'
+    });
+  } catch (error: any) {
+    console.error('Ad set insights fetch error:', error.response?.data || error.message);
+    res.status(500).json({
+      success: false,
+      message: error.response?.data?.error?.message || error.message
+    });
+  }
+};
+

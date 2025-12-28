@@ -4,7 +4,9 @@ import {
   getUserProfile,
   getAdAccounts,
   getCampaigns,
-  getCampaignInsights
+  getCampaignInsights,
+  getAdSets,
+  getAdSetInsights
 } from '../controllers/facebookController';
 // Removed authMiddleware - Facebook routes use FACEBOOK_ACCESS_TOKEN from .env
 
@@ -24,5 +26,11 @@ router.post('/campaigns', getCampaigns);
 
 // Get insights for a campaign (uses FACEBOOK_ACCESS_TOKEN from .env)
 router.post('/insights', getCampaignInsights);
+
+// Get ad sets for a campaign (uses FACEBOOK_ACCESS_TOKEN from .env)
+router.post('/adsets', getAdSets);
+
+// Get insights for an ad set (uses FACEBOOK_ACCESS_TOKEN from .env)
+router.post('/adset-insights', getAdSetInsights);
 
 export default router;

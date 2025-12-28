@@ -168,7 +168,11 @@ const App = () => {
             />
         );
       case 'comparison':
-        return <ComparisonScreen onBack={() => setCurrentView('dashboard')} onNavigate={setCurrentView} />;
+        return <ComparisonScreen 
+          onBack={() => setCurrentView('dashboard')} 
+          onNavigate={setCurrentView} 
+          selectedAccountIds={accounts.filter(a => a.isSelected).map(a => a.id)}
+        />;
       case 'settings':
         return <SettingsScreen onBack={() => setCurrentView('dashboard')} onNavigate={setCurrentView} />;
       case 'recommendations':
