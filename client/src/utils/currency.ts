@@ -29,23 +29,33 @@ export function getCurrencySettings(): CurrencySettings {
 
 /**
  * Format currency value based on user settings
- * @param value - Amount in USD (Facebook API returns USD)
+ * @param value - Amount in account currency (could be USD or VND depending on account)
  * @param decimals - Number of decimal places (default: 0 for VND, 2 for USD)
+ * @param accountCurrency - The currency of the account (USD, VND, etc.)
  */
-export function formatCurrencyWithSettings(value: number | string, decimals?: number): string {
+export function formatCurrencyWithSettings(
+  value: number | string, 
+  decimals?: number,
+  accountCurrency: string = 'USD'
+): string {
   const settings = getCurrencySettings();
   const numValue = typeof value === 'string' ? parseFloat(value) : value;
   
   if (isNaN(numValue)) return '0';
 
+  // If user wants VND display
   if (settings.currency === 'VND') {
-    const vndValue = numValue * settings.rate;
+    // Convert if account is USD
+    const vndValue = accountCurrency === 'USD' ? numValue * settings.rate : numValue;
     const formatted = vndValue.toLocaleString('vi-VN', {
       maximumFractionDigits: decimals ?? 0,
       minimumFractionDigits: 0
     });
     return `${formatted} ₫`;
   } else {
+    // User wants USD display
+    // If account is already USD, keep as is
+    // If account is VND, would need to convert but we'll just show as is
     const formatted = numValue.toLocaleString('en-US', {
       maximumFractionDigits: decimals ?? 2,
       minimumFractionDigits: decimals ?? 2

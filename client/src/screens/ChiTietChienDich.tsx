@@ -190,7 +190,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
           </>
         )}
 
-        {/* Line Chart */}
+        {/* Performance Summary Card */}
         <BrutalistCard variant="dark" className="!p-4">
             <div className="flex justify-between items-center mb-4">
                 <h3 className="font-bold text-lg">Hiệu quả theo thời gian</h3>
@@ -227,109 +227,42 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
                 </div>
             </div>
             
-            <div className="h-48 relative">
-                 {/* TODO: Replace with real insights data from API when available */}
-                 {/* Y-Axis Labels */}
-                 <div className="absolute left-0 top-0 bottom-6 w-8 flex flex-col justify-between text-[10px] text-gray-500 text-right pr-1">
-                     <span>20K</span>
-                     <span>15K</span>
-                     <span>10K</span>
-                     <span>5K</span>
-                     <span>0</span>
-                 </div>
-                 
-                 {/* Chart Area */}
-                 <div className="absolute left-8 right-0 top-0 bottom-6 border-l border-b border-white/10">
-                    {/* Horizontal Grids */}
-                    <div className="absolute top-0 w-full h-px bg-white/5"></div>
-                    <div className="absolute top-1/4 w-full h-px bg-white/5"></div>
-                    <div className="absolute top-2/4 w-full h-px bg-white/5"></div>
-                    <div className="absolute top-3/4 w-full h-px bg-white/5"></div>
-
-                    {/* SVG Line */}
-                    <svg className="w-full h-full overflow-visible" preserveAspectRatio="none">
-                         <defs>
-                            <linearGradient id="lineGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.5"/>
-                                <stop offset="100%" stopColor="#3B82F6" stopOpacity="0"/>
-                            </linearGradient>
-                        </defs>
-                        <path 
-                            d="M0,80 L20,60 L40,70 L60,40 L80,50 L100,20 L120,30 L140,0" // Mock path
-                            vectorEffect="non-scaling-stroke"
-                            fill="none"
-                            stroke={isPaused ? "#F97316" : "#3B82F6"} // Orange if paused, Blue if active
-                            strokeWidth="3"
-                            className={`drop-shadow-[0_0_10px_${isPaused ? 'rgba(249,115,22,0.5)' : 'rgba(59,130,246,0.5)'}]`}
-                        />
-                         {/* Simple polyline for better responsiveness in this mock */}
-                         <polyline 
-                            points="0,90 40,70 80,85 120,50 160,60 200,30 240,40 280,10"
-                            fill="none"
-                            stroke={isPaused ? "#F97316" : "#3B82F6"}
-                            strokeWidth="4"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            vectorEffect="non-scaling-stroke"
-                         />
-                    </svg>
-                 </div>
-
-                 {/* X-Axis Labels */}
-                 <div className="absolute left-8 right-0 bottom-0 flex justify-between text-[10px] text-gray-500 pt-2 px-2">
-                     <span>T2</span>
-                     <span>T3</span>
-                     <span>T4</span>
-                     <span>T5</span>
-                     <span>T6</span>
-                     <span>T7</span>
-                     <span>CN</span>
-                 </div>
-            </div>
-        </BrutalistCard>
-
-        {/* Gender Distribution Pie Chart */}
-        <BrutalistCard variant="dark" className="!p-4">
-             <h3 className="font-bold text-lg mb-4">Phân bổ theo Giới tính</h3>
-             {/* TODO: Replace with real demographic data from Facebook Insights API */}
-             <div className="flex items-center gap-6">
-                 {/* Donut Chart */}
-                 <div className="relative w-32 h-32 flex-shrink-0">
-                     <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
-                         <circle cx="50" cy="50" r="40" fill="none" stroke="#1e293b" strokeWidth="12" />
-                         {/* 65% segment = 251 * 0.65 = 163 */}
-                         <circle 
-                            cx="50" cy="50" r="40" 
-                            fill="none" stroke="#2563EB" strokeWidth="12"
-                            strokeDasharray="163 251"
-                            strokeLinecap="round"
-                         />
-                         {/* 35% segment = 251 * 0.35 = 88. Start at 65% */}
-                         <circle 
-                            cx="50" cy="50" r="40" 
-                            fill="none" stroke="#60A5FA" strokeWidth="12"
-                            strokeDasharray="88 251"
-                            strokeDashoffset="-170" // Approx offset
-                            strokeLinecap="round"
-                         />
-                     </svg>
-                     <div className="absolute inset-0 flex items-center justify-center">
-                         <span className="font-display font-bold text-2xl">100%</span>
-                     </div>
-                 </div>
-
-                 {/* Legend */}
-                 <div className="space-y-2">
-                     <div className="flex items-center gap-2">
-                         <div className="w-3 h-3 bg-blue-600 rounded-sm"></div>
-                         <span className="text-sm font-medium">Nữ - 65%</span>
-                     </div>
-                     <div className="flex items-center gap-2">
-                         <div className="w-3 h-3 bg-blue-400 rounded-sm"></div>
-                         <span className="text-sm font-medium">Nam - 35%</span>
-                     </div>
-                 </div>
-             </div>
+            {/* Performance Summary instead of chart (daily breakdown not available from API) */}
+            {insights ? (
+              <div className="space-y-4">
+                <div className="text-center py-6 border border-white/10 rounded bg-white/5">
+                  <div className="text-3xl font-bold text-blue-400 mb-2">{clicks}</div>
+                  <div className="text-sm text-gray-400">Tổng lượt click</div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="flex justify-between border-b border-white/10 pb-2">
+                    <span className="text-gray-400">Thời gian:</span>
+                    <span className="font-medium text-gray-300">
+                      {insights.date_start && insights.date_stop 
+                        ? `${new Date(insights.date_start).toLocaleDateString('vi-VN')} - ${new Date(insights.date_stop).toLocaleDateString('vi-VN')}`
+                        : selectedDateLabel}
+                    </span>
+                  </div>
+                  <div className="flex justify-between border-b border-white/10 pb-2">
+                    <span className="text-gray-400">Chi tiêu:</span>
+                    <span className="font-bold text-green-400">{spend}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-white/10 pb-2">
+                    <span className="text-gray-400">Hiển thị:</span>
+                    <span className="font-bold">{impressions}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-white/10 pb-2">
+                    <span className="text-gray-400">CTR:</span>
+                    <span className="font-bold">{ctr}</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <p>Không có dữ liệu cho khoảng thời gian này</p>
+              </div>
+            )}
         </BrutalistCard>
 
         {/* Recommendations Teaser */}

@@ -104,6 +104,8 @@ export interface CampaignInsights {
   cpm?: string;
   conversions?: string;
   cost_per_conversion?: string;
+  date_start?: string;
+  date_stop?: string;
 }
 
 /**

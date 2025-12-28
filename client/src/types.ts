@@ -27,6 +27,7 @@ export interface AccountData {
     name: string;
     status: 'active' | 'paused';
     isSelected: boolean;
+    currency?: string; // Account currency (VND, USD, etc.)
 }
 
 export interface CampaignData {

@@ -3,8 +3,9 @@ import { Facebook, Globe, MessageCircleQuestion, X, UserPlus, LogIn, CheckSquare
 import { BrutalistCard, BrutalistButton, BrutalistInput, TextureOverlay } from './shared/UIComponents';
 import { askAssistant } from './services/geminiService';
 import { initFacebookSdk, loginWithFacebook, getFacebookUserProfile } from './services/facebookService';
-import { getAdAccounts, getCampaigns } from './services/apiService';
+import { getAdAccounts, getCampaigns, getCampaignInsights } from './services/apiService';
 import { AdAccount, Campaign } from './services/apiService';
+import { getCurrencySettings } from './utils/currency';
 import DashboardScreen from './screens/Dashboard';
 import ManagementScreen from './screens/QuanLyChienDich';
 import ComparisonScreen from './screens/SoSanhChienDich';
@@ -68,6 +69,7 @@ const App = () => {
             name: acc.name,
             isSelected: false,
             status: 'active' as const, // Default status
+            currency: acc.currency, // Save account currency (VND, USD, etc.)
           }));
           
           setAccounts(transformedAccounts);
@@ -95,31 +97,90 @@ const App = () => {
         const campaignsArrays = await Promise.all(campaignsPromises);
         const allCampaigns = campaignsArrays.flat();
 
+        // Fetch insights for each campaign to get spend data
+        const campaignsWithInsights = await Promise.all(
+          allCampaigns.map(async (camp: Campaign) => {
+            try {
+              // Use 'maximum' instead of 'lifetime' - valid date_preset
+              const insights = await getCampaignInsights(camp.id, 'maximum');
+              return { ...camp, insights };
+            } catch (err) {
+              console.error(`Error fetching insights for campaign ${camp.id}:`, err);
+              return { ...camp, insights: null };
+            }
+          })
+        );
+
         // Transform API data to CampaignData format
-        const transformedCampaigns: CampaignData[] = allCampaigns.map((camp: Campaign) => {
+        const transformedCampaigns: CampaignData[] = campaignsWithInsights.map((camp: Campaign & { insights: any }) => {
           const budget = camp.daily_budget || camp.lifetime_budget || '0';
-          const budgetNumber = parseFloat(budget) / 100; // Facebook returns in cents
+          const budgetInAccountCurrency = parseFloat(budget) / 100; // Facebook returns in cents, this is in account currency
           
-          // Calculate progress based on spend_cap if available
+          // Get account currency
+          const account = selectedAccounts[0];
+          const accountCurrency = account?.currency || 'USD';
+          
+          // Get user's currency display settings
+          const currencySettings = getCurrencySettings();
+          
+          // Calculate progress: (spend / budget) * 100
+          // LOGIC: Convert BOTH budget and spend to user's display currency, then calculate
           let progress = 0;
-          if (camp.spend_cap) {
-            const spendCap = parseFloat(camp.spend_cap) / 100;
-            const spent = parseFloat(camp.spent || '0') / 100;
-            progress = Math.min(Math.round((spent / spendCap) * 100), 100);
+          let displayBudget = budgetInAccountCurrency;
+          let displaySpend = 0;
+          
+          if (camp.insights?.spend && budgetInAccountCurrency > 0) {
+            const spendInAccountCurrency = parseFloat(camp.insights.spend); // Spend is in account currency
+            displaySpend = spendInAccountCurrency;
+            
+            // If user chose VND display but account is USD, convert BOTH to VND
+            if (currencySettings.currency === 'VND' && accountCurrency === 'USD') {
+              displayBudget = budgetInAccountCurrency * currencySettings.rate;
+              displaySpend = spendInAccountCurrency * currencySettings.rate;
+            }
+            // If user chose USD and account is USD, keep as is
+            // If account is VND and user chose VND, keep as is
+            
+            progress = Math.min(Math.round((displaySpend / displayBudget) * 100), 100);
           }
+          
+          // Format currency for display based on user settings
+          const formatBudgetDisplay = () => {
+            if (currencySettings.currency === 'VND') {
+              // Convert USD to VND if account is USD
+              const valueInVND = accountCurrency === 'USD' 
+                ? budgetInAccountCurrency * currencySettings.rate 
+                : budgetInAccountCurrency;
+              return `${valueInVND.toLocaleString('vi-VN')} ₫`;
+            } else {
+              return `$${budgetInAccountCurrency.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+            }
+          };
+          
+          const formatSpendDisplay = () => {
+            const spendValue = camp.insights?.spend ? parseFloat(camp.insights.spend) : 0;
+            if (currencySettings.currency === 'VND') {
+              const valueInVND = accountCurrency === 'USD' 
+                ? spendValue * currencySettings.rate 
+                : spendValue;
+              return `${valueInVND.toLocaleString('vi-VN')} ₫`;
+            } else {
+              return `$${spendValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+            }
+          };
           
           return {
             id: camp.id,
             accountId: selectedAccounts[0].id,
             title: camp.name,
             status: camp.status.toLowerCase() === 'active' ? 'active' as const : 'paused' as const,
-            budget: formatCurrency(budgetNumber),
+            budget: formatBudgetDisplay(),
             objective: camp.objective || 'N/A',
             progress: progress,
-            spent: formatCurrency(0),
-            impressions: '0',
-            results: '0',
-            costPerResult: formatCurrency(0),
+            spent: formatSpendDisplay(),
+            impressions: camp.insights?.impressions || '0',
+            results: camp.insights?.clicks || '0',
+            costPerResult: formatCurrency(camp.insights?.cpc ? parseFloat(camp.insights.cpc) : 0),
           };
         });
 
