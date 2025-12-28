@@ -174,6 +174,36 @@ export async function getAdSetInsights(
   });
 }
 
+/**
+ * Demographic breakdown data from Facebook Insights API
+ */
+export interface DemographicData {
+  age: string;
+  gender: string;
+  impressions: string;
+  clicks: string;
+  spend: string;
+  reach: string;
+  ctr: string;
+  cpc: string;
+}
+
+/**
+ * Get demographic insights (age, gender breakdown) for a campaign
+ */
+export async function getDemographicInsights(
+  campaignId: string,
+  datePreset: string = 'last_7d'
+): Promise<DemographicData[]> {
+  return fetchApi<DemographicData[]>('/facebook/demographic-insights', {
+    method: 'POST',
+    body: JSON.stringify({
+      campaign_id: campaignId,
+      date_preset: datePreset,
+    }),
+  });
+}
+
 // ==================== AUTH API ====================
 
 export interface LoginCredentials {

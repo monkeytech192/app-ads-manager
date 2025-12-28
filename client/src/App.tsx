@@ -181,6 +181,8 @@ const App = () => {
             impressions: camp.insights?.impressions || '0',
             results: camp.insights?.clicks || '0',
             costPerResult: formatCurrency(camp.insights?.cpc ? parseFloat(camp.insights.cpc) : 0),
+            dailyBudget: camp.daily_budget,
+            lifetimeBudget: camp.lifetime_budget,
           };
         });
 

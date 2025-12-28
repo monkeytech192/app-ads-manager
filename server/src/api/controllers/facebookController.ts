@@ -362,3 +362,54 @@ export const getAdSetInsights = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * Get demographic insights (age, gender breakdown) for a campaign
+ * 
+ * MỤC ĐÍCH: Lấy số liệu phân tích theo độ tuổi và giới tính
+ * SỬ DỤNG: FACEBOOK_ACCESS_TOKEN từ .env (long-lived token)
+ */
+export const getDemographicInsights = async (req: Request, res: Response) => {
+  try {
+    const { campaign_id, date_preset } = req.body;
+
+    // Kiểm tra FACEBOOK_ACCESS_TOKEN có được config không
+    if (!FACEBOOK_ACCESS_TOKEN) {
+      return res.status(500).json({
+        success: false,
+        message: 'FACEBOOK_ACCESS_TOKEN chưa được cấu hình trong .env. Vui lòng thêm token vào biến môi trường.'
+      });
+    }
+
+    if (!campaign_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Campaign ID is required'
+      });
+    }
+
+    const response = await axios.get(
+      `https://graph.facebook.com/v24.0/${campaign_id}/insights`,
+      {
+        params: {
+          fields: 'impressions,clicks,spend,reach,ctr,cpc',
+          breakdowns: 'age,gender',
+          date_preset: date_preset || 'last_7d',
+          access_token: FACEBOOK_ACCESS_TOKEN
+        }
+      }
+    );
+
+    res.json({
+      success: true,
+      data: response.data.data || [],
+      message: 'Demographic insights retrieved successfully'
+    });
+  } catch (error: any) {
+    console.error('Demographic insights fetch error:', error.response?.data || error.message);
+    res.status(500).json({
+      success: false,
+      message: error.response?.data?.error?.message || error.message
+    });
+  }
+};
+

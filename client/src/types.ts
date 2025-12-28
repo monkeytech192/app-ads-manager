@@ -42,6 +42,8 @@ export interface CampaignData {
   impressions: string;
   results: string;
   costPerResult: string;
+  dailyBudget?: string;
+  lifetimeBudget?: string;
 }
 
 export type ScreenView = 'login' | 'register' | 'dashboard' | 'management' | 'comparison' | 'settings' | 'recommendations' | 'campaignDetail';
