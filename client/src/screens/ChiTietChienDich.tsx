@@ -206,10 +206,50 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
 
   const totalImpressions = processedDemographics.byGender.reduce((sum, g) => sum + g.impressions, 0);
 
+  // ==================== RENDER DATE DROPDOWN ====================
+  const renderDateDropdown = () => (
+    <div className="relative">
+      <button
+        onClick={() => setShowDateDropdown(!showDateDropdown)}
+        className="flex items-center gap-1 bg-black border-2 border-white px-3 py-1.5 text-xs font-bold uppercase"
+      >
+        <span>{selectedDateLabel}</span>
+        <ChevronDown size={14} className={`transition-transform ${showDateDropdown ? 'rotate-180' : ''}`} />
+      </button>
+      
+      {showDateDropdown && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setShowDateDropdown(false)} />
+          <div className="absolute right-0 top-full mt-1 bg-black border-4 border-white z-50 min-w-[140px] shadow-hard">
+            {dateOptions.map(option => (
+              <button
+                key={option.value}
+                onClick={() => {
+                  setDatePreset(option.value);
+                  setShowDateDropdown(false);
+                }}
+                className={`w-full text-left px-3 py-2 text-sm font-bold uppercase transition-colors ${
+                  datePreset === option.value ? 'bg-brutal-yellow text-black' : 'text-white hover:bg-white/10'
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+
   // ==================== RENDER TABS ====================
 
   const renderOverviewTab = () => (
     <div className="space-y-4">
+      {/* Date selector for Overview */}
+      <div className="flex justify-end">
+        {renderDateDropdown()}
+      </div>
+
       <div className="grid grid-cols-2 gap-3">
         <StatCard label={`Chi tiêu (${selectedDateLabel})`} value={spend} highlight />
         <StatCard label="Lượt hiển thị" value={impressions} />
@@ -248,37 +288,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
       <div className="border-4 border-black bg-[#1e293b] p-4 shadow-hard">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-bold text-lg uppercase tracking-wide text-brutal-yellow">Chi Tiết Hiệu Quả</h3>
-          <div className="relative">
-            <button
-              onClick={() => setShowDateDropdown(!showDateDropdown)}
-              className="flex items-center gap-1 bg-black border-2 border-white px-3 py-1.5 text-xs font-bold uppercase"
-            >
-              <span>{selectedDateLabel}</span>
-              <ChevronDown size={14} className={`transition-transform ${showDateDropdown ? 'rotate-180' : ''}`} />
-            </button>
-            
-            {showDateDropdown && (
-              <>
-                <div className="fixed inset-0 z-40" onClick={() => setShowDateDropdown(false)} />
-                <div className="absolute right-0 top-full mt-1 bg-black border-4 border-white z-50 min-w-[140px] shadow-hard">
-                  {dateOptions.map(option => (
-                    <button
-                      key={option.value}
-                      onClick={() => {
-                        setDatePreset(option.value);
-                        setShowDateDropdown(false);
-                      }}
-                      className={`w-full text-left px-3 py-2 text-sm font-bold uppercase transition-colors ${
-                        datePreset === option.value ? 'bg-brutal-yellow text-black' : 'text-white hover:bg-white/10'
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
+          {renderDateDropdown()}
         </div>
 
         {insights ? (

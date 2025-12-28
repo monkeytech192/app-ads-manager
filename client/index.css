@@ -1,0 +1,117 @@
+/* ===========================================
+   Quản Lý Ads FB - Brutalist Style CSS
+   Font: Oswald (display), Roboto Condensed (body)
+   =========================================== */
+
+/* Base Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Font Face Declarations with font-display: swap to prevent FOUT */
+@font-face {
+  font-family: 'Oswald';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/oswald/v53/TK3_WkUHHAIjg75cFRf3bXL8LICs1_Fv40pKlN4NNSeSASz.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Roboto Condensed';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/robotocondensed/v27/ieVo2ZhZI2eCN5jzbjEETS9weq8-19K7DQk6YvNkeg.woff2') format('woff2');
+}
+
+/* Body defaults - same font everywhere */
+html, body {
+  font-family: 'Roboto Condensed', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Prevent layout shift by setting explicit dimensions */
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: #d6d3d1;
+  background-image: url("https://www.transparenttextures.com/patterns/concrete-wall.png");
+  overscroll-behavior-y: none;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Display font - Oswald for headings */
+.font-display,
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Oswald', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 700;
+}
+
+/* Consistent text sizing */
+.text-xs { font-size: 0.75rem; line-height: 1rem; }
+.text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+.text-base { font-size: 1rem; line-height: 1.5rem; }
+.text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+.text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+.text-2xl { font-size: 1.5rem; line-height: 2rem; }
+.text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+
+/* Hide scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Brutalist shadows */
+.shadow-hard {
+  box-shadow: 4px 4px 0px 0px rgba(0,0,0,1);
+}
+.shadow-hard-sm {
+  box-shadow: 2px 2px 0px 0px rgba(0,0,0,1);
+}
+
+/* Button active state */
+.btn-brutal:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+/* Loading skeleton animation */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Ensure consistent spacing */
+.space-y-4 > * + * {
+  margin-top: 1rem;
+}
+.space-y-3 > * + * {
+  margin-top: 0.75rem;
+}
+.space-y-2 > * + * {
+  margin-top: 0.5rem;
+}
+
+/* Fix for iOS Safari */
+input, button, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
