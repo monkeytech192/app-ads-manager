@@ -3,6 +3,8 @@ import { Facebook, Globe, MessageCircleQuestion, X, UserPlus, LogIn, CheckSquare
 import { BrutalistCard, BrutalistButton, BrutalistInput, TextureOverlay } from './shared/UIComponents';
 import { askAssistant } from './services/geminiService';
 import { initFacebookSdk, loginWithFacebook, getFacebookUserProfile } from './services/facebookService';
+import { getAdAccounts, getCampaigns } from './services/apiService';
+import { AdAccount, Campaign } from './services/apiService';
 import DashboardScreen from './screens/Dashboard';
 import ManagementScreen from './screens/QuanLyChienDich';
 import ComparisonScreen from './screens/SoSanhChienDich';
@@ -10,6 +12,13 @@ import SettingsScreen from './screens/CaiDat';
 import RecommendationsScreen from './screens/DeXuat';
 import CampaignDetailScreen from './screens/ChiTietChienDich';
 import { ScreenView, CampaignData, AccountData, FacebookUserProfile } from './types';
+
+const formatCurrency = (value: number): string => {
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND'
+  }).format(value);
+};
 
 const App = () => {
   const [currentView, setCurrentView] = useState<ScreenView>('login');
@@ -33,39 +42,11 @@ const App = () => {
   // --- Global State for Management Screen (Persist on Navigation) ---
   const [managementTab, setManagementTab] = useState<'accounts' | 'campaigns'>('accounts');
   
-  const [accounts, setAccounts] = useState<AccountData[]>([
-      { id: 'acc1', name: 'Tài khoản 1: Ad Account A', status: 'active', isSelected: false },
-      { id: 'acc2', name: 'Tài khoản 2: Ad Account B', status: 'paused', isSelected: false },
-  ]);
-
-  const [campaigns, setCampaigns] = useState<CampaignData[]>([
-    {
-      id: '1',
-      accountId: 'acc1',
-      title: 'Chiến dịch: Mùa Hè Sale',
-      status: 'active',
-      budget: '50,000,000 VND',
-      objective: 'DOANH SỐ',
-      progress: 60,
-      spent: '30,000,000 VND',
-      impressions: '850.5K',
-      results: '1,200',
-      costPerResult: '25,000đ'
-    },
-    {
-      id: '2',
-      accountId: 'acc2',
-      title: 'Chiến dịch: Tết 2025',
-      status: 'paused',
-      budget: '20,000,000 VND',
-      objective: 'TƯƠNG TÁC',
-      progress: 30,
-      spent: '6,000,000 VND',
-      impressions: '200.1K',
-      results: '5,000',
-      costPerResult: '1,200đ'
-    }
-  ]);
+  // Real API data - fetched once and cached
+  const [accounts, setAccounts] = useState<AccountData[]>([]);
+  const [campaigns, setCampaigns] = useState<CampaignData[]>([]);
+  const [accountsLoaded, setAccountsLoaded] = useState(false);
+  const [campaignsLoaded, setCampaignsLoaded] = useState(false);
 
   // Init Facebook SDK on mount
   useEffect(() => {
@@ -73,6 +54,75 @@ const App = () => {
         console.log("FB SDK Initialized");
     });
   }, []);
+
+  // Fetch accounts ONCE when management screen is opened (if not already loaded)
+  useEffect(() => {
+    if (currentView === 'management' && !accountsLoaded) {
+      const fetchAccounts = async () => {
+        try {
+          const accountsData = await getAdAccounts();
+          
+          // Transform API data to AccountData format
+          const transformedAccounts: AccountData[] = accountsData.map((acc: AdAccount) => ({
+            id: acc.id,
+            name: acc.name,
+            isSelected: false,
+            status: 'active' as const, // Default status
+          }));
+          
+          setAccounts(transformedAccounts);
+          setAccountsLoaded(true);
+        } catch (err: any) {
+          console.error('Error fetching accounts:', err);
+        }
+      };
+
+      fetchAccounts();
+    }
+  }, [currentView, accountsLoaded]);
+
+  // Fetch campaigns when accounts are selected
+  useEffect(() => {
+    const selectedAccounts = accounts.filter(a => a.isSelected);
+    if (selectedAccounts.length === 0) {
+      setCampaigns([]);
+      return;
+    }
+
+    const fetchCampaigns = async () => {
+      try {
+        const campaignsPromises = selectedAccounts.map(acc => getCampaigns(acc.id));
+        const campaignsArrays = await Promise.all(campaignsPromises);
+        const allCampaigns = campaignsArrays.flat();
+
+        // Transform API data to CampaignData format
+        const transformedCampaigns: CampaignData[] = allCampaigns.map((camp: Campaign) => {
+          const budget = camp.daily_budget || camp.lifetime_budget || '0';
+          const budgetNumber = parseFloat(budget) / 100; // Facebook returns in cents
+          
+          return {
+            id: camp.id,
+            accountId: selectedAccounts[0].id,
+            title: camp.name,
+            status: camp.status.toLowerCase() === 'active' ? 'active' as const : 'paused' as const,
+            budget: formatCurrency(budgetNumber),
+            objective: camp.objective || 'N/A',
+            progress: 0,
+            spent: formatCurrency(0),
+            impressions: '0',
+            results: '0',
+            costPerResult: formatCurrency(0),
+          };
+        });
+
+        setCampaigns(transformedCampaigns);
+      } catch (err: any) {
+        console.error('Error fetching campaigns:', err);
+      }
+    };
+
+    fetchCampaigns();
+  }, [accounts]);
 
   const handleToggleAccount = (id: string) => {
     setAccounts(prev => prev.map(acc => 
