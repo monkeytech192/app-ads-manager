@@ -3,7 +3,7 @@ import { ChevronDown, Lightbulb, AlertCircle, Users, TrendingUp, Wallet, BarChar
 import { BrutalistCard, BrutalistHeader } from '../shared/UIComponents';
 import { CampaignData } from '../types';
 import { getCampaignInsights, getDemographicInsights, formatNumber, type CampaignInsights, type DemographicData } from '../services/apiService';
-import { formatCurrencyWithSettings } from '../utils/currency';
+import { formatCurrencyWithSettings, getCurrencySettings } from '../utils/currency';
 
 interface CampaignDetailScreenProps {
   onBack: () => void;
@@ -11,18 +11,19 @@ interface CampaignDetailScreenProps {
   campaign: CampaignData | null;
 }
 
-const StatItem = ({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) => (
-  <BrutalistCard variant="dark" className="!p-3 flex flex-col justify-between h-24 sm:h-28 relative overflow-hidden group">
-      <div className="absolute top-0 right-0 w-8 h-8 bg-white/5 rounded-bl-full z-0 transition-transform group-hover:scale-150"></div>
-      <span className="text-gray-400 text-xs sm:text-sm font-medium z-10">{label}</span>
-      <span className={`text-2xl sm:text-3xl font-bold font-display tracking-tight z-10 ${highlight ? 'text-green-400' : ''}`}>{value}</span>
-  </BrutalistCard>
+// Brutalist style stat card
+const StatCard = ({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) => (
+  <div className="border-4 border-black bg-[#1e293b] p-3 flex flex-col justify-between h-24 sm:h-28 shadow-hard">
+    <span className="text-gray-400 text-xs sm:text-sm font-bold uppercase tracking-wide">{label}</span>
+    <span className={`text-2xl sm:text-3xl font-bold font-display tracking-tight ${highlight ? 'text-brutal-yellow' : 'text-white'}`}>{value}</span>
+  </div>
 );
 
 type TabType = 'overview' | 'performance' | 'audience' | 'budget';
 
 const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onNavigateToRecommendations, campaign }) => {
   const [insights, setInsights] = useState<CampaignInsights | null>(null);
+  const [lifetimeInsights, setLifetimeInsights] = useState<CampaignInsights | null>(null);
   const [demographics, setDemographics] = useState<DemographicData[]>([]);
   const [loading, setLoading] = useState(true);
   const [demographicsLoading, setDemographicsLoading] = useState(false);
@@ -42,13 +43,13 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
   const selectedDateLabel = dateOptions.find(opt => opt.value === datePreset)?.label || '7 ngày qua';
 
   const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
-    { id: 'overview', label: 'Tổng quan', icon: <BarChart3 size={16} /> },
-    { id: 'performance', label: 'Hiệu quả', icon: <TrendingUp size={16} /> },
-    { id: 'audience', label: 'Đối tượng', icon: <Users size={16} /> },
-    { id: 'budget', label: 'Ngân sách', icon: <Wallet size={16} /> },
+    { id: 'overview', label: 'TỔNG QUAN', icon: <BarChart3 size={16} /> },
+    { id: 'performance', label: 'HIỆU QUẢ', icon: <TrendingUp size={16} /> },
+    { id: 'audience', label: 'ĐỐI TƯỢNG', icon: <Users size={16} /> },
+    { id: 'budget', label: 'NGÂN SÁCH', icon: <Wallet size={16} /> },
   ];
 
-  // Fetch campaign insights
+  // Fetch campaign insights for selected date range
   useEffect(() => {
     if (!campaign?.id) {
       setLoading(false);
@@ -72,6 +73,23 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
     fetchInsights();
   }, [campaign?.id, datePreset]);
 
+  // Fetch lifetime insights for budget calculation (same logic as App.tsx)
+  useEffect(() => {
+    if (!campaign?.id) return;
+
+    const fetchLifetimeInsights = async () => {
+      try {
+        // Use 'maximum' like App.tsx for consistent progress calculation
+        const data = await getCampaignInsights(campaign.id, 'maximum');
+        setLifetimeInsights(data);
+      } catch (err) {
+        console.error('Error fetching lifetime insights:', err);
+      }
+    };
+
+    fetchLifetimeInsights();
+  }, [campaign?.id]);
+
   // Fetch demographics when audience tab is active
   useEffect(() => {
     if (activeTab !== 'audience' || !campaign?.id) return;
@@ -83,7 +101,6 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
         setDemographics(data);
       } catch (err: any) {
         console.error('Error fetching demographics:', err);
-        // Don't show error, just empty data
         setDemographics([]);
       } finally {
         setDemographicsLoading(false);
@@ -93,7 +110,6 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
     fetchDemographics();
   }, [activeTab, campaign?.id, datePreset]);
   
-  // Fallback if no campaign selected
   const displayCampaign = campaign || {
       id: '',
       accountId: '',
@@ -112,7 +128,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
 
   const isPaused = displayCampaign.status === 'paused';
 
-  // Get real data from insights or fallback to campaign data
+  // Get real data from insights
   const spend = insights?.spend ? formatCurrencyWithSettings(parseFloat(insights.spend)) : displayCampaign.spent;
   const impressions = insights?.impressions ? formatNumber(parseInt(insights.impressions)) : displayCampaign.impressions;
   const clicks = insights?.clicks ? formatNumber(parseInt(insights.clicks)) : displayCampaign.results;
@@ -122,11 +138,46 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
   const ctr = insights?.ctr ? `${parseFloat(insights.ctr).toFixed(2)}%` : '0%';
   const cpm = insights?.cpm ? formatCurrencyWithSettings(parseFloat(insights.cpm), 2) : '0';
 
+  // Calculate budget progress using LIFETIME insights (same logic as App.tsx)
+  const calculateBudgetProgress = () => {
+    const dailyBudget = campaign?.dailyBudget;
+    const lifetimeBudget = campaign?.lifetimeBudget;
+    const budget = dailyBudget || lifetimeBudget || '0';
+    const budgetInAccountCurrency = parseFloat(budget) / 100;
+    
+    const currencySettings = getCurrencySettings();
+    // Assuming USD account for now - in real app, this should come from account data
+    const accountCurrency = 'USD';
+    
+    let displayBudget = budgetInAccountCurrency;
+    let displaySpend = 0;
+    
+    if (lifetimeInsights?.spend && budgetInAccountCurrency > 0) {
+      const spendInAccountCurrency = parseFloat(lifetimeInsights.spend);
+      displaySpend = spendInAccountCurrency;
+      
+      if (currencySettings.currency === 'VND' && accountCurrency === 'USD') {
+        displayBudget = budgetInAccountCurrency * currencySettings.rate;
+        displaySpend = spendInAccountCurrency * currencySettings.rate;
+      }
+      
+      return {
+        percentage: Math.min(Math.round((displaySpend / displayBudget) * 100), 100),
+        spent: displaySpend,
+        budget: displayBudget,
+        remaining: Math.max(displayBudget - displaySpend, 0)
+      };
+    }
+    
+    return { percentage: 0, spent: 0, budget: displayBudget, remaining: displayBudget };
+  };
+
+  const budgetProgress = calculateBudgetProgress();
+
   // Process demographics data
   const processedDemographics = React.useMemo(() => {
-    if (!demographics.length) return { byGender: [], byAge: [], byAgeGender: [] };
+    if (!demographics.length) return { byGender: [], byAge: [] };
 
-    // Group by gender
     const genderMap = new Map<string, { impressions: number; clicks: number; spend: number }>();
     const ageMap = new Map<string, { impressions: number; clicks: number; spend: number }>();
     
@@ -147,68 +198,60 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
       });
     });
 
-    const byGender = Array.from(genderMap.entries()).map(([gender, data]) => ({
-      gender,
-      ...data
-    }));
-
-    const byAge = Array.from(ageMap.entries()).map(([age, data]) => ({
-      age,
-      ...data
-    })).sort((a, b) => a.age.localeCompare(b.age));
-
-    return { byGender, byAge, byAgeGender: demographics };
+    return {
+      byGender: Array.from(genderMap.entries()).map(([gender, data]) => ({ gender, ...data })),
+      byAge: Array.from(ageMap.entries()).map(([age, data]) => ({ age, ...data })).sort((a, b) => a.age.localeCompare(b.age))
+    };
   }, [demographics]);
 
-  // Calculate total for percentages
   const totalImpressions = processedDemographics.byGender.reduce((sum, g) => sum + g.impressions, 0);
 
-  // Render Overview Tab
+  // ==================== RENDER TABS ====================
+
   const renderOverviewTab = () => (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
-        <StatItem label="Số tiền đã chi tiêu" value={spend} highlight />
-        <StatItem label="Lượt hiển thị" value={impressions} />
-        <StatItem label="Số lần nhấp" value={clicks} />
-        <StatItem label="Chi phí mỗi click" value={cpc} />
+        <StatCard label="Đã chi tiêu" value={spend} highlight />
+        <StatCard label="Lượt hiển thị" value={impressions} />
+        <StatCard label="Số lần nhấp" value={clicks} />
+        <StatCard label="Chi phí/click" value={cpc} />
       </div>
 
       {insights && (
-        <BrutalistCard variant="dark" className="!p-4">
-          <h3 className="font-bold text-lg mb-3">Metrics bổ sung</h3>
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div className="flex justify-between border-b border-white/10 pb-2">
-              <span className="text-gray-400">Reach:</span>
-              <span className="font-bold">{reach}</span>
+        <div className="border-4 border-black bg-[#1e293b] p-4 shadow-hard">
+          <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-brutal-yellow">Metrics Bổ Sung</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="border-2 border-white/20 p-3 bg-black/20">
+              <span className="text-gray-400 text-xs uppercase">Reach</span>
+              <div className="font-bold text-xl">{reach}</div>
             </div>
-            <div className="flex justify-between border-b border-white/10 pb-2">
-              <span className="text-gray-400">Frequency:</span>
-              <span className="font-bold">{frequency}</span>
+            <div className="border-2 border-white/20 p-3 bg-black/20">
+              <span className="text-gray-400 text-xs uppercase">Frequency</span>
+              <div className="font-bold text-xl">{frequency}</div>
             </div>
-            <div className="flex justify-between border-b border-white/10 pb-2">
-              <span className="text-gray-400">CTR:</span>
-              <span className="font-bold">{ctr}</span>
+            <div className="border-2 border-white/20 p-3 bg-black/20">
+              <span className="text-gray-400 text-xs uppercase">CTR</span>
+              <div className="font-bold text-xl">{ctr}</div>
             </div>
-            <div className="flex justify-between border-b border-white/10 pb-2">
-              <span className="text-gray-400">CPM:</span>
-              <span className="font-bold">{cpm}</span>
+            <div className="border-2 border-white/20 p-3 bg-black/20">
+              <span className="text-gray-400 text-xs uppercase">CPM</span>
+              <div className="font-bold text-xl">{cpm}</div>
             </div>
           </div>
-        </BrutalistCard>
+        </div>
       )}
     </div>
   );
 
-  // Render Performance Tab
   const renderPerformanceTab = () => (
     <div className="space-y-4">
-      <BrutalistCard variant="dark" className="!p-4">
+      <div className="border-4 border-black bg-[#1e293b] p-4 shadow-hard">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold text-lg">Chi tiết Hiệu quả</h3>
+          <h3 className="font-bold text-lg uppercase tracking-wide text-brutal-yellow">Chi Tiết Hiệu Quả</h3>
           <div className="relative">
             <button
               onClick={() => setShowDateDropdown(!showDateDropdown)}
-              className="flex items-center gap-1 bg-white/10 px-3 py-1.5 rounded text-xs cursor-pointer hover:bg-white/20 transition-colors"
+              className="flex items-center gap-1 bg-black border-2 border-white px-3 py-1.5 text-xs font-bold uppercase"
             >
               <span>{selectedDateLabel}</span>
               <ChevronDown size={14} className={`transition-transform ${showDateDropdown ? 'rotate-180' : ''}`} />
@@ -217,7 +260,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
             {showDateDropdown && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowDateDropdown(false)} />
-                <div className="absolute right-0 top-full mt-1 bg-[#1e293b] border-2 border-white/20 rounded shadow-xl z-50 min-w-[140px]">
+                <div className="absolute right-0 top-full mt-1 bg-black border-4 border-white z-50 min-w-[140px] shadow-hard">
                   {dateOptions.map(option => (
                     <button
                       key={option.value}
@@ -225,8 +268,8 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
                         setDatePreset(option.value);
                         setShowDateDropdown(false);
                       }}
-                      className={`w-full text-left px-3 py-2 text-sm hover:bg-white/10 transition-colors ${
-                        datePreset === option.value ? 'bg-blue-600 text-white' : 'text-gray-300'
+                      className={`w-full text-left px-3 py-2 text-sm font-bold uppercase transition-colors ${
+                        datePreset === option.value ? 'bg-brutal-yellow text-black' : 'text-white hover:bg-white/10'
                       }`}
                     >
                       {option.label}
@@ -239,115 +282,106 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
         </div>
 
         {insights ? (
-          <div className="space-y-3">
-            <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="bg-white/5 p-3 rounded">
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-2">
+              <div className="border-2 border-blue-500 bg-blue-500/10 p-3 text-center">
                 <div className="text-2xl font-bold text-blue-400">{impressions}</div>
-                <div className="text-xs text-gray-400">Hiển thị</div>
+                <div className="text-xs text-gray-400 uppercase">Hiển thị</div>
               </div>
-              <div className="bg-white/5 p-3 rounded">
+              <div className="border-2 border-green-500 bg-green-500/10 p-3 text-center">
                 <div className="text-2xl font-bold text-green-400">{clicks}</div>
-                <div className="text-xs text-gray-400">Nhấp chuột</div>
+                <div className="text-xs text-gray-400 uppercase">Clicks</div>
               </div>
-              <div className="bg-white/5 p-3 rounded">
+              <div className="border-2 border-yellow-500 bg-yellow-500/10 p-3 text-center">
                 <div className="text-2xl font-bold text-yellow-400">{reach}</div>
-                <div className="text-xs text-gray-400">Reach</div>
+                <div className="text-xs text-gray-400 uppercase">Reach</div>
               </div>
             </div>
 
             <div className="space-y-2 mt-4">
-              <div className="flex justify-between items-center py-2 border-b border-white/10">
-                <span className="text-gray-400">Tỷ lệ nhấp (CTR)</span>
-                <span className="font-bold text-lg">{ctr}</span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-white/10">
-                <span className="text-gray-400">Chi phí mỗi click (CPC)</span>
-                <span className="font-bold text-lg">{cpc}</span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-white/10">
-                <span className="text-gray-400">Chi phí 1000 hiển thị (CPM)</span>
-                <span className="font-bold text-lg">{cpm}</span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-white/10">
-                <span className="text-gray-400">Tần suất (Frequency)</span>
-                <span className="font-bold text-lg">{frequency}</span>
-              </div>
-              <div className="flex justify-between items-center py-2">
-                <span className="text-gray-400">Tổng chi tiêu</span>
-                <span className="font-bold text-lg text-green-400">{spend}</span>
-              </div>
+              {[
+                { label: 'Tỷ lệ nhấp (CTR)', value: ctr },
+                { label: 'Chi phí mỗi click (CPC)', value: cpc },
+                { label: 'Chi phí 1000 hiển thị (CPM)', value: cpm },
+                { label: 'Tần suất (Frequency)', value: frequency },
+                { label: 'Tổng chi tiêu', value: spend, highlight: true },
+              ].map((item, i) => (
+                <div key={i} className="flex justify-between items-center py-2 border-b-2 border-white/10">
+                  <span className="text-gray-400 uppercase text-sm">{item.label}</span>
+                  <span className={`font-bold text-lg ${item.highlight ? 'text-brutal-yellow' : ''}`}>{item.value}</span>
+                </div>
+              ))}
             </div>
 
             {insights.date_start && insights.date_stop && (
-              <div className="text-center text-xs text-gray-500 mt-4 pt-3 border-t border-white/10">
-                Dữ liệu từ {new Date(insights.date_start).toLocaleDateString('vi-VN')} đến {new Date(insights.date_stop).toLocaleDateString('vi-VN')}
+              <div className="text-center text-xs text-gray-500 mt-4 pt-3 border-t-2 border-white/10 uppercase">
+                Dữ liệu: {new Date(insights.date_start).toLocaleDateString('vi-VN')} - {new Date(insights.date_stop).toLocaleDateString('vi-VN')}
               </div>
             )}
           </div>
         ) : (
-          <div className="text-center py-8 text-gray-500">
-            <p>Không có dữ liệu cho khoảng thời gian này</p>
+          <div className="text-center py-8 text-gray-500 uppercase font-bold">
+            Không có dữ liệu
           </div>
         )}
-      </BrutalistCard>
+      </div>
     </div>
   );
 
-  // Render Audience Tab
   const renderAudienceTab = () => (
     <div className="space-y-4">
       {demographicsLoading ? (
-        <div className="border-4 border-white/20 bg-white/5 p-6 text-center">
+        <div className="border-4 border-black bg-[#1e293b] p-6 text-center shadow-hard">
           <div className="animate-pulse space-y-3">
-            <div className="h-4 bg-white/20 rounded w-3/4 mx-auto"></div>
-            <div className="h-4 bg-white/20 rounded w-1/2 mx-auto"></div>
+            <div className="h-4 bg-white/20 w-3/4 mx-auto"></div>
+            <div className="h-4 bg-white/20 w-1/2 mx-auto"></div>
           </div>
-          <p className="mt-3 font-bold">Đang tải dữ liệu đối tượng...</p>
+          <p className="mt-3 font-bold uppercase">Đang tải...</p>
         </div>
       ) : demographics.length > 0 ? (
         <>
           {/* Gender Distribution */}
-          <BrutalistCard variant="dark" className="!p-4">
-            <h3 className="font-bold text-lg mb-4">Phân bổ theo Giới tính</h3>
-            <div className="space-y-3">
+          <div className="border-4 border-black bg-[#1e293b] p-4 shadow-hard">
+            <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-brutal-yellow">Phân Bổ Giới Tính</h3>
+            <div className="space-y-4">
               {processedDemographics.byGender.map((g) => {
-                const percentage = totalImpressions > 0 ? (g.impressions / totalImpressions * 100).toFixed(1) : 0;
+                const percentage = totalImpressions > 0 ? (g.impressions / totalImpressions * 100) : 0;
                 return (
-                  <div key={g.gender} className="space-y-1">
+                  <div key={g.gender} className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="font-medium">{g.gender}</span>
-                      <span className="text-gray-400">{percentage}% • {formatNumber(g.impressions)} hiển thị</span>
+                      <span className="font-bold uppercase">{g.gender}</span>
+                      <span className="text-gray-400">{percentage.toFixed(1)}% • {formatNumber(g.impressions)}</span>
                     </div>
-                    <div className="h-3 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-4 bg-black border-2 border-white/20 overflow-hidden">
                       <div 
-                        className={`h-full rounded-full ${g.gender === 'Nam' ? 'bg-blue-500' : 'bg-pink-500'}`}
+                        className={`h-full ${g.gender === 'Nam' ? 'bg-blue-500' : 'bg-pink-500'}`}
                         style={{ width: `${percentage}%` }}
                       />
                     </div>
                     <div className="text-xs text-gray-500">
-                      {formatNumber(g.clicks)} clicks • {formatCurrencyWithSettings(g.spend)} chi tiêu
+                      {formatNumber(g.clicks)} clicks • {formatCurrencyWithSettings(g.spend)}
                     </div>
                   </div>
                 );
               })}
             </div>
-          </BrutalistCard>
+          </div>
 
           {/* Age Distribution */}
-          <BrutalistCard variant="dark" className="!p-4">
-            <h3 className="font-bold text-lg mb-4">Phân bổ theo Độ tuổi</h3>
+          <div className="border-4 border-black bg-[#1e293b] p-4 shadow-hard">
+            <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-brutal-yellow">Phân Bổ Độ Tuổi</h3>
             <div className="space-y-3">
               {processedDemographics.byAge.map((a) => {
-                const percentage = totalImpressions > 0 ? (a.impressions / totalImpressions * 100).toFixed(1) : 0;
+                const percentage = totalImpressions > 0 ? (a.impressions / totalImpressions * 100) : 0;
                 return (
                   <div key={a.age} className="space-y-1">
                     <div className="flex justify-between text-sm">
-                      <span className="font-medium">{a.age} tuổi</span>
-                      <span className="text-gray-400">{percentage}%</span>
+                      <span className="font-bold">{a.age}</span>
+                      <span className="text-gray-400">{percentage.toFixed(1)}%</span>
                     </div>
-                    <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-3 bg-black border-2 border-white/20 overflow-hidden">
                       <div 
-                        className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
+                        className="h-full bg-gradient-to-r from-blue-500 to-purple-500"
                         style={{ width: `${percentage}%` }}
                       />
                     </div>
@@ -358,105 +392,105 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
                 );
               })}
             </div>
-          </BrutalistCard>
+          </div>
         </>
       ) : (
-        <BrutalistCard variant="dark" className="!p-6 text-center">
+        <div className="border-4 border-black bg-[#1e293b] p-6 text-center shadow-hard">
           <Users size={48} className="mx-auto text-gray-600 mb-3" />
-          <h3 className="font-bold text-lg mb-2">Chưa có dữ liệu đối tượng</h3>
+          <h3 className="font-bold text-lg mb-2 uppercase">Chưa Có Dữ Liệu</h3>
           <p className="text-gray-400 text-sm">
             Dữ liệu demographic sẽ hiển thị khi chiến dịch có đủ lượt hiển thị.
           </p>
-        </BrutalistCard>
+        </div>
       )}
     </div>
   );
 
-  // Render Budget Tab
   const renderBudgetTab = () => {
-    const dailyBudget = (campaign as any)?.dailyBudget;
-    const lifetimeBudget = (campaign as any)?.lifetimeBudget;
-    const spentAmount = insights?.spend ? parseFloat(insights.spend) : 0;
-    const budgetAmount = lifetimeBudget ? parseFloat(lifetimeBudget) / 100 : (dailyBudget ? parseFloat(dailyBudget) / 100 : 0);
-    const spentPercentage = budgetAmount > 0 ? Math.min((spentAmount / budgetAmount) * 100, 100) : 0;
-
+    const currencySettings = getCurrencySettings();
+    const dailyBudget = campaign?.dailyBudget;
+    const lifetimeBudget = campaign?.lifetimeBudget;
+    
     return (
       <div className="space-y-4">
-        <BrutalistCard variant="dark" className="!p-4">
-          <h3 className="font-bold text-lg mb-4">Thông tin Ngân sách</h3>
+        <div className="border-4 border-black bg-[#1e293b] p-4 shadow-hard">
+          <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-brutal-yellow">Thông Tin Ngân Sách</h3>
           
-          <div className="space-y-4">
-            {/* Budget Type */}
-            <div className="flex justify-between items-center py-2 border-b border-white/10">
-              <span className="text-gray-400">Loại ngân sách</span>
-              <span className="font-bold">{lifetimeBudget ? 'Trọn đời' : dailyBudget ? 'Hàng ngày' : 'Chưa thiết lập'}</span>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center py-3 border-b-2 border-white/10">
+              <span className="text-gray-400 uppercase text-sm">Loại ngân sách</span>
+              <span className="font-bold">{lifetimeBudget ? 'Trọn đời' : dailyBudget ? 'Hàng ngày' : 'N/A'}</span>
             </div>
 
-            {/* Budget Amount */}
-            <div className="flex justify-between items-center py-2 border-b border-white/10">
-              <span className="text-gray-400">Ngân sách</span>
-              <span className="font-bold text-lg">
-                {lifetimeBudget 
-                  ? formatCurrencyWithSettings(parseFloat(lifetimeBudget) / 100)
-                  : dailyBudget 
-                    ? formatCurrencyWithSettings(parseFloat(dailyBudget) / 100) + '/ngày'
-                    : 'N/A'}
+            <div className="flex justify-between items-center py-3 border-b-2 border-white/10">
+              <span className="text-gray-400 uppercase text-sm">Ngân sách</span>
+              <span className="font-bold text-xl">
+                {currencySettings.currency === 'VND' 
+                  ? `${budgetProgress.budget.toLocaleString('vi-VN')} ₫`
+                  : `$${budgetProgress.budget.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+                }
               </span>
             </div>
 
-            {/* Spent Amount */}
-            <div className="flex justify-between items-center py-2 border-b border-white/10">
-              <span className="text-gray-400">Đã chi tiêu</span>
-              <span className="font-bold text-lg text-green-400">{spend}</span>
+            <div className="flex justify-between items-center py-3 border-b-2 border-white/10">
+              <span className="text-gray-400 uppercase text-sm">Đã chi tiêu</span>
+              <span className="font-bold text-xl text-green-400">
+                {currencySettings.currency === 'VND'
+                  ? `${budgetProgress.spent.toLocaleString('vi-VN')} ₫`
+                  : `$${budgetProgress.spent.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+                }
+              </span>
             </div>
 
-            {/* Remaining */}
             {lifetimeBudget && (
-              <div className="flex justify-between items-center py-2 border-b border-white/10">
-                <span className="text-gray-400">Còn lại</span>
-                <span className="font-bold text-lg text-blue-400">
-                  {formatCurrencyWithSettings(Math.max(budgetAmount - spentAmount, 0))}
+              <div className="flex justify-between items-center py-3 border-b-2 border-white/10">
+                <span className="text-gray-400 uppercase text-sm">Còn lại</span>
+                <span className="font-bold text-xl text-blue-400">
+                  {currencySettings.currency === 'VND'
+                    ? `${budgetProgress.remaining.toLocaleString('vi-VN')} ₫`
+                    : `$${budgetProgress.remaining.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+                  }
                 </span>
               </div>
             )}
 
-            {/* Progress Bar for Lifetime Budget */}
+            {/* Progress Bar */}
             {lifetimeBudget && (
-              <div className="mt-4">
+              <div className="mt-4 pt-2">
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-gray-400">Tiến độ chi tiêu</span>
-                  <span className="font-bold">{spentPercentage.toFixed(1)}%</span>
+                  <span className="text-gray-400 uppercase">Tiến độ chi tiêu</span>
+                  <span className="font-bold">{budgetProgress.percentage}%</span>
                 </div>
-                <div className="h-4 bg-white/10 rounded-full overflow-hidden">
+                <div className="h-6 bg-black border-4 border-white/30 overflow-hidden">
                   <div 
-                    className={`h-full rounded-full transition-all ${
-                      spentPercentage >= 90 ? 'bg-red-500' : 
-                      spentPercentage >= 70 ? 'bg-yellow-500' : 'bg-green-500'
+                    className={`h-full transition-all ${
+                      budgetProgress.percentage >= 90 ? 'bg-red-500' : 
+                      budgetProgress.percentage >= 70 ? 'bg-yellow-500' : 'bg-green-500'
                     }`}
-                    style={{ width: `${spentPercentage}%` }}
+                    style={{ width: `${budgetProgress.percentage}%` }}
                   />
                 </div>
               </div>
             )}
           </div>
-        </BrutalistCard>
+        </div>
 
-        {/* Campaign Schedule */}
-        <BrutalistCard variant="dark" className="!p-4">
-          <h3 className="font-bold text-lg mb-4">Lịch chạy Chiến dịch</h3>
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between py-2 border-b border-white/10">
-              <span className="text-gray-400">Trạng thái</span>
+        {/* Campaign Info */}
+        <div className="border-4 border-black bg-[#1e293b] p-4 shadow-hard">
+          <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-brutal-yellow">Thông Tin Chiến Dịch</h3>
+          <div className="space-y-3">
+            <div className="flex justify-between py-3 border-b-2 border-white/10">
+              <span className="text-gray-400 uppercase text-sm">Trạng thái</span>
               <span className={`font-bold ${isPaused ? 'text-orange-400' : 'text-green-400'}`}>
-                {isPaused ? 'Đang tạm dừng' : 'Đang hoạt động'}
+                {isPaused ? 'TẠM DỪNG' : 'HOẠT ĐỘNG'}
               </span>
             </div>
-            <div className="flex justify-between py-2 border-b border-white/10">
-              <span className="text-gray-400">Mục tiêu</span>
-              <span className="font-medium">{displayCampaign.objective}</span>
+            <div className="flex justify-between py-3 border-b-2 border-white/10">
+              <span className="text-gray-400 uppercase text-sm">Mục tiêu</span>
+              <span className="font-bold">{displayCampaign.objective}</span>
             </div>
           </div>
-        </BrutalistCard>
+        </div>
       </div>
     );
   };
@@ -465,38 +499,35 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
     <div className="flex flex-col h-full w-full bg-[#0f172a] text-white font-sans">
       
       <BrutalistHeader 
-        title="Chi tiết Chiến dịch" 
+        title="CHI TIẾT CHIẾN DỊCH" 
         onBack={onBack}
         variant="dark"
       />
 
-      {/* Main Content Area - Scrollable */}
       <div className="flex-1 overflow-y-auto no-scrollbar p-4 space-y-4">
         
-        {/* Loading State */}
         {loading && (
-          <div className="border-4 border-white/20 bg-white/5 p-6 text-center">
+          <div className="border-4 border-black bg-[#1e293b] p-6 text-center shadow-hard">
             <div className="animate-pulse space-y-3">
-              <div className="h-4 bg-white/20 rounded w-3/4 mx-auto"></div>
-              <div className="h-4 bg-white/20 rounded w-1/2 mx-auto"></div>
+              <div className="h-4 bg-white/20 w-3/4 mx-auto"></div>
+              <div className="h-4 bg-white/20 w-1/2 mx-auto"></div>
             </div>
-            <p className="mt-3 font-bold">Đang tải insights...</p>
+            <p className="mt-3 font-bold uppercase">Đang tải insights...</p>
           </div>
         )}
 
-        {/* Error State */}
         {error && !loading && (
-          <div className="border-4 border-red-600 bg-red-900/20 p-6">
+          <div className="border-4 border-red-600 bg-red-900/20 p-6 shadow-hard">
             <div className="flex items-start gap-3">
               <AlertCircle size={24} className="text-red-400 shrink-0" />
               <div>
-                <h3 className="font-bold text-lg text-red-400 mb-2">LỖI TẢI INSIGHTS</h3>
+                <h3 className="font-bold text-lg text-red-400 mb-2 uppercase">Lỗi Tải Insights</h3>
                 <p className="text-sm text-gray-300 mb-3">{error}</p>
                 <button 
                   onClick={() => window.location.reload()}
-                  className="bg-red-600 text-white border-2 border-white font-bold px-4 py-2"
+                  className="bg-red-600 text-white border-4 border-black font-bold px-4 py-2 uppercase shadow-hard active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
                 >
-                  THỬ LẠI
+                  Thử Lại
                 </button>
               </div>
             </div>
@@ -506,32 +537,32 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
         {!loading && (
           <>
             {/* Title & Status */}
-            <div>
+            <div className="border-4 border-black bg-black p-4 shadow-hard">
               <h2 className="font-display font-bold text-2xl mb-2">{displayCampaign.title}</h2>
               <div className="flex items-center gap-2 text-sm">
-                <span className={`w-2 h-2 rounded-full animate-pulse ${isPaused ? 'bg-orange-500' : 'bg-green-500'}`}></span>
-                <span className={`font-bold ${isPaused ? 'text-orange-500' : 'text-green-500'}`}>
+                <span className={`w-3 h-3 ${isPaused ? 'bg-orange-500' : 'bg-green-500'}`}></span>
+                <span className={`font-bold uppercase ${isPaused ? 'text-orange-500' : 'text-green-500'}`}>
                     {isPaused ? 'Đang tạm dừng' : 'Đang hoạt động'}
                 </span>
                 <span className="text-gray-500">•</span>
-                <span className="text-gray-400">{displayCampaign.objective}</span>
+                <span className="text-gray-400 uppercase">{displayCampaign.objective}</span>
               </div>
             </div>
 
-            {/* Navigation Tabs */}
-            <div className="flex border-b border-white/20 overflow-x-auto hide-scrollbar gap-1">
+            {/* Navigation Tabs - Brutalist Style */}
+            <div className="flex border-4 border-black bg-black overflow-x-auto">
               {tabs.map((tab) => (
                 <button 
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-1.5 pb-3 px-3 text-sm font-bold whitespace-nowrap transition-colors ${
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-3 px-2 text-xs font-bold uppercase tracking-wide transition-colors border-r-2 border-white/20 last:border-r-0 ${
                     activeTab === tab.id 
-                      ? 'text-blue-400 border-b-2 border-blue-400' 
-                      : 'text-gray-400 hover:text-white'
+                      ? 'bg-brutal-yellow text-black' 
+                      : 'text-gray-400 hover:bg-white/10 hover:text-white'
                   }`}
                 >
                   {tab.icon}
-                  {tab.label}
+                  <span className="hidden sm:inline">{tab.label}</span>
                 </button>
               ))}
             </div>
@@ -546,19 +577,19 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
             {activeTab === 'overview' && (
               <button 
                 onClick={onNavigateToRecommendations}
-                className="w-full bg-gradient-to-r from-yellow-400 to-yellow-600 border-4 border-black p-3 flex items-center justify-between shadow-hard active:translate-y-1 active:shadow-none transition-all group"
+                className="w-full bg-brutal-yellow border-4 border-black p-4 flex items-center justify-between shadow-hard active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
               >
                 <div className="flex items-center gap-3">
-                  <div className="bg-black p-1.5 rounded-full text-white">
-                    <Lightbulb size={20} />
+                  <div className="bg-black p-2">
+                    <Lightbulb size={20} className="text-brutal-yellow" />
                   </div>
                   <div className="text-left text-black">
-                    <p className="font-bold text-sm leading-none">CÓ 3 ĐỀ XUẤT MỚI</p>
+                    <p className="font-bold text-sm uppercase">Có 3 đề xuất mới</p>
                     <p className="text-xs font-medium">Tối ưu ngay để tăng hiệu quả +20%</p>
                   </div>
                 </div>
-                <div className="bg-black text-white px-2 py-1 text-xs font-bold group-hover:bg-gray-800">
-                  XEM NGAY
+                <div className="bg-black text-brutal-yellow px-3 py-1 text-xs font-bold uppercase">
+                  Xem
                 </div>
               </button>
             )}
