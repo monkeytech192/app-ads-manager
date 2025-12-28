@@ -265,7 +265,7 @@ const App = () => {
     <div className="fixed inset-0 w-full flex flex-col items-center justify-center bg-[#1c1917] font-sans text-black py-4">
       <div className="absolute inset-0 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/dark-concrete.png')] opacity-30 z-0"></div>
 
-      <div className="w-full max-w-md z-10 space-y-2 bg-[#e5e5e5] p-4 border-4 border-black shadow-[10px_10px_0px_0px_rgba(255,255,255,0.1)]">
+      <div className="h-full overflow-y-auto w-full max-w-md z-10 space-y-2 bg-[#e5e5e5] p-4 border-4 border-black shadow-[10px_10px_0px_0px_rgba(255,255,255,0.1)]">
         <TextureOverlay />
         
         {/* Header */}

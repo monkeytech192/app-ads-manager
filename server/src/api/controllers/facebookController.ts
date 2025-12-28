@@ -1,9 +1,37 @@
 import { Request, Response } from 'express';
 import axios from 'axios';
 
+/**
+ * ==========================================
+ * FACEBOOK CONTROLLER
+ * ==========================================
+ * 
+ * QUAN TRỌNG: Controller này sử dụng 2 LOẠI TOKEN RIÊNG BIỆT:
+ * 
+ * 1. USER LOGIN TOKEN (từ request body - qua Facebook Login SDK):
+ *    - Dùng CHỈ cho: getUserProfile() - lấy profile user sau khi login
+ *    - Token ngắn hạn (1-2 giờ)
+ *    - Được gửi từ frontend sau khi user login bằng Facebook
+ * 
+ * 2. FACEBOOK_ACCESS_TOKEN (từ .env - long-lived token):
+ *    - Dùng cho: getAdAccounts(), getCampaigns(), getCampaignInsights()
+ *    - Token dài hạn (60 ngày)
+ *    - Admin cấu hình trong .env khi deploy
+ *    - KHÔNG expose lên frontend, chỉ sử dụng trên backend
+ * 
+ * Lý do tách biệt:
+ * - Bảo mật: Access token có quyền cao không nên để frontend biết
+ * - Ổn định: Token dài hạn không bị expired giữa chừng
+ * - Đơn giản: Frontend không cần quản lý token cho ads data
+ * 
+ * ==========================================
+ */
+
 const FACEBOOK_APP_ID = process.env.FACEBOOK_APP_ID || '';
 const FACEBOOK_APP_SECRET = process.env.FACEBOOK_APP_SECRET || '';
 const FACEBOOK_REDIRECT_URI = process.env.FACEBOOK_REDIRECT_URI || '';
+// Long-lived access token để truy xuất ads data - LẤY TỪ .env
+const FACEBOOK_ACCESS_TOKEN = process.env.FACEBOOK_ACCESS_TOKEN || '';
 
 /**
  * Exchange Facebook authorization code for access token
@@ -63,6 +91,9 @@ export const exchangeCodeForToken = async (req: Request, res: Response) => {
 
 /**
  * Get Facebook user profile
+ * 
+ * MỤC ĐÍCH: Lấy thông tin profile sau khi user đăng nhập
+ * SỬ DỤNG: User login token từ Facebook Login SDK (request body)
  */
 export const getUserProfile = async (req: Request, res: Response) => {
   try {
@@ -98,22 +129,24 @@ export const getUserProfile = async (req: Request, res: Response) => {
 
 /**
  * Get Facebook Ad Accounts
+ * 
+ * MỤC ĐÍCH: Lấy danh sách tài khoản quảng cáo
+ * SỬ DỤNG: FACEBOOK_ACCESS_TOKEN từ .env (long-lived token)
  */
 export const getAdAccounts = async (req: Request, res: Response) => {
   try {
-    const { access_token } = req.body;
-
-    if (!access_token) {
-      return res.status(400).json({
+    // Kiểm tra FACEBOOK_ACCESS_TOKEN có được config không
+    if (!FACEBOOK_ACCESS_TOKEN) {
+      return res.status(500).json({
         success: false,
-        message: 'Access token is required'
+        message: 'FACEBOOK_ACCESS_TOKEN chưa được cấu hình trong .env. Vui lòng thêm token vào biến môi trường.'
       });
     }
 
     const response = await axios.get(`https://graph.facebook.com/v21.0/me/adaccounts`, {
       params: {
         fields: 'id,name,account_id,account_status,currency,timezone_name,business',
-        access_token: access_token
+        access_token: FACEBOOK_ACCESS_TOKEN // Dùng token từ .env
       }
     });
 
@@ -133,15 +166,26 @@ export const getAdAccounts = async (req: Request, res: Response) => {
 
 /**
  * Get campaigns for an ad account
+ * 
+ * MỤC ĐÍCH: Lấy danh sách chiến dịch của một ad account
+ * SỬ DỤNG: FACEBOOK_ACCESS_TOKEN từ .env (long-lived token)
  */
 export const getCampaigns = async (req: Request, res: Response) => {
   try {
-    const { access_token, ad_account_id } = req.body;
+    const { ad_account_id } = req.body;
 
-    if (!access_token || !ad_account_id) {
+    // Kiểm tra FACEBOOK_ACCESS_TOKEN có được config không
+    if (!FACEBOOK_ACCESS_TOKEN) {
+      return res.status(500).json({
+        success: false,
+        message: 'FACEBOOK_ACCESS_TOKEN chưa được cấu hình trong .env. Vui lòng thêm token vào biến môi trường.'
+      });
+    }
+
+    if (!ad_account_id) {
       return res.status(400).json({
         success: false,
-        message: 'Access token and ad account ID are required'
+        message: 'Ad account ID is required'
       });
     }
 
@@ -150,7 +194,7 @@ export const getCampaigns = async (req: Request, res: Response) => {
       {
         params: {
           fields: 'id,name,objective,status,daily_budget,lifetime_budget,start_time,stop_time,created_time,updated_time',
-          access_token: access_token
+          access_token: FACEBOOK_ACCESS_TOKEN // Dùng token từ .env
         }
       }
     );
@@ -171,15 +215,26 @@ export const getCampaigns = async (req: Request, res: Response) => {
 
 /**
  * Get insights/metrics for campaigns
+ * 
+ * MỤC ĐÍCH: Lấy số liệu phân tích của chiến dịch
+ * SỬ DỤNG: FACEBOOK_ACCESS_TOKEN từ .env (long-lived token)
  */
 export const getCampaignInsights = async (req: Request, res: Response) => {
   try {
-    const { access_token, campaign_id, date_preset } = req.body;
+    const { campaign_id, date_preset } = req.body;
 
-    if (!access_token || !campaign_id) {
+    // Kiểm tra FACEBOOK_ACCESS_TOKEN có được config không
+    if (!FACEBOOK_ACCESS_TOKEN) {
+      return res.status(500).json({
+        success: false,
+        message: 'FACEBOOK_ACCESS_TOKEN chưa được cấu hình trong .env. Vui lòng thêm token vào biến môi trường.'
+      });
+    }
+
+    if (!campaign_id) {
       return res.status(400).json({
         success: false,
-        message: 'Access token and campaign ID are required'
+        message: 'Campaign ID is required'
       });
     }
 
@@ -189,7 +244,7 @@ export const getCampaignInsights = async (req: Request, res: Response) => {
         params: {
           fields: 'impressions,clicks,spend,reach,frequency,ctr,cpc,cpm,conversions,cost_per_conversion',
           date_preset: date_preset || 'last_7d',
-          access_token: access_token
+          access_token: FACEBOOK_ACCESS_TOKEN // Dùng token từ .env
         }
       }
     );

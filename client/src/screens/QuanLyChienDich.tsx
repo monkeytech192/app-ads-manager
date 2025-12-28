@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { Search, Filter, Menu, Target, Facebook, Check } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Filter, Menu, Target, Facebook, Check, AlertCircle } from 'lucide-react';
 import { BrutalistButton, BrutalistCard, BrutalistToggle, BrutalistHeader } from '../shared/UIComponents';
 import BottomNav from '../shared/BottomNav';
 import { ScreenView, CampaignData, AccountData } from '../types';
+import { getAdAccounts, getCampaigns, formatCurrency, type AdAccount, type Campaign } from '../services/apiService';
 
 interface ManagementScreenProps {
   onBack: () => void;
@@ -23,9 +24,9 @@ const ManagementScreen: React.FC<ManagementScreenProps> = ({
   onSelectCampaign,
   activeTab,
   setActiveTab,
-  accounts,
+  accounts: _accounts,
   onToggleAccount,
-  campaigns,
+  campaigns: _campaigns,
   onToggleCampaignStatus
 }) => {
   // Input State (What user types)
@@ -35,9 +36,103 @@ const ManagementScreen: React.FC<ManagementScreenProps> = ({
   const [appliedSearch, setAppliedSearch] = useState('');
   const [isFilterApplied, setIsFilterApplied] = useState(false);
 
+  // Real data from API
+  const [accounts, setAccounts] = useState<AccountData[]>([]);
+  const [campaigns, setCampaigns] = useState<CampaignData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch ad accounts on mount
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getAdAccounts();
+        
+        // Transform API data to AccountData format
+        const transformedAccounts: AccountData[] = data.map((acc: AdAccount) => ({
+          id: acc.id,
+          name: acc.name,
+          status: acc.account_status === 1 ? 'active' as const : 'paused' as const,
+          isSelected: false,
+        }));
+        
+        setAccounts(transformedAccounts);
+      } catch (err: any) {
+        console.error('Error fetching accounts:', err);
+        setError(err.message || 'Không thể tải tài khoản quảng cáo');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAccounts();
+  }, []);
+
+  // Fetch campaigns when accounts are selected
+  useEffect(() => {
+    const selectedAccounts = accounts.filter(a => a.isSelected);
+    if (selectedAccounts.length === 0) {
+      setCampaigns([]);
+      return;
+    }
+
+    const fetchCampaigns = async () => {
+      try {
+        setLoading(true);
+        const campaignsPromises = selectedAccounts.map(acc => getCampaigns(acc.id));
+        const campaignsArrays = await Promise.all(campaignsPromises);
+        const allCampaigns = campaignsArrays.flat();
+
+        // Transform API data to CampaignData format
+        const transformedCampaigns: CampaignData[] = allCampaigns.map((camp: Campaign) => {
+          const budget = camp.daily_budget || camp.lifetime_budget || '0';
+          const budgetNumber = parseFloat(budget) / 100; // Facebook returns in cents
+          
+          return {
+            id: camp.id,
+            accountId: selectedAccounts[0].id, // Associate with first account
+            title: camp.name,
+            status: camp.status.toLowerCase() === 'active' ? 'active' as const : 'paused' as const,
+            budget: formatCurrency(budgetNumber),
+            objective: camp.objective || 'N/A',
+            progress: 0, // Would need insights to calculate
+            spent: formatCurrency(0), // Would need insights
+            impressions: '0',
+            results: '0',
+            costPerResult: formatCurrency(0),
+          };
+        });
+
+        setCampaigns(transformedCampaigns);
+      } catch (err: any) {
+        console.error('Error fetching campaigns:', err);
+        setError(err.message || 'Không thể tải chiến dịch');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCampaigns();
+  }, [accounts]);
+
   const handleApplyFilter = () => {
     setAppliedSearch(searchInput);
     setIsFilterApplied(true);
+  };
+
+  const handleToggleAccountLocal = (id: string) => {
+    setAccounts(prev => prev.map(acc => 
+        acc.id === id ? { ...acc, isSelected: !acc.isSelected } : acc
+    ));
+  };
+
+  const handleToggleCampaignStatusLocal = (id: string) => {
+    setCampaigns(prev => prev.map(camp => 
+        camp.id === id ? { ...camp, status: camp.status === 'active' ? 'paused' : 'active' } : camp
+    ));
+    // TODO: Call API to actually update campaign status on Facebook
   };
 
   const selectedAccountIds = accounts.filter(a => a.isSelected).map(a => a.id);
@@ -121,9 +216,42 @@ const ManagementScreen: React.FC<ManagementScreenProps> = ({
         {/* List Content */}
         <div className="space-y-4 pb-4">
           
-          {activeTab === 'accounts' && (
+          {loading && (
+            <div className="border-4 border-black bg-white p-6 text-center">
+              <div className="animate-pulse space-y-3">
+                <div className="h-4 bg-gray-300 rounded w-3/4 mx-auto"></div>
+                <div className="h-4 bg-gray-300 rounded w-1/2 mx-auto"></div>
+              </div>
+              <p className="mt-3 font-bold">Đang tải...</p>
+            </div>
+          )}
+
+          {error && !loading && (
+            <div className="border-4 border-red-600 bg-white p-6">
+              <div className="flex items-start gap-3">
+                <AlertCircle size={24} className="text-red-600 shrink-0" />
+                <div>
+                  <h3 className="font-bold text-lg text-red-600 mb-2">LỖI TẢI DỮ LIỆU</h3>
+                  <p className="text-sm mb-3">{error}</p>
+                  <button 
+                    onClick={() => window.location.reload()}
+                    className="bg-red-600 text-white border-2 border-black font-bold px-4 py-2 shadow-hard-sm"
+                  >
+                    THỬ LẠI
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {!loading && !error && activeTab === 'accounts' && (
             <>
-              {filteredAccounts.map((acc) => (
+              {filteredAccounts.length === 0 ? (
+                <div className="text-center py-10 opacity-50 font-bold text-xl border-4 border-black border-dashed">
+                  KHÔNG TÌM THẤY TÀI KHOẢN
+                </div>
+              ) : (
+                filteredAccounts.map((acc) => (
                   <div key={acc.id} className="border-4 border-black bg-black p-3 flex items-center justify-between shadow-hard">
                     <div className="flex items-center gap-3">
                         <div className="bg-[#1877F2] p-2 border-2 border-[#1877F2] rounded-sm">
@@ -138,7 +266,7 @@ const ManagementScreen: React.FC<ManagementScreenProps> = ({
                     </div>
                     
                     <BrutalistButton 
-                        onClick={() => onToggleAccount(acc.id)}
+                        onClick={() => handleToggleAccountLocal(acc.id)}
                         variant={acc.isSelected ? 'black' : 'yellow'} 
                         className={`
                             !text-sm !py-1 !px-4 !border-2 
@@ -153,11 +281,12 @@ const ManagementScreen: React.FC<ManagementScreenProps> = ({
                         ) : 'CHỌN'}
                     </BrutalistButton>
                   </div>
-              ))}
+                ))
+              )}
             </>
           )}
 
-          {activeTab === 'campaigns' && (
+          {!loading && !error && activeTab === 'campaigns' && (
             <>
                {selectedAccountIds.length === 0 ? (
                    <div className="text-center py-10 opacity-50 font-bold text-xl border-4 border-black border-dashed">
@@ -189,7 +318,7 @@ const ManagementScreen: React.FC<ManagementScreenProps> = ({
                                       <div className="shrink-0 pt-1">
                                           <BrutalistToggle 
                                             checked={camp.status === 'active'} 
-                                            onChange={() => onToggleCampaignStatus(camp.id)}
+                                            onChange={() => handleToggleCampaignStatusLocal(camp.id)}
                                             labelOn="ON"
                                             labelOff="OFF"
                                           />

@@ -1,7 +1,8 @@
-import React from 'react';
-import { Pause, Pencil, ChevronDown, Lightbulb } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Pause, Pencil, ChevronDown, Lightbulb, AlertCircle } from 'lucide-react';
 import { BrutalistButton, BrutalistCard, BrutalistHeader } from '../shared/UIComponents';
 import { ScreenView, CampaignData } from '../types';
+import { getCampaignInsights, formatCurrency, formatNumber, type CampaignInsights } from '../services/apiService';
 
 interface CampaignDetailScreenProps {
   onBack: () => void;
@@ -18,11 +19,44 @@ const StatItem = ({ label, value }: { label: string; value: string }) => (
 );
 
 const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onNavigateToRecommendations, campaign }) => {
+  const [insights, setInsights] = useState<CampaignInsights | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [datePreset, setDatePreset] = useState<string>('last_7d');
+
+  // Fetch campaign insights
+  useEffect(() => {
+    if (!campaign?.id) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchInsights = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getCampaignInsights(campaign.id, datePreset);
+        setInsights(data);
+      } catch (err: any) {
+        console.error('Error fetching campaign insights:', err);
+        setError(err.message || 'Không thể tải dữ liệu insights');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInsights();
+  }, [campaign?.id, datePreset]);
   
   // Fallback if no campaign selected (shouldn't happen in normal flow)
   const displayCampaign = campaign || {
+      id: '',
+      accountId: '',
       title: 'Chiến dịch không xác định',
-      status: 'paused',
+      status: 'paused' as const,
+      budget: '0đ',
+      objective: 'N/A',
+      progress: 0,
       spent: '0đ',
       impressions: '0',
       results: '0',
@@ -30,6 +64,12 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
   };
 
   const isPaused = displayCampaign.status === 'paused';
+
+  // Get real data from insights or fallback to campaign data
+  const spend = insights?.spend ? formatCurrency(parseFloat(insights.spend)) : displayCampaign.spent;
+  const impressions = insights?.impressions ? formatNumber(parseInt(insights.impressions)) : displayCampaign.impressions;
+  const clicks = insights?.clicks ? formatNumber(parseInt(insights.clicks)) : displayCampaign.results;
+  const cpc = insights?.cpc ? formatCurrency(parseFloat(insights.cpc)) : displayCampaign.costPerResult;
 
   return (
     <div className="flex flex-col h-full w-full bg-[#0f172a] text-white font-sans">
@@ -43,18 +83,50 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
       {/* Main Content Area - Scrollable */}
       <div className="flex-1 overflow-y-auto no-scrollbar p-4 space-y-6">
         
-        {/* Title & Status */}
-        <div>
-          <h2 className="font-display font-bold text-3xl mb-2">{displayCampaign.title}</h2>
-          <div className="flex items-center gap-2 text-sm">
-            <span className={`w-2 h-2 rounded-full animate-pulse ${isPaused ? 'bg-orange-500' : 'bg-green-500'}`}></span>
-            <span className={`font-bold ${isPaused ? 'text-orange-500' : 'text-green-500'}`}>
-                {isPaused ? 'Đang tạm dừng' : 'Đang hoạt động'}
-            </span>
-            <span className="text-gray-500">•</span>
-            <span className="text-gray-400">Ngân sách hàng ngày</span>
+        {/* Loading State */}
+        {loading && (
+          <div className="border-4 border-white/20 bg-white/5 p-6 text-center">
+            <div className="animate-pulse space-y-3">
+              <div className="h-4 bg-white/20 rounded w-3/4 mx-auto"></div>
+              <div className="h-4 bg-white/20 rounded w-1/2 mx-auto"></div>
+            </div>
+            <p className="mt-3 font-bold">Đang tải insights...</p>
           </div>
-        </div>
+        )}
+
+        {/* Error State */}
+        {error && !loading && (
+          <div className="border-4 border-red-600 bg-red-900/20 p-6">
+            <div className="flex items-start gap-3">
+              <AlertCircle size={24} className="text-red-400 shrink-0" />
+              <div>
+                <h3 className="font-bold text-lg text-red-400 mb-2">LỖI TẢI INSIGHTS</h3>
+                <p className="text-sm text-gray-300 mb-3">{error}</p>
+                <button 
+                  onClick={() => window.location.reload()}
+                  className="bg-red-600 text-white border-2 border-white font-bold px-4 py-2"
+                >
+                  THỬ LẠI
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {!loading && (
+          <>
+            {/* Title & Status */}
+            <div>
+              <h2 className="font-display font-bold text-3xl mb-2">{displayCampaign.title}</h2>
+              <div className="flex items-center gap-2 text-sm">
+                <span className={`w-2 h-2 rounded-full animate-pulse ${isPaused ? 'bg-orange-500' : 'bg-green-500'}`}></span>
+                <span className={`font-bold ${isPaused ? 'text-orange-500' : 'text-green-500'}`}>
+                    {isPaused ? 'Đang tạm dừng' : 'Đang hoạt động'}
+                </span>
+                <span className="text-gray-500">•</span>
+                <span className="text-gray-400">{displayCampaign.objective}</span>
+              </div>
+            </div>
 
         {/* Navigation Tabs */}
         <div className="flex border-b border-white/20 overflow-x-auto hide-scrollbar gap-6">
@@ -70,11 +142,45 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-3">
-            <StatItem label="Số tiền đã chi tiêu" value={displayCampaign.spent} />
-            <StatItem label="Lượt hiển thị" value={displayCampaign.impressions} />
-            <StatItem label="Kết quả" value={displayCampaign.results} />
-            <StatItem label="Giá mỗi kết quả" value={displayCampaign.costPerResult} />
+            <StatItem label="Số tiền đã chi tiêu" value={spend} />
+            <StatItem label="Lượt hiển thị" value={impressions} />
+            <StatItem label="Số lần nhấp" value={clicks} />
+            <StatItem label="Chi phí mỗi click" value={cpc} />
         </div>
+
+        {insights && (
+          <BrutalistCard variant="dark" className="!p-4">
+            <h3 className="font-bold text-lg mb-3">Thêm Metrics</h3>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              {insights.reach && (
+                <div className="flex justify-between border-b border-white/10 pb-2">
+                  <span className="text-gray-400">Reach:</span>
+                  <span className="font-bold">{formatNumber(parseInt(insights.reach))}</span>
+                </div>
+              )}
+              {insights.frequency && (
+                <div className="flex justify-between border-b border-white/10 pb-2">
+                  <span className="text-gray-400">Frequency:</span>
+                  <span className="font-bold">{parseFloat(insights.frequency).toFixed(2)}</span>
+                </div>
+              )}
+              {insights.ctr && (
+                <div className="flex justify-between border-b border-white/10 pb-2">
+                  <span className="text-gray-400">CTR:</span>
+                  <span className="font-bold">{parseFloat(insights.ctr).toFixed(2)}%</span>
+                </div>
+              )}
+              {insights.cpm && (
+                <div className="flex justify-between border-b border-white/10 pb-2">
+                  <span className="text-gray-400">CPM:</span>
+                  <span className="font-bold">{formatCurrency(parseFloat(insights.cpm))}</span>
+                </div>
+              )}
+            </div>
+          </BrutalistCard>
+        )}
+          </>
+        )}
 
         {/* Line Chart */}
         <BrutalistCard variant="dark" className="!p-4">

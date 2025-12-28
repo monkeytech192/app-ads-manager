@@ -6,13 +6,29 @@
 
 ## 🌟 Tính Năng
 
-- 🔐 **Đăng nhập Facebook** - Hỗ trợ cả Business và Personal Account
+- 🔐 **Đăng nhập Facebook** - Xác thực user với Facebook Login
 - 📊 **Dashboard Thời Gian Thực** - Theo dõi hiệu suất chiến dịch 
 - 🎯 **Quản Lý Chiến Dịch** - Tạo, sửa, xóa chiến dịch quảng cáo
 - 📈 **Phân Tích Chi Tiết** - Biểu đồ và số liệu chi tiết
 - 🤖 **Đề Xuất AI** - Tối ưu bằng Google Gemini (optional)
 - 📱 **PWA** - Cài đặt như app mobile
 - 🎨 **Giao diện Brutalist** - Thiết kế táo bạo, tối giản
+
+### 🔑 Về Facebook Access Token
+
+App sử dụng **2 loại token riêng biệt**:
+
+1. **Login Token** (tự động):
+   - Dùng CHỈ cho đăng nhập/authentication user
+   - Tạo tự động qua Facebook Login SDK
+   - Token ngắn hạn (1-2 giờ)
+
+2. **Access Token** (cấu hình trong .env):
+   - Dùng CHỈ cho truy xuất dữ liệu quảng cáo (campaigns, metrics)
+   - **BẮT BUỘC** phải cấu hình `FACEBOOK_ACCESS_TOKEN` trong .env
+   - Token dài hạn (60 ngày)
+   - Lấy từ: [Facebook Graph API Explorer](https://developers.facebook.com/tools/explorer/)
+   - Permissions cần: `ads_read`, `ads_management`, `business_management`
 
 ## 🛠️ Công Nghệ
 
@@ -62,13 +78,16 @@
 | MongoDB URI | MongoDB Atlas → Connect → Drivers |
 | Facebook App ID | developers.facebook.com/apps |
 | Facebook App Secret | Facebook App → Settings → Basic |
+| **Facebook Access Token** | **Graph API Explorer → Get User Access Token → Extend** |
 | JWT Secret | `openssl rand -base64 32` |
+
+**LƯU Ý:** `FACEBOOK_ACCESS_TOKEN` là BẮT BUỘC để truy xuất dữ liệu quảng cáo!
 
 ---
 
 ## 📋 Biến Môi Trường
 
-**CHỈ 5 BIẾN BẮT BUỘC:**
+**CHỈ 6 BIẾN BẮT BUỘC:**
 
 ```env
 VITE_API_URL=https://your-railway-domain.up.railway.app/api/v1
@@ -76,6 +95,7 @@ VITE_FB_APP_ID=your_facebook_app_id
 MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/ads-manager
 JWT_SECRET=random_32_chars_minimum
 FACEBOOK_APP_SECRET=your_facebook_app_secret
+FACEBOOK_ACCESS_TOKEN=your_long_lived_facebook_access_token
 ```
 
 📖 **Chi tiết:** [.env.example](.env.example)
@@ -83,6 +103,7 @@ FACEBOOK_APP_SECRET=your_facebook_app_secret
 **LƯU Ý:** 
 - Development local: Copy `.env.example` thành `.env` và điền giá trị
 - Production: Nhập biến vào Railway/Vercel Dashboard (KHÔNG cần file .env)
+- **QUAN TRỌNG**: `FACEBOOK_ACCESS_TOKEN` cần là long-lived token (60 ngày) có đủ permissions
 
 ---
 

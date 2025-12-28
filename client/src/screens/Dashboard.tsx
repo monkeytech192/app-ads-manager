@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { DollarSign, Eye, MousePointer2, TrendingUp, Activity, LogOut } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { DollarSign, Eye, MousePointer2, TrendingUp, Activity, LogOut, AlertCircle } from 'lucide-react';
 import { BrutalistCard, BrutalistHeader } from '../shared/UIComponents';
 import BottomNav from '../shared/BottomNav';
 import { ScreenView, FacebookUserProfile } from '../types';
+import { getDashboardMetrics, formatCurrency, formatNumber, formatPercentage, type DashboardMetrics } from '../services/apiService';
 
 interface DashboardScreenProps {
   onBack: () => void; // Used for logout
@@ -101,6 +102,28 @@ const AdSetCard = ({ title, budget, clicks, ctr }: any) => (
 
 const DashboardScreen: React.FC<DashboardScreenProps> = ({ onBack, onNavigate, userProfile }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch dashboard metrics on mount
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getDashboardMetrics();
+        setMetrics(data);
+      } catch (err: any) {
+        console.error('Error fetching dashboard metrics:', err);
+        setError(err.message || 'Không thể tải dữ liệu. Vui lòng kiểm tra Access Token trong .env');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMetrics();
+  }, []);
   
   // Use FB data if available, else fallback image
   const avatarUrl = userProfile?.picture?.data?.url || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=150&q=80";
@@ -156,70 +179,113 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ onBack, onNavigate, u
 
       <div className="flex-1 overflow-y-auto no-scrollbar p-2 sm:p-4 space-y-6">
         
-        <BrutalistCard variant="yellow" className="relative !p-3 sm:!p-5">
-          <div className="absolute top-0 right-0 w-16 h-16 bg-[repeating-linear-gradient(45deg,black,black_10px,yellow_10px,yellow_20px)] border-l-4 border-b-4 border-black z-0 opacity-20"></div>
-          
-          <h2 className="font-display font-bold text-xl mb-3 border-b-4 border-black inline-block bg-white px-2">
-            HIỆU SUẤT CHÍNH
-          </h2>
-
-          <div className="grid grid-cols-2 gap-3">
-             <div className="col-span-2 sm:col-span-1">
-                <StatBox 
-                    label="Tổng Ngân sách:" 
-                    value="50,000,000 VND" 
-                    icon={DollarSign} 
-                />
-             </div>
-             <div className="col-span-2 sm:col-span-1">
-                <StatBox 
-                    label="Số lượt hiển thị:" 
-                    value="1,200,000" 
-                    icon={Eye} 
-                />
-             </div>
-             
-             <div className="col-span-2 grid grid-cols-3 gap-3">
-                <StatBox label="Số lần nhấp:" value="85,000" icon={MousePointer2} />
-                <StatBox label="CTR:" value="7.08%" icon={TrendingUp} />
-                <StatBox label="ROI:" value="150%" icon={Activity} />
-             </div>
-          </div>
-        </BrutalistCard>
-
-        <BrutalistCard variant="white" className="!p-3 sm:!p-5">
-           <h2 className="font-display font-bold text-xl mb-1 border-b-4 border-black inline-block bg-[#e5e5e5] px-2">
-            BIỂU ĐỒ CHI PHÍ vs. LỢI NHUẬN
-          </h2>
-          <BarChart />
-        </BrutalistCard>
-
-        <div>
-            <h2 className="font-display font-bold text-xl mb-3 uppercase pl-1">
-                Thống kê nhóm quảng cáo
-            </h2>
-            <div className="space-y-4 pb-4">
-                <AdSetCard 
-                    title="Nhóm 1: Target Tuổi 18-24" 
-                    budget="50,000,000 VND" 
-                    clicks="85,000" 
-                    ctr="7.08%" 
-                />
-                 <AdSetCard 
-                    title="Nhóm 2: Target Tuổi 25-34" 
-                    budget="35,000,000 VND" 
-                    clicks="42,000" 
-                    ctr="12.5%" 
-                />
-                 <AdSetCard 
-                    title="Nhóm 3: Remarketing" 
-                    budget="10,000,000 VND" 
-                    clicks="15,000" 
-                    ctr="18.2%" 
-                />
+        {/* Loading State */}
+        {loading && (
+          <BrutalistCard variant="white" className="!p-8 text-center">
+            <div className="animate-pulse space-y-4">
+              <div className="h-4 bg-gray-300 rounded w-3/4 mx-auto"></div>
+              <div className="h-4 bg-gray-300 rounded w-1/2 mx-auto"></div>
+              <div className="h-4 bg-gray-300 rounded w-2/3 mx-auto"></div>
             </div>
-        </div>
+            <p className="mt-4 font-bold text-lg">Đang tải dữ liệu...</p>
+          </BrutalistCard>
+        )}
 
+        {/* Error State */}
+        {error && !loading && (
+          <BrutalistCard variant="white" className="!p-6 border-red-600">
+            <div className="flex items-start gap-3">
+              <AlertCircle size={24} className="text-red-600 shrink-0 mt-1" />
+              <div>
+                <h3 className="font-bold text-lg text-red-600 mb-2">LỖI TẢI DỮ LIỆU</h3>
+                <p className="text-sm mb-3">{error}</p>
+                <button 
+                  onClick={() => window.location.reload()}
+                  className="bg-red-600 text-white border-2 border-black font-bold px-4 py-2 shadow-hard-sm hover:bg-red-700 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
+                >
+                  THỬ LẠI
+                </button>
+              </div>
+            </div>
+          </BrutalistCard>
+        )}
+
+        {/* Data Display */}
+        {!loading && !error && metrics && (
+          <>
+            <BrutalistCard variant="yellow" className="relative !p-3 sm:!p-5">
+              <div className="absolute top-0 right-0 w-16 h-16 bg-[repeating-linear-gradient(45deg,black,black_10px,yellow_10px,yellow_20px)] border-l-4 border-b-4 border-black z-0 opacity-20"></div>
+              
+              <h2 className="font-display font-bold text-xl mb-3 border-b-4 border-black inline-block bg-white px-2">
+                HIỆU SUẤT CHÍNH
+              </h2>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="col-span-2 sm:col-span-1">
+                    <StatBox 
+                        label="Tổng Chi phí:" 
+                        value={formatCurrency(metrics.totalSpend)} 
+                        icon={DollarSign} 
+                    />
+                </div>
+                <div className="col-span-2 sm:col-span-1">
+                    <StatBox 
+                        label="Số lượt hiển thị:" 
+                        value={formatNumber(metrics.totalImpressions)} 
+                        icon={Eye} 
+                    />
+                </div>
+                
+                <div className="col-span-2 grid grid-cols-3 gap-3">
+                    <StatBox 
+                      label="Số lần nhấp:" 
+                      value={formatNumber(metrics.totalClicks)} 
+                      icon={MousePointer2} 
+                    />
+                    <StatBox 
+                      label="CTR:" 
+                      value={formatPercentage(metrics.averageCTR)} 
+                      icon={TrendingUp} 
+                    />
+                    <StatBox 
+                      label="Hoạt động:" 
+                      value={`${metrics.activeCampaigns}/${metrics.activeCampaigns + metrics.pausedCampaigns}`} 
+                      icon={Activity} 
+                    />
+                </div>
+              </div>
+            </BrutalistCard>
+
+            <BrutalistCard variant="white" className="!p-3 sm:!p-5">
+              <h2 className="font-display font-bold text-xl mb-1 border-b-4 border-black inline-block bg-[#e5e5e5] px-2">
+                BIỂU ĐỒ CHI PHÍ vs. LỢI NHUẬN
+              </h2>
+              <BarChart />
+              <p className="text-xs text-gray-500 mt-2 text-center italic">
+                * Dữ liệu demo - Sẽ được cập nhật với insights thực tế
+              </p>
+            </BrutalistCard>
+
+            <div>
+                <h2 className="font-display font-bold text-xl mb-3 uppercase pl-1">
+                    Tổng quan chiến dịch
+                </h2>
+                <BrutalistCard variant="white" className="!p-6">
+                  <div className="grid grid-cols-2 gap-4 text-center">
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">CHIẾN DỊCH HOẠT ĐỘNG</p>
+                      <p className="font-display font-bold text-4xl text-green-600">{metrics.activeCampaigns}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">CHIẾN DỊCH TẠM DỪNG</p>
+                      <p className="font-display font-bold text-4xl text-yellow-600">{metrics.pausedCampaigns}</p>
+                    </div>
+                  </div>
+                </BrutalistCard>
+            </div>
+          </>
+        )}
+        
       </div>
 
       <BottomNav currentView="dashboard" onNavigate={onNavigate} />

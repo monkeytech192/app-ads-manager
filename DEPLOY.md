@@ -2,16 +2,19 @@
 
 ## 🚀 Tóm Tắt Nhanh
 
-**Chỉ cần 4 biến BẮT BUỘC:**
+**Chỉ cần 6 biến BẮT BUỘC:**
 1. `VITE_API_URL` - URL backend
 2. `VITE_FB_APP_ID` - Facebook App ID
 3. `MONGODB_URI` - MongoDB connection string
 4. `JWT_SECRET` - Random secret key (32+ ký tự)
 5. `FACEBOOK_APP_SECRET` - Facebook App Secret
+6. **`FACEBOOK_ACCESS_TOKEN`** - Long-lived Facebook Access Token (60 ngày)
 
 **Tùy chọn:**
 - `VITE_FB_CONFIG_ID` - Chỉ nếu dùng Business
 - `GEMINI_API_KEY` - Chỉ nếu dùng AI
+
+**LƯU Ý:** `FACEBOOK_ACCESS_TOKEN` là biến mới, BẮT BUỘC để truy xuất dữ liệu quảng cáo. Xem [FACEBOOK_LOGIN.md](docs/FACEBOOK_LOGIN.md) để biết cách lấy.
 
 ---
 
@@ -34,7 +37,10 @@
    MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/ads-manager
    JWT_SECRET=uF9vQ3kA7L2mZP6D8sX4NwEJcH0R5YbT
    FACEBOOK_APP_SECRET=your_app_secret
+   FACEBOOK_ACCESS_TOKEN=EAAxxxxx_your_long_lived_token
    ```
+   
+   **CHÚ Ý:** `FACEBOOK_ACCESS_TOKEN` là token dài hạn (60 ngày) để truy xuất ads data. Xem [FACEBOOK_LOGIN.md](docs/FACEBOOK_LOGIN.md#-phần-2-setup-access-token-cho-ads-data---bắt-buộc) để biết cách lấy.
 
 4. **Lấy domain backend:**
    - Settings → Generate Domain
@@ -142,6 +148,24 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 
 ---
 
+## � Lấy Facebook Access Token (BẮT BUỘC)
+
+Access Token dài hạn cần để backend truy xuất dữ liệu quảng cáo.
+
+### Cách Nhanh:
+
+1. **Graph API Explorer:** https://developers.facebook.com/tools/explorer/
+2. Chọn app → **Generate Access Token**
+3. Chọn permissions: `ads_read`, `ads_management`, `business_management`
+4. Click biểu tượng **ⓘ** → **Open in Access Token Tool**
+5. Click **Extend Access Token** → Copy Long-Lived Token (60 ngày)
+
+### Hướng Dẫn Chi Tiết:
+
+Xem [FACEBOOK_LOGIN.md - PHẦN 2](docs/FACEBOOK_LOGIN.md#-phần-2-setup-access-token-cho-ads-data---bắt-buộc)
+
+---
+
 ## 📝 Checklist Deploy
 
 ### Backend (Railway/Vercel)
@@ -149,6 +173,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 - [ ] Set `MONGODB_URI`
 - [ ] Set `JWT_SECRET` (random 32+ chars)
 - [ ] Set `FACEBOOK_APP_SECRET`
+- [ ] **Set `FACEBOOK_ACCESS_TOKEN` (long-lived 60 ngày)**
 - [ ] Test API: `https://your-domain.com/health`
 
 ### MongoDB Atlas
@@ -161,8 +186,8 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 - [ ] App đã tạo
 - [ ] Facebook Login đã enable
 - [ ] OAuth URIs: `https://your-domain.com` (KHÔNG localhost!)
-- [ ] Permissions đã request: `ads_read`, `ads_management`
-- [ ] App Mode: Development (test) → Live (sau khi approve)
+- [ ] **Access Token đã lấy và extend (60 ngày)**
+- [ ] App Mode: Development (test) → Live (nếu cần public)
 
 ### Frontend (Vercel/Netlify)
 - [ ] Deploy thành công
