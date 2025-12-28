@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Pause, Pencil, ChevronDown, Lightbulb, AlertCircle } from 'lucide-react';
-import { BrutalistButton, BrutalistCard, BrutalistHeader } from '../shared/UIComponents';
+import { ChevronDown, Lightbulb, AlertCircle } from 'lucide-react';
+import { BrutalistCard, BrutalistHeader } from '../shared/UIComponents';
 import { ScreenView, CampaignData } from '../types';
 import { getCampaignInsights, formatNumber, type CampaignInsights } from '../services/apiService';
 import { formatCurrencyWithSettings, formatCurrencyShort } from '../utils/currency';
@@ -144,17 +144,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
               </div>
             </div>
 
-        {/* Navigation Tabs */}
-        <div className="flex border-b border-white/20 overflow-x-auto hide-scrollbar gap-6">
-            {['Tổng quan', 'Hiệu quả', 'Đối tượng', 'Ngân sách'].map((tab, i) => (
-                <button 
-                    key={tab} 
-                    className={`pb-3 text-sm font-bold whitespace-nowrap transition-colors ${i === 0 ? 'text-blue-500 border-b-2 border-blue-500' : 'text-gray-400 hover:text-white'}`}
-                >
-                    {tab}
-                </button>
-            ))}
-        </div>
+
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-3">
@@ -284,16 +274,6 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
              </div>
         </button>
 
-      </div>
-
-      {/* Bottom Actions - Fixed at bottom of flex column */}
-      <div className="w-full bg-[#0f172a] border-t-2 border-white/10 p-4 flex gap-3 z-50 shrink-0">
-          <BrutalistButton variant="dark-outline" className="flex-1 !text-base sm:!text-lg">
-             <Pause size={20} /> Tạm dừng
-          </BrutalistButton>
-          <BrutalistButton variant="blue" className="flex-1 !border-white !text-base sm:!text-lg">
-             <Pencil size={20} /> Chỉnh sửa
-          </BrutalistButton>
       </div>
 
     </div>
