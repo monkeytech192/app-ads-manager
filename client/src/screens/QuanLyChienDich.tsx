@@ -255,7 +255,7 @@ const ManagementScreen: React.FC<ManagementScreenProps> = ({
                                           ></div>
                                       </div>
                                       <div className="flex justify-between items-center">
-                                          <span className="font-bold text-sm">{camp.progress}% TIẾN ĐỘ</span>
+                                          <span className="font-bold text-sm">{camp.progress}% ĐÃ CHI / NGÂN SÁCH</span>
                                           <BrutalistButton onClick={() => onSelectCampaign(camp)} variant="yellow" className="!text-sm !py-1 !border-2">
                                              XEM CHI TIẾT
                                           </BrutalistButton>

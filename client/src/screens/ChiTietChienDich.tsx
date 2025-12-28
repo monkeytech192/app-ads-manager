@@ -24,6 +24,17 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [datePreset, setDatePreset] = useState<string>('last_7d');
+  const [showDateDropdown, setShowDateDropdown] = useState(false);
+  
+  const dateOptions = [
+    { value: 'last_7d', label: '7 ngày qua' },
+    { value: 'last_14d', label: '14 ngày qua' },
+    { value: 'last_30d', label: '30 ngày qua' },
+    { value: 'this_month', label: 'Tháng này' },
+    { value: 'last_month', label: 'Tháng trước' },
+  ];
+  
+  const selectedDateLabel = dateOptions.find(opt => opt.value === datePreset)?.label || '7 ngày qua';
 
   // Fetch campaign insights
   useEffect(() => {
@@ -183,13 +194,41 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
         <BrutalistCard variant="dark" className="!p-4">
             <div className="flex justify-between items-center mb-4">
                 <h3 className="font-bold text-lg">Hiệu quả theo thời gian</h3>
-                <div className="flex items-center gap-1 bg-white/10 px-2 py-1 rounded text-xs cursor-pointer">
-                    <span>7 ngày qua</span>
-                    <ChevronDown size={14} />
+                <div className="relative">
+                  <button
+                    onClick={() => setShowDateDropdown(!showDateDropdown)}
+                    className="flex items-center gap-1 bg-white/10 px-3 py-1.5 rounded text-xs cursor-pointer hover:bg-white/20 transition-colors"
+                  >
+                    <span>{selectedDateLabel}</span>
+                    <ChevronDown size={14} className={`transition-transform ${showDateDropdown ? 'rotate-180' : ''}`} />
+                  </button>
+                  
+                  {showDateDropdown && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setShowDateDropdown(false)} />
+                      <div className="absolute right-0 top-full mt-1 bg-[#1e293b] border-2 border-white/20 rounded shadow-xl z-50 min-w-[140px]">
+                        {dateOptions.map(option => (
+                          <button
+                            key={option.value}
+                            onClick={() => {
+                              setDatePreset(option.value);
+                              setShowDateDropdown(false);
+                            }}
+                            className={`w-full text-left px-3 py-2 text-sm hover:bg-white/10 transition-colors ${
+                              datePreset === option.value ? 'bg-blue-600 text-white' : 'text-gray-300'
+                            }`}
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </div>
             </div>
             
             <div className="h-48 relative">
+                 {/* TODO: Replace with real insights data from API when available */}
                  {/* Y-Axis Labels */}
                  <div className="absolute left-0 top-0 bottom-6 w-8 flex flex-col justify-between text-[10px] text-gray-500 text-right pr-1">
                      <span>20K</span>
@@ -252,6 +291,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
         {/* Gender Distribution Pie Chart */}
         <BrutalistCard variant="dark" className="!p-4">
              <h3 className="font-bold text-lg mb-4">Phân bổ theo Giới tính</h3>
+             {/* TODO: Replace with real demographic data from Facebook Insights API */}
              <div className="flex items-center gap-6">
                  {/* Donut Chart */}
                  <div className="relative w-32 h-32 flex-shrink-0">
