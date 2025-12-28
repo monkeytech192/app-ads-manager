@@ -11,8 +11,6 @@ interface SettingsScreenProps {
 
 const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, onNavigate }) => {
   const [alerts, setAlerts] = useState({ cost: true, ctr: false });
-  const [dailyBudget, setDailyBudget] = useState(500000);
-  const [lifetimeBudget, setLifetimeBudget] = useState(15000000);
   
   // Currency settings
   const [currency, setCurrency] = useState(() => {
@@ -133,57 +131,6 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, onNavigate }) =
                     LƯU CÀI ĐẶT TIỀN TỆ
                 </BrutalistButton>
             </div>
-        </div>
-
-        <hr className="border-2 border-black" />
-
-        {/* Section 3: Budget */}
-        <div>
-            <h2 className="font-display font-bold text-2xl uppercase mb-4">QUẢN LÝ NGÂN SÁCH</h2>
-            
-            <div className="space-y-6">
-                <div>
-                    <div className="flex justify-between items-center mb-2">
-                        <label className="font-bold text-lg">Ngân sách hàng ngày</label>
-                        <div className="border-2 border-black bg-white px-2 py-1 font-mono font-bold">
-                            {dailyBudget.toLocaleString()} VND
-                        </div>
-                    </div>
-                    <BrutalistSlider 
-                        value={dailyBudget} 
-                        min={100000} 
-                        max={5000000} 
-                        step={50000}
-                        onChange={(e) => setDailyBudget(Number(e.target.value))} 
-                    />
-                </div>
-
-                <div>
-                    <div className="flex justify-between items-center mb-2">
-                        <label className="font-bold text-lg">Ngân sách trọn đời</label>
-                         <div className="border-2 border-black bg-white px-2 py-1 font-mono font-bold">
-                            {lifetimeBudget.toLocaleString()} VND
-                        </div>
-                    </div>
-                    <BrutalistSlider 
-                        value={lifetimeBudget} 
-                        min={1000000} 
-                        max={100000000} 
-                        step={1000000}
-                        onChange={(e) => setLifetimeBudget(Number(e.target.value))} 
-                    />
-                </div>
-            </div>
-        </div>
-
-        {/* Footer Actions */}
-        <div className="grid grid-cols-2 gap-3 pt-4 pb-4">
-             <BrutalistButton variant="gray" className="!bg-[#a8a29e]">
-                HỦY BỎ
-             </BrutalistButton>
-             <BrutalistButton variant="orange" className="!bg-[#f97316]">
-                LƯU THAY ĐỔI
-             </BrutalistButton>
         </div>
 
       </div>

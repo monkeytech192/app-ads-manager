@@ -100,6 +100,14 @@ const App = () => {
           const budget = camp.daily_budget || camp.lifetime_budget || '0';
           const budgetNumber = parseFloat(budget) / 100; // Facebook returns in cents
           
+          // Calculate progress based on spend_cap if available
+          let progress = 0;
+          if (camp.spend_cap) {
+            const spendCap = parseFloat(camp.spend_cap) / 100;
+            const spent = parseFloat(camp.spent || '0') / 100;
+            progress = Math.min(Math.round((spent / spendCap) * 100), 100);
+          }
+          
           return {
             id: camp.id,
             accountId: selectedAccounts[0].id,
@@ -107,7 +115,7 @@ const App = () => {
             status: camp.status.toLowerCase() === 'active' ? 'active' as const : 'paused' as const,
             budget: formatCurrency(budgetNumber),
             objective: camp.objective || 'N/A',
-            progress: 0,
+            progress: progress,
             spent: formatCurrency(0),
             impressions: '0',
             results: '0',

@@ -26,18 +26,18 @@ const StatBox = ({ label, value, icon: Icon, fullWidth = false }: any) => (
 
 const BarChart = () => {
   const data = [
-    { m: 'Jan', c: 60, p: 20 },
-    { m: 'Feb', c: 70, p: 25 },
-    { m: 'Mar', c: 65, p: 35 },
-    { m: 'Apr', c: 80, p: 30 },
-    { m: 'May', c: 85, p: 40 },
-    { m: 'Jun', c: 90, p: 50 },
-    { m: 'Jul', c: 95, p: 60 },
-    { m: 'Aug', c: 98, p: 55 },
-    { m: 'Sep', c: 70, p: 80 },
-    { m: 'Oct', c: 75, p: 60 },
-    { m: 'Nov', c: 85, p: 90 },
-    { m: 'Dec', c: 60, p: 95 },
+    { m: 'Jan', c: 60 },
+    { m: 'Feb', c: 70 },
+    { m: 'Mar', c: 65 },
+    { m: 'Apr', c: 80 },
+    { m: 'May', c: 85 },
+    { m: 'Jun', c: 90 },
+    { m: 'Jul', c: 95 },
+    { m: 'Aug', c: 98 },
+    { m: 'Sep', c: 70 },
+    { m: 'Oct', c: 75 },
+    { m: 'Nov', c: 85 },
+    { m: 'Dec', c: 60 },
   ];
 
   return (
@@ -51,20 +51,8 @@ const BarChart = () => {
       
       {data.map((item, idx) => (
         <div key={idx} className="flex flex-col items-center gap-0.5 w-full h-full justify-end z-10 group relative">
-           {item.m === 'Mar' && (
-             <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-black text-white text-[10px] px-1 py-0.5 whitespace-nowrap font-bold">
-               Cost: 3 UND
-             </div>
-           )}
-           {item.m === 'Nov' && (
-             <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-[10px] px-1 py-0.5 whitespace-nowrap font-bold">
-               Profit: 2 UND
-             </div>
-           )}
-
           <div className="flex items-end gap-[1px] w-full justify-center h-full">
-            <div style={{ height: `${item.c}%` }} className="w-1.5 sm:w-2 bg-black"></div>
-            <div style={{ height: `${item.p}%` }} className="w-1.5 sm:w-2 bg-red-600 border border-black border-b-0"></div>
+            <div style={{ height: `${item.c}%` }} className="w-3 sm:w-4 bg-black hover:bg-blue-600 transition-colors"></div>
           </div>
           <span className="text-[10px] sm:text-xs font-bold uppercase rotate-0">{item.m}</span>
         </div>
@@ -107,7 +95,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ onBack, onNavigate, u
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch dashboard metrics on mount
+  // Fetch dashboard metrics on mount - ONLY ONCE
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
@@ -124,7 +112,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ onBack, onNavigate, u
     };
 
     fetchMetrics();
-  }, []);
+  }, []); // Empty deps = fetch only once
   
   // Use FB data if available, else fallback image
   const avatarUrl = userProfile?.picture?.data?.url || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=150&q=80";
@@ -259,7 +247,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ onBack, onNavigate, u
 
             <BrutalistCard variant="white" className="!p-3 sm:!p-5">
               <h2 className="font-display font-bold text-xl mb-1 border-b-4 border-black inline-block bg-[#e5e5e5] px-2">
-                BIỂU ĐỒ CHI PHÍ vs. LỢI NHUẬN
+                CHI PHÍ QUẢNG CÁO THEO THÁNG
               </h2>
               <BarChart />
               <p className="text-xs text-gray-500 mt-2 text-center italic">

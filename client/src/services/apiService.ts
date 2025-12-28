@@ -70,6 +70,8 @@ export interface Campaign {
   status: 'ACTIVE' | 'PAUSED' | 'DELETED' | 'ARCHIVED';
   daily_budget?: string;
   lifetime_budget?: string;
+  spend_cap?: string;
+  spent?: string;
   start_time?: string;
   stop_time?: string;
   created_time: string;

@@ -145,7 +145,28 @@ const ManagementScreen: React.FC<ManagementScreenProps> = ({
         {/* List Content */}
         <div className="space-y-4 pb-4">
           
-          {activeTab === 'accounts' && (
+          {/* Loading State */}
+          {accounts.length === 0 && activeTab === 'accounts' && (
+            <div className="border-4 border-black bg-white p-6 text-center">
+              <div className="animate-pulse space-y-3">
+                <div className="h-4 bg-gray-300 rounded w-3/4 mx-auto"></div>
+                <div className="h-4 bg-gray-300 rounded w-1/2 mx-auto"></div>
+              </div>
+              <p className="mt-3 font-bold">ĐANG TẢI TÀI KHOẢN...</p>
+            </div>
+          )}
+
+          {campaigns.length === 0 && activeTab === 'campaigns' && selectedAccountIds.length > 0 && (
+            <div className="border-4 border-black bg-white p-6 text-center">
+              <div className="animate-pulse space-y-3">
+                <div className="h-4 bg-gray-300 rounded w-3/4 mx-auto"></div>
+                <div className="h-4 bg-gray-300 rounded w-1/2 mx-auto"></div>
+              </div>
+              <p className="mt-3 font-bold">ĐANG TẢI CHIẾN DỊCH...</p>
+            </div>
+          )}
+          
+          {activeTab === 'accounts' && accounts.length > 0 && (
             <>
               {filteredAccounts.length === 0 ? (
                 <div className="text-center py-10 opacity-50 font-bold text-xl border-4 border-black border-dashed">
@@ -187,7 +208,7 @@ const ManagementScreen: React.FC<ManagementScreenProps> = ({
             </>
           )}
 
-          {activeTab === 'campaigns' && (
+          {activeTab === 'campaigns' && campaigns.length > 0 && (
             <>
                {selectedAccountIds.length === 0 ? (
                    <div className="text-center py-10 opacity-50 font-bold text-xl border-4 border-black border-dashed">
