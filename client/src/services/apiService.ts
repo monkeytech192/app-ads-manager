@@ -5,6 +5,26 @@
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
 
+// Simple in-memory cache to prevent duplicate API calls
+const apiCache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_DURATION = 60000; // 1 minute cache
+
+function getCached<T>(key: string): T | null {
+  const cached = apiCache.get(key);
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    return cached.data as T;
+  }
+  return null;
+}
+
+function setCache(key: string, data: any): void {
+  apiCache.set(key, { data, timestamp: Date.now() });
+}
+
+export function clearCache(): void {
+  apiCache.clear();
+}
+
 interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
@@ -109,25 +129,37 @@ export interface CampaignInsights {
 }
 
 /**
- * Get all ad accounts from Facebook
+ * Get all ad accounts from Facebook (cached)
  */
 export async function getAdAccounts(): Promise<AdAccount[]> {
-  return fetchApi<AdAccount[]>('/facebook/adaccounts', {
+  const cacheKey = 'adaccounts';
+  const cached = getCached<AdAccount[]>(cacheKey);
+  if (cached) return cached;
+
+  const data = await fetchApi<AdAccount[]>('/facebook/adaccounts', {
     method: 'POST',
     body: JSON.stringify({}),
   });
+  setCache(cacheKey, data);
+  return data;
 }
 
 /**
- * Get campaigns for a specific ad account
+ * Get campaigns for a specific ad account (cached)
  */
 export async function getCampaigns(adAccountId: string): Promise<Campaign[]> {
-  return fetchApi<Campaign[]>('/facebook/campaigns', {
+  const cacheKey = `campaigns-${adAccountId}`;
+  const cached = getCached<Campaign[]>(cacheKey);
+  if (cached) return cached;
+
+  const data = await fetchApi<Campaign[]>('/facebook/campaigns', {
     method: 'POST',
     body: JSON.stringify({
       ad_account_id: adAccountId,
     }),
   });
+  setCache(cacheKey, data);
+  return data;
 }
 
 /**
@@ -137,13 +169,19 @@ export async function getCampaignInsights(
   campaignId: string,
   datePreset: string = 'last_7d'
 ): Promise<CampaignInsights> {
-  return fetchApi<CampaignInsights>('/facebook/insights', {
+  const cacheKey = `insights-${campaignId}-${datePreset}`;
+  const cached = getCached<CampaignInsights>(cacheKey);
+  if (cached) return cached;
+
+  const data = await fetchApi<CampaignInsights>('/facebook/insights', {
     method: 'POST',
     body: JSON.stringify({
       campaign_id: campaignId,
       date_preset: datePreset,
     }),
   });
+  setCache(cacheKey, data);
+  return data;
 }
 
 /**

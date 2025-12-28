@@ -9,12 +9,11 @@ if (!rootElement) {
 }
 
 const root = ReactDOM.createRoot(rootElement);
+// Note: StrictMode removed to prevent duplicate API calls in development
 root.render(
-  <React.StrictMode>
-    <ToastProvider>
-      <App />
-    </ToastProvider>
-  </React.StrictMode>
+  <ToastProvider>
+    <App />
+  </ToastProvider>
 );
 
 // Register Service Worker

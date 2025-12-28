@@ -36,6 +36,11 @@
       #root {
         min-height: 100vh;
         min-height: 100dvh;
+        opacity: 0;
+        transition: opacity 0.1s ease-in;
+      }
+      #root.fonts-loaded {
+        opacity: 1;
       }
       /* Hide scrollbar */
       .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -74,6 +79,21 @@
 </head>
   <body>
     <div id="root"></div>
+  <script>
+    // Show content when fonts are loaded (or after timeout)
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(function() {
+        document.getElementById('root').classList.add('fonts-loaded');
+      });
+    } else {
+      // Fallback for browsers without Font Loading API
+      document.getElementById('root').classList.add('fonts-loaded');
+    }
+    // Fallback timeout - show content after 500ms regardless
+    setTimeout(function() {
+      document.getElementById('root').classList.add('fonts-loaded');
+    }, 500);
+  </script>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 </html>
