@@ -93,7 +93,7 @@ export interface CampaignInsights {
  * Get all ad accounts from Facebook
  */
 export async function getAdAccounts(): Promise<AdAccount[]> {
-  return fetchApi<AdAccount[]>('/facebook/ad-accounts', {
+  return fetchApi<AdAccount[]>('/facebook/adaccounts', {
     method: 'POST',
     body: JSON.stringify({}),
   });
@@ -118,7 +118,7 @@ export async function getCampaignInsights(
   campaignId: string,
   datePreset: string = 'last_7d'
 ): Promise<CampaignInsights> {
-  return fetchApi<CampaignInsights>('/facebook/campaign-insights', {
+  return fetchApi<CampaignInsights>('/facebook/insights', {
     method: 'POST',
     body: JSON.stringify({
       campaign_id: campaignId,

@@ -6,26 +6,23 @@ import {
   getCampaigns,
   getCampaignInsights
 } from '../controllers/facebookController';
-import { authMiddleware } from '../../middleware/auth';
+// Removed authMiddleware - Facebook routes use FACEBOOK_ACCESS_TOKEN from .env
 
 const router = express.Router();
-
-// All routes require authentication
-router.use(authMiddleware);
 
 // Exchange authorization code for access token (for System User Access Token)
 router.post('/exchange-token', exchangeCodeForToken);
 
-// Get Facebook user profile
+// Get Facebook user profile (uses user's login token from request)
 router.post('/profile', getUserProfile);
 
-// Get ad accounts
+// Get ad accounts (uses FACEBOOK_ACCESS_TOKEN from .env)
 router.post('/adaccounts', getAdAccounts);
 
-// Get campaigns for an ad account
+// Get campaigns for an ad account (uses FACEBOOK_ACCESS_TOKEN from .env)
 router.post('/campaigns', getCampaigns);
 
-// Get insights for a campaign
+// Get insights for a campaign (uses FACEBOOK_ACCESS_TOKEN from .env)
 router.post('/insights', getCampaignInsights);
 
 export default router;
