@@ -1263,6 +1263,8 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
             {/* Footer - Action Button */}
             {!analysisLoading && (
               <div className="p-4 border-t-4 border-black bg-gray-100">
+                <button
+                  onClick={() => setShowAnalysis(false)}
                   className="w-full bg-brutal-yellow text-black border-4 border-black font-bold py-3 uppercase tracking-wider shadow-hard active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
                 >
                   {lang === 'vi' ? 'Đóng' : 'Close'}
