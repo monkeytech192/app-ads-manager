@@ -12,7 +12,7 @@ import DashboardScreen from './screens/Dashboard';
 import ManagementScreen from './screens/QuanLyChienDich';
 import ComparisonScreen from './screens/SoSanhChienDich';
 import SettingsScreen from './screens/CaiDat';
-import RecommendationsScreen from './screens/DeXuat';
+// DeXuat screen removed - AI analysis now in CampaignDetail
 import CampaignDetailScreen from './screens/ChiTietChienDich';
 import { ScreenView, CampaignData, AccountData, FacebookUserProfile } from './types';
 
@@ -303,7 +303,6 @@ const App = () => {
             <CampaignDetailScreen 
                 campaign={selectedCampaign}
                 onBack={() => setCurrentView('management')}
-                onNavigateToRecommendations={() => setCurrentView('recommendations')}
             />
         );
       case 'comparison':
@@ -314,8 +313,7 @@ const App = () => {
         />;
       case 'settings':
         return <SettingsScreen onBack={() => setCurrentView('dashboard')} onNavigate={setCurrentView} />;
-      case 'recommendations':
-        return <RecommendationsScreen onNavigate={setCurrentView} onBack={() => setCurrentView('campaignDetail')} />;
+      // recommendations screen removed - AI analysis now integrated in campaign detail
       case 'dashboard':
       default:
         return (

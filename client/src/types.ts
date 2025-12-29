@@ -46,7 +46,7 @@ export interface CampaignData {
   lifetimeBudget?: string;
 }
 
-export type ScreenView = 'login' | 'register' | 'dashboard' | 'management' | 'comparison' | 'settings' | 'recommendations' | 'campaignDetail';
+export type ScreenView = 'login' | 'register' | 'dashboard' | 'management' | 'comparison' | 'settings' | 'campaignDetail';
 
 // --- FACEBOOK TYPES ---
 export interface FacebookUserProfile {

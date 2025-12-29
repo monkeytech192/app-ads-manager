@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, Lightbulb, AlertCircle, Users, TrendingUp, Wallet, BarChart3, MapPin, Layout } from 'lucide-react';
+import { ChevronDown, AlertCircle, Users, TrendingUp, Wallet, BarChart3, MapPin, Layout, Sparkles, X } from 'lucide-react';
 import { BrutalistCard, BrutalistHeader } from '../shared/UIComponents';
 import { CampaignData } from '../types';
 import { getCampaignInsights, getDemographicInsights, getPlacementInsights, getLocationInsights, formatNumber, type CampaignInsights, type DemographicData, type PlacementData, type LocationData } from '../services/apiService';
 import { formatCurrencyWithSettings, getCurrencySettings } from '../utils/currency';
 import { useTranslation } from '../services/i18n';
+import { analyzeCampaign, type CampaignAnalysisData } from '../services/geminiService';
 
 interface CampaignDetailScreenProps {
   onBack: () => void;
-  onNavigateToRecommendations: () => void;
   campaign: CampaignData | null;
 }
 
@@ -22,7 +22,7 @@ const StatCard = ({ label, value, highlight }: { label: string; value: string; h
 
 type TabType = 'overview' | 'performance' | 'audience' | 'placements' | 'budget';
 
-const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onNavigateToRecommendations, campaign }) => {
+const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, campaign }) => {
   const [insights, setInsights] = useState<CampaignInsights | null>(null);
   const [lifetimeInsights, setLifetimeInsights] = useState<CampaignInsights | null>(null);
   const [demographics, setDemographics] = useState<DemographicData[]>([]);
@@ -37,6 +37,11 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
   const [showDateDropdown, setShowDateDropdown] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const { t, lang } = useTranslation();
+  
+  // AI Analysis state
+  const [showAnalysis, setShowAnalysis] = useState(false);
+  const [analysisLoading, setAnalysisLoading] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<string>('');
   
   const dateOptions = [
     { value: 'last_7d', label: t('detail.last7days') },
@@ -354,6 +359,35 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
 
   const totalPlacementImpressions = processedPlacements.reduce((sum, p) => sum + p.impressions, 0);
   const totalLocationImpressions = processedLocations.reduce((sum, l) => sum + l.impressions, 0);
+
+  // ==================== AI ANALYSIS FUNCTION ====================
+  const handleAIAnalysis = async () => {
+    if (!insights || !campaign) return;
+    
+    setAnalysisLoading(true);
+    setShowAnalysis(true);
+    
+    const analysisData: CampaignAnalysisData = {
+      campaignName: displayCampaign.title,
+      status: displayCampaign.status,
+      objective: displayCampaign.objective,
+      budget: budgetProgress.budget,
+      spent: budgetProgress.spent,
+      impressions: parseInt(insights.impressions || '0'),
+      clicks: parseInt(insights.clicks || '0'),
+      reach: parseInt(insights.reach || '0'),
+      ctr: parseFloat(insights.ctr || '0'),
+      cpc: parseFloat(insights.cpc || '0'),
+      cpm: parseFloat(insights.cpm || '0'),
+      frequency: parseFloat(insights.frequency || '0'),
+      budgetProgress: budgetProgress.percentage,
+      dateRange: selectedDateLabel,
+    };
+    
+    const result = await analyzeCampaign(analysisData, lang);
+    setAnalysisResult(result);
+    setAnalysisLoading(false);
+  };
 
   // ==================== RENDER DATE DROPDOWN ====================
   const renderDateDropdown = () => (
@@ -923,23 +957,30 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
             {activeTab === 'placements' && renderPlacementsTab()}
             {activeTab === 'budget' && renderBudgetTab()}
 
-            {/* Recommendations Teaser - Only on Overview */}
-            {activeTab === 'overview' && (
+            {/* AI Analysis Button - Only on Overview */}
+            {activeTab === 'overview' && insights && (
               <button 
-                onClick={onNavigateToRecommendations}
-                className="w-full bg-brutal-yellow border-4 border-black p-4 flex items-center justify-between shadow-hard active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
+                onClick={handleAIAnalysis}
+                disabled={analysisLoading}
+                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 border-4 border-black p-4 flex items-center justify-between shadow-hard active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all disabled:opacity-50"
               >
                 <div className="flex items-center gap-3">
                   <div className="bg-black p-2">
-                    <Lightbulb size={20} className="text-brutal-yellow" />
+                    <Sparkles size={20} className="text-purple-400" />
                   </div>
-                  <div className="text-left text-black">
-                    <p className="font-bold text-sm uppercase">Có 3 đề xuất mới</p>
-                    <p className="text-xs font-medium">Tối ưu ngay để tăng hiệu quả +20%</p>
+                  <div className="text-left text-white">
+                    <p className="font-bold text-sm uppercase">
+                      {lang === 'vi' ? 'Kết Luận AI' : 'AI Conclusion'}
+                    </p>
+                    <p className="text-xs font-medium opacity-80">
+                      {lang === 'vi' ? 'Phân tích hiệu quả chiến dịch bằng AI' : 'Analyze campaign effectiveness with AI'}
+                    </p>
                   </div>
                 </div>
-                <div className="bg-black text-brutal-yellow px-3 py-1 text-xs font-bold uppercase">
-                  Xem
+                <div className="bg-black text-purple-400 px-3 py-1 text-xs font-bold uppercase">
+                  {analysisLoading 
+                    ? (lang === 'vi' ? 'Đang phân tích...' : 'Analyzing...') 
+                    : (lang === 'vi' ? 'Phân tích' : 'Analyze')}
                 </div>
               </button>
             )}
@@ -947,6 +988,75 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
         )}
 
       </div>
+
+      {/* AI Analysis Modal */}
+      {showAnalysis && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/70" onClick={() => !analysisLoading && setShowAnalysis(false)} />
+          <div className="relative bg-[#1e293b] border-4 border-black w-full max-w-lg max-h-[80vh] overflow-y-auto shadow-hard">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b-4 border-black bg-gradient-to-r from-purple-600 to-indigo-600">
+              <div className="flex items-center gap-2">
+                <Sparkles size={24} className="text-white" />
+                <h3 className="font-bold text-lg uppercase text-white">
+                  {lang === 'vi' ? 'Kết Luận AI' : 'AI Conclusion'}
+                </h3>
+              </div>
+              <button 
+                onClick={() => setShowAnalysis(false)}
+                disabled={analysisLoading}
+                className="text-white hover:text-gray-300 disabled:opacity-50"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            
+            {/* Content */}
+            <div className="p-4">
+              {analysisLoading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+                  <p className="text-gray-400 font-bold uppercase">
+                    {lang === 'vi' ? 'AI đang phân tích dữ liệu...' : 'AI is analyzing data...'}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Campaign Summary */}
+                  <div className="bg-black/30 border-2 border-white/10 p-3">
+                    <p className="text-xs text-gray-400 uppercase mb-1">
+                      {lang === 'vi' ? 'Chiến dịch' : 'Campaign'}
+                    </p>
+                    <p className="font-bold text-white">{displayCampaign.title}</p>
+                    <p className="text-xs text-gray-500 mt-1">{selectedDateLabel}</p>
+                  </div>
+                  
+                  {/* AI Analysis Result */}
+                  <div className="bg-purple-900/20 border-2 border-purple-500/30 p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Sparkles size={16} className="text-purple-400" />
+                      <span className="text-xs font-bold uppercase text-purple-400">
+                        {lang === 'vi' ? 'Phân Tích AI' : 'AI Analysis'}
+                      </span>
+                    </div>
+                    <div className="text-gray-200 text-sm leading-relaxed whitespace-pre-wrap">
+                      {analysisResult}
+                    </div>
+                  </div>
+                  
+                  {/* Action Button */}
+                  <button
+                    onClick={() => setShowAnalysis(false)}
+                    className="w-full bg-brutal-yellow text-black border-4 border-black font-bold py-3 uppercase shadow-hard active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+                  >
+                    {lang === 'vi' ? 'Đóng' : 'Close'}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

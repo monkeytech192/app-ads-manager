@@ -22,7 +22,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentView, onNavigate }) => {
     <div className="w-full bg-[#f5f5f4] border-t-4 border-black grid grid-cols-4 py-2 z-50 shadow-[0_-4px_0_rgba(0,0,0,0.1)] shrink-0">
       {navItems.map((item) => {
         // Active state logic
-        const isActive = currentView === item.id || (item.id === 'management' && currentView === 'recommendations');
+        const isActive = currentView === item.id;
         const Icon = item.icon;
         
         return (

@@ -2,6 +2,27 @@
 
 Tất cả thay đổi quan trọng của dự án sẽ được ghi lại trong file này.
 
+## [1.4.0] - 2025-12-29
+
+### ✨ Thêm Mới
+- **Kết Luận AI** trong màn hình Chi tiết chiến dịch:
+  - Nút "Kết Luận AI" phân tích hiệu quả chiến dịch
+  - AI đánh giá dựa trên ngân sách, chi tiêu và các chỉ số
+  - Modal hiển thị kết quả phân tích chi tiết
+  - Hỗ trợ đa ngôn ngữ (Tiếng Việt & English)
+
+### 🔄 Thay Đổi
+- Xóa màn hình "Đề xuất" riêng biệt
+- Tích hợp AI analysis trực tiếp vào Campaign Detail
+- Cập nhật language selector với SVG flags (hiển thị tốt hơn emoji)
+- Nâng cấp Gemini model từ `gemini-3-flash-preview` lên `gemini-2.0-flash`
+
+### 🐛 Sửa Lỗi
+- Fix React Rules of Hooks violation trong tab Placements
+- Fix flag icons không hiển thị đúng trên một số hệ thống
+
+---
+
 ## [1.3.0] - 2025-12-29
 
 ### ✨ Thêm Mới
