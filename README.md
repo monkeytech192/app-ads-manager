@@ -66,8 +66,8 @@ App sử dụng **2 loại token riêng biệt**:
 
 ### 📖 Hướng Dẫn Chi Tiết
 
-- **[DEPLOY.md](DEPLOY.md)** - Hướng dẫn deploy từng bước (15 phút)
-- **[.env.example](.env.example)** - 5 biến môi trường BẮT BUỘC
+- **[docs/DEPLOY.md](docs/DEPLOY.md)** - Hướng dẫn deploy từng bước (15 phút)
+- **[.env.example](.env.example)** - 6 biến môi trường BẮT BUỘC
 - **[docs/DOMAIN_GUIDE.md](docs/DOMAIN_GUIDE.md)** - Về placeholders và domain
 
 ### ⚡ Quick Reference
@@ -111,11 +111,10 @@ FACEBOOK_ACCESS_TOKEN=your_long_lived_facebook_access_token
 
 | File | Mục Đích |
 |------|----------|
-| **[DEPLOY.md](DEPLOY.md)** | 📦 Hướng dẫn deploy chi tiết từng bước |
+| **[docs/DEPLOY.md](docs/DEPLOY.md)** | 📦 Hướng dẫn deploy chi tiết từng bước |
 | **[.env.example](.env.example)** | ⚙️ Template biến môi trường + giải thích |
 | **[docs/DOMAIN_GUIDE.md](docs/DOMAIN_GUIDE.md)** | 🌐 Về placeholders và domain của bạn |
-| **[docs/FACEBOOK_LOGIN.md](docs/FACEBOOK_LOGIN.md)** | 🔐 Setup Facebook Login (Standard & Business) |
-| **[docs/REDIRECT_URI.md](docs/REDIRECT_URI.md)** | 🔗 Về OAuth Redirect URIs |
+| **[docs/FACEBOOK_LOGIN.md](docs/FACEBOOK_LOGIN.md)** | 🔐 Setup Facebook Login & Access Token |
 
 ---
 

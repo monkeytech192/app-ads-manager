@@ -2,6 +2,36 @@
 
 Tất cả thay đổi quan trọng của dự án sẽ được ghi lại trong file này.
 
+## [1.3.0] - 2025-12-29
+
+### ✨ Thêm Mới
+- **Metrics mở rộng từ Facebook API:**
+  - Actions: Page Likes, Page Engagement, Post Reactions, Saves, Shares
+  - Link Clicks, Outbound Clicks
+  - Video metrics: Views, 25%/50%/75%/100% watch rates
+  - Social spend, Unique clicks, Unique CTR
+- **Tab Placements mới** trong Campaign Detail:
+  - Breakdown theo vị trí quảng cáo (Facebook Reels, Feed, Stories, etc.)
+  - Breakdown theo vị trí địa lý (tỉnh/thành phố)
+- **API mới:**
+  - `POST /facebook/placement-insights` - Lấy dữ liệu theo placement
+  - `POST /facebook/location-insights` - Lấy dữ liệu theo vị trí địa lý
+
+### 🔄 Thay Đổi
+- Mở rộng `CampaignInsights` interface với actions và video metrics
+- Thêm `PlacementData` và `LocationData` interfaces
+- UI Campaign Detail hiển thị thêm:
+  - Card "Tương Tác & Kết Quả" với engagement metrics
+  - Card "Số Liệu Video" với video watch rates
+  - Tab "Vị trí" với placement và location breakdown
+
+### 📚 Tài Liệu
+- Gộp docs trùng lặp (xóa SETUP.md, REDIRECT_URI.md)
+- Cập nhật README.md với links chính xác đến docs/
+- Đơn giản hóa cấu trúc tài liệu
+
+---
+
 ## [1.2.0] - 2025-06-27
 
 ### ✨ Thêm Mới

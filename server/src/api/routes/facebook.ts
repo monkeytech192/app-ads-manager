@@ -7,7 +7,9 @@ import {
   getCampaignInsights,
   getAdSets,
   getAdSetInsights,
-  getDemographicInsights
+  getDemographicInsights,
+  getPlacementInsights,
+  getLocationInsights
 } from '../controllers/facebookController';
 // Removed authMiddleware - Facebook routes use FACEBOOK_ACCESS_TOKEN from .env
 
@@ -30,6 +32,12 @@ router.post('/insights', getCampaignInsights);
 
 // Get demographic insights (age, gender breakdown) for a campaign
 router.post('/demographic-insights', getDemographicInsights);
+
+// Get placement insights (Facebook Reels, Feed, Stories, etc.) for a campaign
+router.post('/placement-insights', getPlacementInsights);
+
+// Get location/region breakdown insights for a campaign
+router.post('/location-insights', getLocationInsights);
 
 // Get ad sets for a campaign (uses FACEBOOK_ACCESS_TOKEN from .env)
 router.post('/adsets', getAdSets);

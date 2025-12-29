@@ -242,7 +242,14 @@ export const getCampaignInsights = async (req: Request, res: Response) => {
       `https://graph.facebook.com/v24.0/${campaign_id}/insights`,
       {
         params: {
-          fields: 'impressions,clicks,spend,reach,frequency,ctr,cpc,cpm,conversions,cost_per_conversion,date_start,date_stop',
+          // Basic metrics
+          fields: 'impressions,clicks,spend,reach,frequency,ctr,cpc,cpm,conversions,cost_per_conversion,date_start,date_stop,' +
+            // Engagement metrics
+            'actions,video_play_actions,video_p25_watched_actions,video_p50_watched_actions,video_p75_watched_actions,video_p100_watched_actions,' +
+            // Website & Link metrics  
+            'website_ctr,inline_link_clicks,inline_link_click_ctr,outbound_clicks,unique_outbound_clicks,' +
+            // Social metrics
+            'social_spend,unique_clicks,unique_ctr',
           date_preset: date_preset || 'last_7d',
           access_token: FACEBOOK_ACCESS_TOKEN // Dùng token từ .env
         }
@@ -406,6 +413,106 @@ export const getDemographicInsights = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error('Demographic insights fetch error:', error.response?.data || error.message);
+    res.status(500).json({
+      success: false,
+      message: error.response?.data?.error?.message || error.message
+    });
+  }
+};
+
+/**
+ * Get placement breakdown insights for a campaign
+ * 
+ * MỤC ĐÍCH: Lấy số liệu phân tích theo vị trí quảng cáo (Facebook Reels, Feed, Stories, etc.)
+ * SỬ DỤNG: FACEBOOK_ACCESS_TOKEN từ .env (long-lived token)
+ */
+export const getPlacementInsights = async (req: Request, res: Response) => {
+  try {
+    const { campaign_id, date_preset } = req.body;
+
+    if (!FACEBOOK_ACCESS_TOKEN) {
+      return res.status(500).json({
+        success: false,
+        message: 'FACEBOOK_ACCESS_TOKEN chưa được cấu hình trong .env.'
+      });
+    }
+
+    if (!campaign_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Campaign ID is required'
+      });
+    }
+
+    const response = await axios.get(
+      `https://graph.facebook.com/v24.0/${campaign_id}/insights`,
+      {
+        params: {
+          fields: 'impressions,clicks,spend,reach,ctr,cpc,actions',
+          breakdowns: 'publisher_platform,platform_position',
+          date_preset: date_preset || 'last_7d',
+          access_token: FACEBOOK_ACCESS_TOKEN
+        }
+      }
+    );
+
+    res.json({
+      success: true,
+      data: response.data.data || [],
+      message: 'Placement insights retrieved successfully'
+    });
+  } catch (error: any) {
+    console.error('Placement insights fetch error:', error.response?.data || error.message);
+    res.status(500).json({
+      success: false,
+      message: error.response?.data?.error?.message || error.message
+    });
+  }
+};
+
+/**
+ * Get location/region breakdown insights for a campaign
+ * 
+ * MỤC ĐÍCH: Lấy số liệu phân tích theo vị trí địa lý (tỉnh/thành phố)
+ * SỬ DỤNG: FACEBOOK_ACCESS_TOKEN từ .env (long-lived token)
+ */
+export const getLocationInsights = async (req: Request, res: Response) => {
+  try {
+    const { campaign_id, date_preset } = req.body;
+
+    if (!FACEBOOK_ACCESS_TOKEN) {
+      return res.status(500).json({
+        success: false,
+        message: 'FACEBOOK_ACCESS_TOKEN chưa được cấu hình trong .env.'
+      });
+    }
+
+    if (!campaign_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Campaign ID is required'
+      });
+    }
+
+    const response = await axios.get(
+      `https://graph.facebook.com/v24.0/${campaign_id}/insights`,
+      {
+        params: {
+          fields: 'impressions,clicks,spend,reach,ctr,cpc',
+          breakdowns: 'region',
+          date_preset: date_preset || 'last_7d',
+          access_token: FACEBOOK_ACCESS_TOKEN
+        }
+      }
+    );
+
+    res.json({
+      success: true,
+      data: response.data.data || [],
+      message: 'Location insights retrieved successfully'
+    });
+  } catch (error: any) {
+    console.error('Location insights fetch error:', error.response?.data || error.message);
     res.status(500).json({
       success: false,
       message: error.response?.data?.error?.message || error.message

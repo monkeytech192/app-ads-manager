@@ -449,7 +449,7 @@ const App = () => {
         {currentView === 'login' ? (
             /* LOGIN VIEW */
             <>
-                <BrutalistCard variant="white" className="relative group z-20">
+                <BrutalistCard variant="white" className="relative group">
                 <h2 className="font-display font-bold text-5xl sm:text-6xl uppercase leading-[0.9] tracking-tight mb-4">
                     {lang === 'vi' ? <>Kết nối dữ liệu <br/> quảng cáo.</> : <>Connect your <br/> ad data.</>}
                 </h2>

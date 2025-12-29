@@ -126,6 +126,23 @@ export interface CampaignInsights {
   cost_per_conversion?: string;
   date_start?: string;
   date_stop?: string;
+  // Engagement & Actions metrics
+  actions?: Array<{ action_type: string; value: string }>;
+  video_play_actions?: Array<{ action_type: string; value: string }>;
+  video_p25_watched_actions?: Array<{ action_type: string; value: string }>;
+  video_p50_watched_actions?: Array<{ action_type: string; value: string }>;
+  video_p75_watched_actions?: Array<{ action_type: string; value: string }>;
+  video_p100_watched_actions?: Array<{ action_type: string; value: string }>;
+  // Link & Website metrics
+  inline_link_clicks?: string;
+  inline_link_click_ctr?: string;
+  outbound_clicks?: Array<{ action_type: string; value: string }>;
+  unique_outbound_clicks?: Array<{ action_type: string; value: string }>;
+  website_ctr?: Array<{ action_type: string; value: string }>;
+  // Social metrics
+  social_spend?: string;
+  unique_clicks?: string;
+  unique_ctr?: string;
 }
 
 /**
@@ -227,6 +244,34 @@ export interface DemographicData {
 }
 
 /**
+ * Placement breakdown data from Facebook Insights API
+ */
+export interface PlacementData {
+  publisher_platform: string;
+  platform_position: string;
+  impressions: string;
+  clicks: string;
+  spend: string;
+  reach: string;
+  ctr: string;
+  cpc: string;
+  actions?: Array<{ action_type: string; value: string }>;
+}
+
+/**
+ * Location/Region breakdown data from Facebook Insights API
+ */
+export interface LocationData {
+  region: string;
+  impressions: string;
+  clicks: string;
+  spend: string;
+  reach: string;
+  ctr: string;
+  cpc: string;
+}
+
+/**
  * Get demographic insights (age, gender breakdown) for a campaign
  */
 export async function getDemographicInsights(
@@ -234,6 +279,38 @@ export async function getDemographicInsights(
   datePreset: string = 'last_7d'
 ): Promise<DemographicData[]> {
   return fetchApi<DemographicData[]>('/facebook/demographic-insights', {
+    method: 'POST',
+    body: JSON.stringify({
+      campaign_id: campaignId,
+      date_preset: datePreset,
+    }),
+  });
+}
+
+/**
+ * Get placement insights (Facebook Reels, Feed, Stories, etc.) for a campaign
+ */
+export async function getPlacementInsights(
+  campaignId: string,
+  datePreset: string = 'last_7d'
+): Promise<PlacementData[]> {
+  return fetchApi<PlacementData[]>('/facebook/placement-insights', {
+    method: 'POST',
+    body: JSON.stringify({
+      campaign_id: campaignId,
+      date_preset: datePreset,
+    }),
+  });
+}
+
+/**
+ * Get location/region breakdown insights for a campaign
+ */
+export async function getLocationInsights(
+  campaignId: string,
+  datePreset: string = 'last_7d'
+): Promise<LocationData[]> {
+  return fetchApi<LocationData[]>('/facebook/location-insights', {
     method: 'POST',
     body: JSON.stringify({
       campaign_id: campaignId,

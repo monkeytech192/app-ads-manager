@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, Lightbulb, AlertCircle, Users, TrendingUp, Wallet, BarChart3 } from 'lucide-react';
+import { ChevronDown, Lightbulb, AlertCircle, Users, TrendingUp, Wallet, BarChart3, MapPin, Layout } from 'lucide-react';
 import { BrutalistCard, BrutalistHeader } from '../shared/UIComponents';
 import { CampaignData } from '../types';
-import { getCampaignInsights, getDemographicInsights, formatNumber, type CampaignInsights, type DemographicData } from '../services/apiService';
+import { getCampaignInsights, getDemographicInsights, getPlacementInsights, getLocationInsights, formatNumber, type CampaignInsights, type DemographicData, type PlacementData, type LocationData } from '../services/apiService';
 import { formatCurrencyWithSettings, getCurrencySettings } from '../utils/currency';
 import { useTranslation } from '../services/i18n';
 
@@ -20,14 +20,18 @@ const StatCard = ({ label, value, highlight }: { label: string; value: string; h
   </div>
 );
 
-type TabType = 'overview' | 'performance' | 'audience' | 'budget';
+type TabType = 'overview' | 'performance' | 'audience' | 'placements' | 'budget';
 
 const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onNavigateToRecommendations, campaign }) => {
   const [insights, setInsights] = useState<CampaignInsights | null>(null);
   const [lifetimeInsights, setLifetimeInsights] = useState<CampaignInsights | null>(null);
   const [demographics, setDemographics] = useState<DemographicData[]>([]);
+  const [placements, setPlacements] = useState<PlacementData[]>([]);
+  const [locations, setLocations] = useState<LocationData[]>([]);
   const [loading, setLoading] = useState(true);
   const [demographicsLoading, setDemographicsLoading] = useState(false);
+  const [placementsLoading, setPlacementsLoading] = useState(false);
+  const [locationsLoading, setLocationsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [datePreset, setDatePreset] = useState<string>('last_7d');
   const [showDateDropdown, setShowDateDropdown] = useState(false);
@@ -48,6 +52,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
     { id: 'overview', label: t('detail.overview'), icon: <BarChart3 size={16} /> },
     { id: 'performance', label: t('detail.performance'), icon: <TrendingUp size={16} /> },
     { id: 'audience', label: t('detail.audience'), icon: <Users size={16} /> },
+    { id: 'placements', label: lang === 'vi' ? 'Vị trí' : 'Placements', icon: <Layout size={16} /> },
     { id: 'budget', label: t('detail.budgetTab'), icon: <Wallet size={16} /> },
   ];
 
@@ -111,6 +116,35 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
 
     fetchDemographics();
   }, [activeTab, campaign?.id, datePreset]);
+
+  // Fetch placements and locations when placements tab is active
+  useEffect(() => {
+    if (activeTab !== 'placements' || !campaign?.id) return;
+
+    const fetchPlacementsAndLocations = async () => {
+      try {
+        setPlacementsLoading(true);
+        setLocationsLoading(true);
+        
+        const [placementData, locationData] = await Promise.all([
+          getPlacementInsights(campaign.id, datePreset),
+          getLocationInsights(campaign.id, datePreset)
+        ]);
+        
+        setPlacements(placementData);
+        setLocations(locationData);
+      } catch (err: any) {
+        console.error('Error fetching placements/locations:', err);
+        setPlacements([]);
+        setLocations([]);
+      } finally {
+        setPlacementsLoading(false);
+        setLocationsLoading(false);
+      }
+    };
+
+    fetchPlacementsAndLocations();
+  }, [activeTab, campaign?.id, datePreset]);
   
   const displayCampaign = campaign || {
       id: '',
@@ -130,6 +164,13 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
 
   const isPaused = displayCampaign.status === 'paused';
 
+  // Helper function to get action value from actions array
+  const getActionValue = (actionType: string): string => {
+    if (!insights?.actions) return '0';
+    const action = insights.actions.find(a => a.action_type === actionType);
+    return action?.value || '0';
+  };
+
   // Get real data from insights
   const spend = insights?.spend ? formatCurrencyWithSettings(parseFloat(insights.spend)) : displayCampaign.spent;
   const impressions = insights?.impressions ? formatNumber(parseInt(insights.impressions)) : displayCampaign.impressions;
@@ -139,6 +180,19 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
   const frequency = insights?.frequency ? parseFloat(insights.frequency).toFixed(2) : '0';
   const ctr = insights?.ctr ? `${parseFloat(insights.ctr).toFixed(2)}%` : '0%';
   const cpm = insights?.cpm ? formatCurrencyWithSettings(parseFloat(insights.cpm), 2) : '0';
+  
+  // Actions metrics from Facebook
+  const pageLikes = getActionValue('like');
+  const pageEngagement = getActionValue('page_engagement');
+  const postReactions = getActionValue('post_reaction');
+  const postSaves = getActionValue('onsite_conversion.post_save');
+  const postShares = getActionValue('post');
+  const linkClicks = insights?.inline_link_clicks || getActionValue('link_click');
+  const videoViews = insights?.video_play_actions?.[0]?.value || getActionValue('video_view');
+  const video25 = insights?.video_p25_watched_actions?.[0]?.value || '0';
+  const video50 = insights?.video_p50_watched_actions?.[0]?.value || '0';
+  const video75 = insights?.video_p75_watched_actions?.[0]?.value || '0';
+  const video100 = insights?.video_p100_watched_actions?.[0]?.value || '0';
 
   // Calculate budget progress using LIFETIME insights (same logic as App.tsx)
   const calculateBudgetProgress = () => {
@@ -289,6 +343,89 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
           )}
         </div>
       )}
+
+      {/* Engagement & Actions Metrics */}
+      {insights?.actions && insights.actions.length > 0 && (
+        <div className="border-4 border-black bg-[#1e293b] p-4 shadow-hard">
+          <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-brutal-yellow">
+            {lang === 'vi' ? 'Tương Tác & Kết Quả' : 'Engagement & Results'}
+          </h3>
+          <div className="grid grid-cols-2 gap-3">
+            {pageLikes !== '0' && (
+              <div className="border-2 border-blue-400/30 p-3 bg-blue-900/10">
+                <span className="text-gray-400 text-xs uppercase">{lang === 'vi' ? 'Lượt thích trang' : 'Page Likes'}</span>
+                <div className="font-bold text-xl text-blue-400">{formatNumber(parseInt(pageLikes))}</div>
+              </div>
+            )}
+            {pageEngagement !== '0' && (
+              <div className="border-2 border-purple-400/30 p-3 bg-purple-900/10">
+                <span className="text-gray-400 text-xs uppercase">{lang === 'vi' ? 'Tương tác trang' : 'Page Engagement'}</span>
+                <div className="font-bold text-xl text-purple-400">{formatNumber(parseInt(pageEngagement))}</div>
+              </div>
+            )}
+            {postReactions !== '0' && (
+              <div className="border-2 border-pink-400/30 p-3 bg-pink-900/10">
+                <span className="text-gray-400 text-xs uppercase">{lang === 'vi' ? 'Cảm xúc bài viết' : 'Post Reactions'}</span>
+                <div className="font-bold text-xl text-pink-400">{formatNumber(parseInt(postReactions))}</div>
+              </div>
+            )}
+            {linkClicks !== '0' && (
+              <div className="border-2 border-green-400/30 p-3 bg-green-900/10">
+                <span className="text-gray-400 text-xs uppercase">{lang === 'vi' ? 'Click liên kết' : 'Link Clicks'}</span>
+                <div className="font-bold text-xl text-green-400">{formatNumber(parseInt(linkClicks as string))}</div>
+              </div>
+            )}
+            {postSaves !== '0' && (
+              <div className="border-2 border-yellow-400/30 p-3 bg-yellow-900/10">
+                <span className="text-gray-400 text-xs uppercase">{lang === 'vi' ? 'Lượt lưu' : 'Post Saves'}</span>
+                <div className="font-bold text-xl text-yellow-400">{formatNumber(parseInt(postSaves))}</div>
+              </div>
+            )}
+            {postShares !== '0' && (
+              <div className="border-2 border-orange-400/30 p-3 bg-orange-900/10">
+                <span className="text-gray-400 text-xs uppercase">{lang === 'vi' ? 'Lượt chia sẻ' : 'Post Shares'}</span>
+                <div className="font-bold text-xl text-orange-400">{formatNumber(parseInt(postShares))}</div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Video Metrics */}
+      {videoViews !== '0' && (
+        <div className="border-4 border-black bg-[#1e293b] p-4 shadow-hard">
+          <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-brutal-yellow">
+            {lang === 'vi' ? 'Số Liệu Video' : 'Video Metrics'}
+          </h3>
+          <div className="space-y-3">
+            <div className="border-2 border-red-400/30 p-3 bg-red-900/10">
+              <span className="text-gray-400 text-xs uppercase">{lang === 'vi' ? 'Lượt xem video' : 'Video Views'}</span>
+              <div className="font-bold text-2xl text-red-400">{formatNumber(parseInt(videoViews))}</div>
+            </div>
+            <div className="grid grid-cols-4 gap-2">
+              <div className="border-2 border-white/10 p-2 text-center bg-black/20">
+                <div className="text-xs text-gray-500">25%</div>
+                <div className="font-bold text-sm">{formatNumber(parseInt(video25))}</div>
+              </div>
+              <div className="border-2 border-white/10 p-2 text-center bg-black/20">
+                <div className="text-xs text-gray-500">50%</div>
+                <div className="font-bold text-sm">{formatNumber(parseInt(video50))}</div>
+              </div>
+              <div className="border-2 border-white/10 p-2 text-center bg-black/20">
+                <div className="text-xs text-gray-500">75%</div>
+                <div className="font-bold text-sm">{formatNumber(parseInt(video75))}</div>
+              </div>
+              <div className="border-2 border-white/10 p-2 text-center bg-black/20">
+                <div className="text-xs text-gray-500">100%</div>
+                <div className="font-bold text-sm">{formatNumber(parseInt(video100))}</div>
+              </div>
+            </div>
+            <div className="text-xs text-gray-500 text-center mt-2">
+              {lang === 'vi' ? 'Tỷ lệ xem video (số người xem đến % video)' : 'Video watch rate (viewers who watched to %)'}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -424,6 +561,201 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
       )}
     </div>
   );
+
+  // Render Placements Tab - NEW
+  const renderPlacementsTab = () => {
+    const isLoading = placementsLoading || locationsLoading;
+    
+    // Process placements data
+    // Define placement item type
+    type PlacementItem = { name: string; platform: string; position: string; impressions: number; clicks: number; spend: number };
+    
+    const processedPlacements = React.useMemo((): PlacementItem[] => {
+      if (!placements.length) return [];
+      
+      // Group by platform and position
+      const grouped: Record<string, PlacementItem> = {};
+      
+      placements.forEach(p => {
+        const key = `${p.publisher_platform}_${p.platform_position}`;
+        const displayName = getPlacementDisplayName(p.publisher_platform, p.platform_position, lang);
+        
+        if (!grouped[key]) {
+          grouped[key] = {
+            name: displayName,
+            platform: p.publisher_platform,
+            position: p.platform_position,
+            impressions: 0,
+            clicks: 0,
+            spend: 0
+          };
+        }
+        
+        grouped[key].impressions += parseInt(p.impressions || '0');
+        grouped[key].clicks += parseInt(p.clicks || '0');
+        grouped[key].spend += parseFloat(p.spend || '0');
+      });
+      
+      return Object.values(grouped).sort((a, b) => b.impressions - a.impressions);
+    }, [placements, lang]);
+
+    // Process locations data
+    const processedLocations = React.useMemo(() => {
+      if (!locations.length) return [];
+      
+      return locations
+        .map(l => ({
+          region: l.region,
+          impressions: parseInt(l.impressions || '0'),
+          clicks: parseInt(l.clicks || '0'),
+          spend: parseFloat(l.spend || '0')
+        }))
+        .sort((a, b) => b.impressions - a.impressions)
+        .slice(0, 10); // Top 10 locations
+    }, [locations]);
+
+    const totalPlacementImpressions = processedPlacements.reduce((sum, p) => sum + p.impressions, 0);
+    const totalLocationImpressions = processedLocations.reduce((sum, l) => sum + l.impressions, 0);
+
+    return (
+      <div className="space-y-4">
+        {isLoading ? (
+          <div className="border-4 border-black bg-[#1e293b] p-6 text-center shadow-hard">
+            <div className="animate-pulse space-y-3">
+              <div className="h-4 bg-white/20 w-3/4 mx-auto"></div>
+              <div className="h-4 bg-white/20 w-1/2 mx-auto"></div>
+            </div>
+            <p className="mt-3 font-bold uppercase">{t('common.loading')}</p>
+          </div>
+        ) : (
+          <>
+            {/* Placement Breakdown */}
+            <div className="border-4 border-black bg-[#1e293b] p-4 shadow-hard">
+              <div className="flex items-center gap-2 mb-4">
+                <Layout size={20} className="text-brutal-yellow" />
+                <h3 className="font-bold text-lg uppercase tracking-wide text-brutal-yellow">
+                  {lang === 'vi' ? 'Vị Trí Quảng Cáo' : 'Ad Placements'}
+                </h3>
+              </div>
+              
+              {processedPlacements.length > 0 ? (
+                <div className="space-y-3">
+                  {processedPlacements.map((p, i) => {
+                    const percentage = totalPlacementImpressions > 0 
+                      ? (p.impressions / totalPlacementImpressions * 100) 
+                      : 0;
+                    return (
+                      <div key={i} className="space-y-1">
+                        <div className="flex justify-between text-sm">
+                          <span className="font-bold truncate flex-1">{p.name}</span>
+                          <span className="text-gray-400 ml-2">{formatNumber(p.impressions)}</span>
+                        </div>
+                        <div className="h-4 bg-black border-2 border-white/20 overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-teal-500 to-cyan-500"
+                            style={{ width: `${Math.max(percentage, 1)}%` }}
+                          />
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {formatNumber(p.clicks)} clicks • {formatCurrencyWithSettings(p.spend)}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-4 text-gray-500">
+                  {lang === 'vi' ? 'Không có dữ liệu placement' : 'No placement data available'}
+                </div>
+              )}
+            </div>
+
+            {/* Location Breakdown */}
+            <div className="border-4 border-black bg-[#1e293b] p-4 shadow-hard">
+              <div className="flex items-center gap-2 mb-4">
+                <MapPin size={20} className="text-brutal-yellow" />
+                <h3 className="font-bold text-lg uppercase tracking-wide text-brutal-yellow">
+                  {lang === 'vi' ? 'Vị Trí Địa Lý' : 'Geographic Locations'}
+                </h3>
+              </div>
+              
+              {processedLocations.length > 0 ? (
+                <div className="space-y-3">
+                  {processedLocations.map((l, i) => {
+                    const percentage = totalLocationImpressions > 0 
+                      ? (l.impressions / totalLocationImpressions * 100) 
+                      : 0;
+                    return (
+                      <div key={i} className="space-y-1">
+                        <div className="flex justify-between text-sm">
+                          <span className="font-bold truncate flex-1">{l.region}</span>
+                          <span className="text-gray-400 ml-2">{formatNumber(l.impressions)}</span>
+                        </div>
+                        <div className="h-3 bg-black border-2 border-white/20 overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-emerald-500 to-green-500"
+                            style={{ width: `${Math.max(percentage, 1)}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-4 text-gray-500">
+                  {lang === 'vi' ? 'Không có dữ liệu vị trí' : 'No location data available'}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    );
+  };
+
+  // Helper function to get display name for placement
+  const getPlacementDisplayName = (platform: string, position: string, lang: string): string => {
+    const names: Record<string, Record<string, string>> = {
+      facebook: {
+        feed: lang === 'vi' ? 'Bảng tin Facebook' : 'Facebook Feed',
+        video_feeds: lang === 'vi' ? 'Video Feeds' : 'Video Feeds',
+        right_hand_column: lang === 'vi' ? 'Cột bên phải' : 'Right Column',
+        instant_article: lang === 'vi' ? 'Instant Article' : 'Instant Article',
+        marketplace: 'Marketplace',
+        story: lang === 'vi' ? 'Stories Facebook' : 'Facebook Stories',
+        search: lang === 'vi' ? 'Tìm kiếm' : 'Search',
+        reels: 'Facebook Reels',
+        facebook_reels: 'Facebook Reels',
+        instream_video: lang === 'vi' ? 'Video trong luồng' : 'In-stream Video',
+      },
+      instagram: {
+        stream: lang === 'vi' ? 'Bảng tin Instagram' : 'Instagram Feed',
+        story: lang === 'vi' ? 'Stories Instagram' : 'Instagram Stories',
+        explore: lang === 'vi' ? 'Khám phá' : 'Explore',
+        reels: 'Instagram Reels',
+        profile_feed: lang === 'vi' ? 'Profile Feed' : 'Profile Feed',
+      },
+      audience_network: {
+        classic: lang === 'vi' ? 'Audience Network' : 'Audience Network',
+        rewarded_video: lang === 'vi' ? 'Video có thưởng' : 'Rewarded Video',
+      },
+      messenger: {
+        messenger_inbox: lang === 'vi' ? 'Hộp thư Messenger' : 'Messenger Inbox',
+        story: lang === 'vi' ? 'Stories Messenger' : 'Messenger Stories',
+      }
+    };
+    
+    const platformNames = names[platform?.toLowerCase()] || {};
+    const positionName = platformNames[position?.toLowerCase()];
+    
+    if (positionName) return positionName;
+    
+    // Fallback: format the raw values
+    const formattedPlatform = platform?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || '';
+    const formattedPosition = position?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || '';
+    
+    return `${formattedPlatform} - ${formattedPosition}`;
+  };
 
   const renderBudgetTab = () => {
     const currencySettings = getCurrencySettings();
@@ -590,6 +922,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
             {activeTab === 'overview' && renderOverviewTab()}
             {activeTab === 'performance' && renderPerformanceTab()}
             {activeTab === 'audience' && renderAudienceTab()}
+            {activeTab === 'placements' && renderPlacementsTab()}
             {activeTab === 'budget' && renderBudgetTab()}
 
             {/* Recommendations Teaser - Only on Overview */}

@@ -107,9 +107,10 @@ const seedDatabase = async () => {
     console.log(`📊 Created ${campaigns.length} sample campaigns`);
 
     console.log('\n✅ Database seeded successfully!');
-    console.log('\n📝 Login credentials:');
+    console.log('\n📝 Demo Login credentials (CHỈ CHO DEV/TEST):');
     console.log('   Email: admin@example.com');
-    console.log('   Password: 123456');
+    console.log('   Password: Admin@12345');
+    console.log('\n⚠️  CẢNH BÁO: Đổi password ngay khi dùng cho production!');
     
     process.exit(0);
   } catch (error) {
