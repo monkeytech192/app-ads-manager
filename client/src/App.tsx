@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Facebook, Globe, MessageCircleQuestion, X, UserPlus, LogIn, CheckSquare, Square, ChevronDown } from 'lucide-react';
 import { BrutalistCard, BrutalistButton, BrutalistInput, TextureOverlay } from './shared/UIComponents';
-import { askAssistant } from './services/geminiService';
+import { askAssistant } from './services/aiService';
 import { useTranslation, type Language } from './services/i18n';
 import { initFacebookSdk, loginWithFacebook, getFacebookUserProfile } from './services/facebookService';
 import { getAdAccounts, getCampaigns, getCampaignInsights } from './services/apiService';
