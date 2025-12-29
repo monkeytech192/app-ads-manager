@@ -286,9 +286,9 @@ THÔNG TIN CƠ BẢN:
 - Mục tiêu: ${getObjectiveName(context.objective, 'vi')}
 
 NGÂN SÁCH:
-- Tổng ngân sách: ${formatCurrencyForPrompt(context.budget)}
-- Đã chi tiêu: ${formatCurrencyForPrompt(context.spent)} (${context.budgetProgress}%)
-- Còn lại: ${formatCurrencyForPrompt(context.remaining)}
+- Tổng ngân sách: ${formatCurrencyForPrompt(context.budget * 100)}
+- Đã chi tiêu: ${formatCurrencyForPrompt(context.spent * 100)} (${context.budgetProgress}%)
+- Còn lại: ${formatCurrencyForPrompt(context.remaining * 100)}
 
 HIỆU SUẤT:
 - Lượt hiển thị: ${context.impressions.toLocaleString()}
@@ -331,9 +331,9 @@ BASIC INFO:
 - Objective: ${getObjectiveName(context.objective, 'en')}
 
 BUDGET:
-- Total Budget: ${formatCurrencyForPrompt(context.budget)}
-- Spent: ${formatCurrencyForPrompt(context.spent)} (${context.budgetProgress}%)
-- Remaining: ${formatCurrencyForPrompt(context.remaining)}
+- Total Budget: ${formatCurrencyForPrompt(context.budget * 100)}
+- Spent: ${formatCurrencyForPrompt(context.spent * 100)} (${context.budgetProgress}%)
+- Remaining: ${formatCurrencyForPrompt(context.remaining * 100)}
 
 PERFORMANCE:
 - Impressions: ${context.impressions.toLocaleString()}

@@ -560,22 +560,22 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
       </div>
 
       {insights && (
-        <div className="border-4 border-brutal-yellow bg-white p-4 shadow-hard">
+        <div className="border-4 border-black bg-white p-4 shadow-hard">
           <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-black">{lang === 'vi' ? 'Metrics Bổ Sung' : 'Additional Metrics'}</h3>
           <div className="grid grid-cols-2 gap-3">
-            <div className="border-4 border-black p-3 bg-gray-50">
+            <div className="border-4 border-black p-3 bg-gray-50 shadow-hard">
               <span className="text-gray-600 text-xs uppercase">{t('dashboard.reach')}</span>
               <div className="font-bold text-xl text-black">{reach}</div>
             </div>
-            <div className="border-4 border-black p-3 bg-gray-50">
+            <div className="border-4 border-black p-3 bg-gray-50 shadow-hard">
               <span className="text-gray-600 text-xs uppercase">{t('detail.frequency')}</span>
               <div className="font-bold text-xl text-black">{frequency}</div>
             </div>
-            <div className="border-4 border-black p-3 bg-gray-50">
+            <div className="border-4 border-black p-3 bg-gray-50 shadow-hard">
               <span className="text-gray-600 text-xs uppercase">{t('dashboard.ctr')}</span>
               <div className="font-bold text-xl text-black">{ctr}</div>
             </div>
-            <div className="border-4 border-black p-3 bg-gray-50">
+            <div className="border-4 border-black p-3 bg-gray-50 shadow-hard">
               <span className="text-gray-600 text-xs uppercase">{t('detail.cpm')}</span>
               <div className="font-bold text-xl text-black">{cpm}</div>
             </div>
@@ -592,43 +592,43 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
 
       {/* Engagement & Actions Metrics */}
       {insights?.actions && insights.actions.length > 0 && (
-        <div className="border-4 border-brutal-yellow bg-white p-4 shadow-hard">
+        <div className="border-4 border-black bg-white p-4 shadow-hard">
           <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-black">
             {lang === 'vi' ? 'Tương Tác & Kết Quả' : 'Engagement & Results'}
           </h3>
           <div className="grid grid-cols-2 gap-3">
             {pageLikes !== '0' && (
-              <div className="border-4 border-blue-500 p-3 bg-blue-50">
+              <div className="border-4 border-black p-3 bg-blue-50 shadow-hard">
                 <span className="text-gray-600 text-xs uppercase">{lang === 'vi' ? 'Lượt thích trang' : 'Page Likes'}</span>
                 <div className="font-bold text-xl text-blue-600">{formatNumber(parseInt(pageLikes))}</div>
               </div>
             )}
             {pageEngagement !== '0' && (
-              <div className="border-4 border-purple-500 p-3 bg-purple-50">
+              <div className="border-4 border-black p-3 bg-purple-50 shadow-hard">
                 <span className="text-gray-600 text-xs uppercase">{lang === 'vi' ? 'Tương tác trang' : 'Page Engagement'}</span>
                 <div className="font-bold text-xl text-purple-600">{formatNumber(parseInt(pageEngagement))}</div>
               </div>
             )}
             {postReactions !== '0' && (
-              <div className="border-4 border-pink-500 p-3 bg-pink-50">
+              <div className="border-4 border-black p-3 bg-pink-50 shadow-hard">
                 <span className="text-gray-600 text-xs uppercase">{lang === 'vi' ? 'Cảm xúc bài viết' : 'Post Reactions'}</span>
                 <div className="font-bold text-xl text-pink-600">{formatNumber(parseInt(postReactions))}</div>
               </div>
             )}
             {linkClicks !== '0' && (
-              <div className="border-4 border-green-500 p-3 bg-green-50">
+              <div className="border-4 border-black p-3 bg-green-50 shadow-hard">
                 <span className="text-gray-600 text-xs uppercase">{lang === 'vi' ? 'Click liên kết' : 'Link Clicks'}</span>
                 <div className="font-bold text-xl text-green-600">{formatNumber(parseInt(linkClicks as string))}</div>
               </div>
             )}
             {postSaves !== '0' && (
-              <div className="border-4 border-yellow-500 p-3 bg-yellow-50">
+              <div className="border-4 border-black p-3 bg-yellow-50 shadow-hard">
                 <span className="text-gray-600 text-xs uppercase">{lang === 'vi' ? 'Lượt lưu' : 'Post Saves'}</span>
                 <div className="font-bold text-xl text-yellow-600">{formatNumber(parseInt(postSaves))}</div>
               </div>
             )}
             {postShares !== '0' && (
-              <div className="border-4 border-orange-500 p-3 bg-orange-50">
+              <div className="border-4 border-black p-3 bg-orange-50 shadow-hard">
                 <span className="text-gray-600 text-xs uppercase">{lang === 'vi' ? 'Lượt chia sẻ' : 'Post Shares'}</span>
                 <div className="font-bold text-xl text-orange-600">{formatNumber(parseInt(postShares))}</div>
               </div>
@@ -639,29 +639,29 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
 
       {/* Video Metrics */}
       {videoViews !== '0' && (
-        <div className="border-4 border-brutal-yellow bg-white p-4 shadow-hard">
+        <div className="border-4 border-black bg-white p-4 shadow-hard">
           <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-black">
             {lang === 'vi' ? 'Số Liệu Video' : 'Video Metrics'}
           </h3>
           <div className="space-y-3">
-            <div className="border-4 border-red-500 p-3 bg-red-50">
+            <div className="border-4 border-black p-3 bg-red-50 shadow-hard">
               <span className="text-gray-600 text-xs uppercase">{lang === 'vi' ? 'Lượt xem video' : 'Video Views'}</span>
               <div className="font-bold text-2xl text-red-600">{formatNumber(parseInt(videoViews))}</div>
             </div>
             <div className="grid grid-cols-4 gap-2">
-              <div className="border-4 border-black p-2 text-center bg-gray-50">
+              <div className="border-4 border-black p-2 text-center bg-gray-50 shadow-hard">
                 <div className="text-xs text-gray-500">25%</div>
                 <div className="font-bold text-sm text-black">{formatNumber(parseInt(video25))}</div>
               </div>
-              <div className="border-4 border-black p-2 text-center bg-gray-50">
+              <div className="border-4 border-black p-2 text-center bg-gray-50 shadow-hard">
                 <div className="text-xs text-gray-500">50%</div>
                 <div className="font-bold text-sm text-black">{formatNumber(parseInt(video50))}</div>
               </div>
-              <div className="border-4 border-black p-2 text-center bg-gray-50">
+              <div className="border-4 border-black p-2 text-center bg-gray-50 shadow-hard">
                 <div className="text-xs text-gray-500">75%</div>
                 <div className="font-bold text-sm text-black">{formatNumber(parseInt(video75))}</div>
               </div>
-              <div className="border-4 border-black p-2 text-center bg-gray-50">
+              <div className="border-4 border-black p-2 text-center bg-gray-50 shadow-hard">
                 <div className="text-xs text-gray-500">100%</div>
                 <div className="font-bold text-sm text-black">{formatNumber(parseInt(video100))}</div>
               </div>
@@ -677,7 +677,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
 
   const renderPerformanceTab = () => (
     <div className="space-y-4">
-      <div className="border-4 border-brutal-yellow bg-white p-4 shadow-hard">
+      <div className="border-4 border-black bg-white p-4 shadow-hard">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-bold text-lg uppercase tracking-wide text-black">{lang === 'vi' ? 'Chi Tiết Hiệu Quả' : 'Performance Details'}</h3>
           {renderDateDropdown()}
@@ -686,15 +686,15 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
         {insights ? (
           <div className="space-y-4">
             <div className="grid grid-cols-3 gap-2">
-              <div className="border-4 border-blue-500 bg-blue-50 p-3 text-center">
+              <div className="border-4 border-black bg-blue-50 p-3 text-center shadow-hard">
                 <div className="text-2xl font-bold text-blue-600">{impressions}</div>
                 <div className="text-xs text-gray-600 uppercase">{t('dashboard.impressions')}</div>
               </div>
-              <div className="border-4 border-green-500 bg-green-50 p-3 text-center">
+              <div className="border-4 border-black bg-green-50 p-3 text-center shadow-hard">
                 <div className="text-2xl font-bold text-green-600">{clicks}</div>
                 <div className="text-xs text-gray-600 uppercase">{t('dashboard.clicks')}</div>
               </div>
-              <div className="border-4 border-yellow-500 bg-yellow-50 p-3 text-center">
+              <div className="border-4 border-black bg-yellow-50 p-3 text-center shadow-hard">
                 <div className="text-2xl font-bold text-yellow-600">{reach}</div>
                 <div className="text-xs text-gray-600 uppercase">{t('dashboard.reach')}</div>
               </div>
@@ -743,7 +743,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
       ) : demographics.length > 0 ? (
         <>
           {/* Gender Distribution */}
-          <div className="border-4 border-brutal-yellow bg-white p-4 shadow-hard">
+          <div className="border-4 border-black bg-white p-4 shadow-hard">
             <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-black">{lang === 'vi' ? 'Phân Bổ Giới Tính' : 'Gender Distribution'}</h3>
             <div className="space-y-4">
               {processedDemographics.byGender.map((g) => {
@@ -770,7 +770,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
           </div>
 
           {/* Age Distribution */}
-          <div className="border-4 border-brutal-yellow bg-white p-4 shadow-hard">
+          <div className="border-4 border-black bg-white p-4 shadow-hard">
             <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-black">{lang === 'vi' ? 'Phân Bổ Độ Tuổi' : 'Age Distribution'}</h3>
             <div className="space-y-3">
               {processedDemographics.byAge.map((a) => {
@@ -825,7 +825,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
         ) : (
           <>
             {/* Placement Breakdown */}
-            <div className="border-4 border-brutal-yellow bg-white p-4 shadow-hard">
+            <div className="border-4 border-black bg-white p-4 shadow-hard">
               <div className="flex items-center gap-2 mb-4">
                 <Layout size={20} className="text-black" />
                 <h3 className="font-bold text-lg uppercase tracking-wide text-black">
@@ -866,7 +866,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
             </div>
 
             {/* Location Breakdown */}
-            <div className="border-4 border-brutal-yellow bg-white p-4 shadow-hard">
+            <div className="border-4 border-black bg-white p-4 shadow-hard">
               <div className="flex items-center gap-2 mb-4">
                 <MapPin size={20} className="text-black" />
                 <h3 className="font-bold text-lg uppercase tracking-wide text-black">
@@ -915,7 +915,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
     
     return (
       <div className="space-y-4">
-        <div className="border-4 border-brutal-yellow bg-white p-4 shadow-hard">
+        <div className="border-4 border-black bg-white p-4 shadow-hard">
           <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-black">{lang === 'vi' ? 'Thông Tin Ngân Sách' : 'Budget Information'}</h3>
           
           <div className="space-y-3">
@@ -978,7 +978,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
         </div>
 
         {/* Campaign Info */}
-        <div className="border-4 border-brutal-yellow bg-white p-4 shadow-hard">
+        <div className="border-4 border-black bg-white p-4 shadow-hard">
           <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-black">{lang === 'vi' ? 'Thông Tin Chiến Dịch' : 'Campaign Info'}</h3>
           <div className="space-y-3">
             <div className="flex justify-between py-3 border-b-2 border-black/20">
@@ -1038,7 +1038,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
         {!loading && (
           <>
             {/* Title & Status */}
-            <div className="border-4 border-brutal-yellow bg-white p-4 shadow-hard">
+            <div className="border-4 border-black bg-white p-4 shadow-hard">
               <h2 className="font-display font-bold text-2xl mb-2 text-black">{displayCampaign.title}</h2>
               <div className="flex items-center gap-2 text-sm">
                 <span className={`w-3 h-3 ${getStatusDotClass()}`}></span>
