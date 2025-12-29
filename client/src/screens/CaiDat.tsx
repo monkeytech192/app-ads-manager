@@ -51,6 +51,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, onNavigate }) =
   // AI settings
   const [aiEnabled, setAiEnabled] = useState(() => getAISettings().enabled);
   const [aiApiKey, setAiApiKey] = useState(() => getAISettings().apiKey);
+  const [savedApiKey, setSavedApiKey] = useState(() => getAISettings().apiKey); // Track what's actually saved
   const [showApiKey, setShowApiKey] = useState(false);
 
   // Listen for AI settings changes from other components
@@ -58,6 +59,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, onNavigate }) =
     const handleAiSettingsChange = (e: CustomEvent) => {
       setAiEnabled(e.detail.enabled);
       setAiApiKey(e.detail.apiKey);
+      setSavedApiKey(e.detail.apiKey);
     };
     window.addEventListener('aiSettingsChanged', handleAiSettingsChange as EventListener);
     return () => window.removeEventListener('aiSettingsChanged', handleAiSettingsChange as EventListener);
@@ -80,6 +82,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, onNavigate }) =
     if (!newEnabled) {
       // If disabling, clear API key
       setAiApiKey('');
+      setSavedApiKey('');
       saveAISettings({ enabled: false, apiKey: '' });
       showToast(lang === 'vi' ? 'Đã tắt AI' : 'AI disabled', 'info');
     } else {
@@ -97,6 +100,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, onNavigate }) =
       return;
     }
     saveAISettings({ enabled: aiEnabled, apiKey: aiApiKey.trim() });
+    setSavedApiKey(aiApiKey.trim());
     showToast(lang === 'vi' ? 'Đã lưu API Key' : 'API Key saved', 'success');
   };
 
@@ -281,9 +285,16 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, onNavigate }) =
                                     </button>
                                 </div>
                             </div>
-                            {aiApiKey && (
-                                <p className="text-xs text-gray-500 mt-1 font-mono">
-                                    {lang === 'vi' ? 'Đã lưu' : 'Saved'}: {maskApiKey(aiApiKey)}
+                            {/* Only show "Saved" when API key is actually saved in localStorage */}
+                            {savedApiKey && (
+                                <p className="text-xs text-green-600 mt-1 font-mono">
+                                    ✓ {lang === 'vi' ? 'Đã lưu' : 'Saved'}: {maskApiKey(savedApiKey)}
+                                </p>
+                            )}
+                            {/* Show indicator when input differs from saved */}
+                            {aiApiKey && aiApiKey !== savedApiKey && (
+                                <p className="text-xs text-orange-600 mt-1">
+                                    ⚠ {lang === 'vi' ? 'Chưa lưu - Bấm "Lưu API Key" để lưu' : 'Not saved - Click "Save API Key" to save'}
                                 </p>
                             )}
                         </div>
@@ -310,6 +321,22 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, onNavigate }) =
                                 {lang === 'vi' 
                                     ? 'OpenRouter cung cấp nhiều model AI miễn phí. Đăng ký và tạo API key để sử dụng.'
                                     : 'OpenRouter provides free AI models. Sign up and create an API key to use.'
+                                }
+                            </p>
+                        </div>
+
+                        {/* Security Notice */}
+                        <div className="pt-2 border-t-2 border-black/20 bg-blue-50 -mx-4 -mb-4 px-4 py-3">
+                            <p className="text-xs text-blue-800 font-medium">
+                                🔒 {lang === 'vi' 
+                                    ? 'Bảo mật: API Key chỉ được lưu trên thiết bị của bạn (localStorage), KHÔNG được gửi lên server của chúng tôi. Các request AI được gửi trực tiếp từ trình duyệt đến OpenRouter.'
+                                    : 'Security: API Key is stored only on your device (localStorage), NOT sent to our server. AI requests are sent directly from your browser to OpenRouter.'
+                                }
+                            </p>
+                            <p className="text-xs text-gray-600 mt-1">
+                                {lang === 'vi' 
+                                    ? '⚠️ Lưu ý: Bất kỳ ai có quyền truy cập vào máy tính của bạn có thể xem API key trong DevTools (F12 → Application → Local Storage).'
+                                    : '⚠️ Note: Anyone with access to your computer can view the API key in DevTools (F12 → Application → Local Storage).'
                                 }
                             </p>
                         </div>
