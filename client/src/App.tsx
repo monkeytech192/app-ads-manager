@@ -425,7 +425,11 @@ const App = () => {
               className="bg-brutal-yellow border-4 border-black px-3 py-2 flex items-center gap-2 font-bold text-base shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
               title={lang === 'vi' ? 'Đổi ngôn ngữ' : 'Change language'}
             >
-              <span className="text-xl leading-none">{lang === 'vi' ? '🇻🇳' : '🇺🇸'}</span>
+              {lang === 'vi' ? (
+                <svg className="w-6 h-4" viewBox="0 0 30 20"><rect width="30" height="20" fill="#da251d"/><polygon points="15,4 11.5,14.5 19.5,8 10.5,8 18.5,14.5" fill="#ffff00"/></svg>
+              ) : (
+                <svg className="w-6 h-4" viewBox="0 0 30 20"><rect width="30" height="20" fill="#b22234"/><rect y="1.54" width="30" height="1.54" fill="white"/><rect y="4.62" width="30" height="1.54" fill="white"/><rect y="7.69" width="30" height="1.54" fill="white"/><rect y="10.77" width="30" height="1.54" fill="white"/><rect y="13.85" width="30" height="1.54" fill="white"/><rect y="16.92" width="30" height="1.54" fill="white"/><rect width="12" height="10.77" fill="#3c3b6e"/></svg>
+              )}
               <ChevronDown size={14} className="text-black" />
             </button>
             {showLangMenu && (
@@ -436,14 +440,14 @@ const App = () => {
                     onClick={() => { setLang('vi'); setShowLangMenu(false); }}
                     className={`w-full px-3 py-2.5 text-left font-bold text-sm flex items-center gap-3 border-b-2 border-black/20 hover:bg-gray-100 transition-colors ${lang === 'vi' ? 'bg-brutal-yellow' : ''}`}
                   >
-                    <span className="text-xl">🇻🇳</span>
+                    <svg className="w-6 h-4" viewBox="0 0 30 20"><rect width="30" height="20" fill="#da251d"/><polygon points="15,4 11.5,14.5 19.5,8 10.5,8 18.5,14.5" fill="#ffff00"/></svg>
                     <span>Tiếng Việt</span>
                   </button>
                   <button
                     onClick={() => { setLang('en'); setShowLangMenu(false); }}
                     className={`w-full px-3 py-2.5 text-left font-bold text-sm flex items-center gap-3 hover:bg-gray-100 transition-colors ${lang === 'en' ? 'bg-brutal-yellow' : ''}`}
                   >
-                    <span className="text-xl">🇺🇸</span>
+                    <svg className="w-6 h-4" viewBox="0 0 30 20"><rect width="30" height="20" fill="#b22234"/><rect y="1.54" width="30" height="1.54" fill="white"/><rect y="4.62" width="30" height="1.54" fill="white"/><rect y="7.69" width="30" height="1.54" fill="white"/><rect y="10.77" width="30" height="1.54" fill="white"/><rect y="13.85" width="30" height="1.54" fill="white"/><rect y="16.92" width="30" height="1.54" fill="white"/><rect width="12" height="10.77" fill="#3c3b6e"/></svg>
                     <span>English</span>
                   </button>
                 </div>
