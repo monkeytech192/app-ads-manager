@@ -2,6 +2,20 @@
 
 Tất cả thay đổi quan trọng của dự án sẽ được ghi lại trong file này.
 
+## [1.5.2] - 2025-12-29
+
+### ✨ Thêm Mới
+- **Hiển thị trạng thái chiến dịch thông minh:**
+  - Phân biệt rõ ràng giữa các trạng thái:
+    - 🔵 **ĐÃ HOÀN TẤT**: Chiến dịch đã chi tiêu hết ngân sách (progress >= 100%)
+    - 🟠 **TẠM DỪNG**: User chủ động tắt chiến dịch
+    - 🔴 **CÓ VẤN ĐỀ**: Facebook báo chiến dịch có vấn đề
+    - 🟢 **ĐANG CHẠY**: Chiến dịch đang hoạt động bình thường
+  - Lấy thêm `effective_status` từ Facebook API
+  - Màu sắc và icon phù hợp với từng trạng thái
+
+---
+
 ## [1.5.1] - 2025-12-29
 
 ### 🔄 Thay Đổi
