@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Facebook, Globe, MessageCircleQuestion, X, UserPlus, LogIn, CheckSquare, Square, ChevronDown } from 'lucide-react';
+import { Facebook, Globe, MessageCircleQuestion, X, UserPlus, LogIn, CheckSquare, Square, ChevronDown, Sparkles } from 'lucide-react';
 import { BrutalistCard, BrutalistButton, BrutalistInput, TextureOverlay } from './shared/UIComponents';
-import { askAssistant } from './services/aiService';
+import { askAssistant, askAssistantWithContext, type CampaignContext } from './services/aiService';
 import { useTranslation, type Language } from './services/i18n';
 import { initFacebookSdk, loginWithFacebook, getFacebookUserProfile } from './services/facebookService';
 import { getAdAccounts, getCampaigns, getCampaignInsights } from './services/apiService';
@@ -229,6 +229,9 @@ const App = () => {
   const [chatMessages, setChatMessages] = useState<Array<{role: 'user' | 'assistant', content: string}>>([]);
   const [loading, setLoading] = useState(false);
   const chatContainerRef = React.useRef<HTMLDivElement>(null);
+  
+  // Last viewed campaign context - persists across screens
+  const [lastCampaignContext, setLastCampaignContext] = useState<CampaignContext | null>(null);
 
   // Auto scroll to bottom when new messages arrive
   React.useEffect(() => {
@@ -244,7 +247,13 @@ const App = () => {
     setChatMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setLoading(true);
     try {
-      const result = await askAssistant(userMessage);
+      // Use campaign context if available, otherwise use basic assistant
+      let result: string;
+      if (lastCampaignContext) {
+        result = await askAssistantWithContext(userMessage, lastCampaignContext, lang);
+      } else {
+        result = await askAssistant(userMessage);
+      }
       setChatMessages(prev => [...prev, { role: 'assistant', content: result }]);
     } catch (e) {
       setChatMessages(prev => [...prev, { role: 'assistant', content: lang === 'vi' ? 'Lỗi kết nối.' : 'Connection error.' }]);
@@ -313,6 +322,7 @@ const App = () => {
             <CampaignDetailScreen 
                 campaign={selectedCampaign}
                 onBack={() => setCurrentView('management')}
+                onUpdateCampaignContext={setLastCampaignContext}
             />
         );
       case 'comparison':
@@ -363,6 +373,7 @@ const App = () => {
                 <button 
                     onClick={() => setIsAiOpen(true)}
                     className="bg-black text-white p-3 rounded-full border-4 border-brutal-yellow shadow-hard hover:scale-110 transition-transform"
+                    title={lang === 'vi' ? (lastCampaignContext ? `Trợ lý AI - ${lastCampaignContext.campaignName}` : 'Trợ lý AI') : (lastCampaignContext ? `AI Assistant - ${lastCampaignContext.campaignName}` : 'AI Assistant')}
                 >
                     <MessageCircleQuestion size={24} />
                 </button>
@@ -373,15 +384,47 @@ const App = () => {
                 <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm">
                   <div className="w-full sm:max-w-md bg-[#1a1a2e] border-4 border-black shadow-hard flex flex-col max-h-[85vh] sm:max-h-[70vh] animate-in slide-in-from-bottom sm:slide-in-from-bottom-0 sm:zoom-in duration-200">
                     {/* Header */}
-                    <div className="flex items-center justify-between p-3 border-b-4 border-black bg-black">
-                      <h3 className="font-display font-bold text-lg uppercase text-white">{t('assistant.title')}</h3>
+                    <div className={`flex items-center justify-between p-3 border-b-4 border-black ${lastCampaignContext ? 'bg-brutal-yellow' : 'bg-black'}`}>
+                      <div className="flex items-center gap-2">
+                        {lastCampaignContext && (
+                          <div className="bg-black p-1.5">
+                            <Sparkles size={14} className="text-brutal-yellow" />
+                          </div>
+                        )}
+                        <div>
+                          <h3 className={`font-display font-bold text-sm uppercase ${lastCampaignContext ? 'text-black' : 'text-white'}`}>
+                            {t('assistant.title')}
+                          </h3>
+                          {lastCampaignContext && (
+                            <p className="text-[10px] text-black/70 font-medium truncate max-w-[180px]">
+                              📊 {lastCampaignContext.campaignName}
+                            </p>
+                          )}
+                        </div>
+                      </div>
                       <button 
                         onClick={() => setIsAiOpen(false)}
-                        className="p-1 text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+                        className={`p-1 transition-colors ${lastCampaignContext ? 'text-black/60 hover:text-black hover:bg-black/10' : 'text-gray-400 hover:text-white hover:bg-white/10'}`}
                       >
                         <X size={20} />
                       </button>
                     </div>
+                    
+                    {/* Campaign Context Badge */}
+                    {lastCampaignContext && (
+                      <div className="px-3 py-2 bg-black/30 border-b border-white/10 flex items-center justify-between">
+                        <span className="text-xs text-gray-400">
+                          {lang === 'vi' ? 'Đang phân tích: ' : 'Analyzing: '}
+                          <span className="text-white font-medium">{lastCampaignContext.dateRange}</span>
+                        </span>
+                        <button 
+                          onClick={() => setLastCampaignContext(null)}
+                          className="text-[10px] text-gray-500 hover:text-white uppercase"
+                        >
+                          {lang === 'vi' ? 'Xóa context' : 'Clear context'}
+                        </button>
+                      </div>
+                    )}
                     
                     {/* Chat Messages Area */}
                     <div 
@@ -394,8 +437,16 @@ const App = () => {
                             <MessageCircleQuestion size={24} className="text-brutal-yellow" />
                           </div>
                           <p className="text-gray-400 text-sm">
-                            {lang === 'vi' ? 'Xin chào! Tôi có thể giúp gì cho bạn?' : 'Hello! How can I help you?'}
+                            {lastCampaignContext 
+                              ? (lang === 'vi' ? `Hỏi bất cứ điều gì về "${lastCampaignContext.campaignName}"!` : `Ask anything about "${lastCampaignContext.campaignName}"!`)
+                              : (lang === 'vi' ? 'Xin chào! Tôi có thể giúp gì cho bạn?' : 'Hello! How can I help you?')
+                            }
                           </p>
+                          {lastCampaignContext && (
+                            <p className="text-gray-500 text-xs mt-2">
+                              {lang === 'vi' ? 'AI sẽ trả lời dựa trên dữ liệu chiến dịch' : 'AI will answer based on campaign data'}
+                            </p>
+                          )}
                         </div>
                       ) : (
                         chatMessages.map((msg, idx) => (
