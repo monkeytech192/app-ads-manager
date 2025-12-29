@@ -2,6 +2,27 @@
 
 Tất cả thay đổi quan trọng của dự án sẽ được ghi lại trong file này.
 
+## [1.5.3] - 2025-12-29
+
+### ✨ Thêm Mới
+- **Biểu đồ Demographics thực tế trên Dashboard:**
+  - Biểu đồ tròn (Pie Chart) hiển thị tỷ lệ giới tính (Nam/Nữ)
+  - Biểu đồ thanh ngang hiển thị phân bố độ tuổi
+  - Chỉ lấy dữ liệu từ chiến dịch ĐANG CHẠY (ACTIVE)
+  - Xóa biểu đồ demo "Chi phí theo tháng"
+
+### 🔄 Thay Đổi  
+- **Cài đặt ngôn ngữ với icon cờ SVG:**
+  - Thay thế emoji 🇻🇳 🇺🇸 bằng SVG flags
+  - Hiển thị đúng trên tất cả thiết bị
+  
+- **Cải thiện API Dashboard:**
+  - Metrics chỉ tính từ chiến dịch active
+  - Thêm aggregated demographics data
+  - Tối ưu với Promise.all cho việc fetch song song
+
+---
+
 ## [1.5.2] - 2025-12-29
 
 ### ✨ Thêm Mới
