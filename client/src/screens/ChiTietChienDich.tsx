@@ -103,54 +103,39 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
     fetchLifetimeInsights();
   }, [campaign?.id]);
 
-  // Fetch demographics when audience tab is active
+  // Fetch all supplementary data (demographics, placements, locations) immediately when entering screen
+  // This allows AI to answer questions about all data regardless of current tab
   useEffect(() => {
-    if (activeTab !== 'audience' || !campaign?.id) return;
+    if (!campaign?.id) return;
 
-    const fetchDemographics = async () => {
+    const fetchAllSupplementaryData = async () => {
+      // Set loading states
+      setDemographicsLoading(true);
+      setPlacementsLoading(true);
+      setLocationsLoading(true);
+
       try {
-        setDemographicsLoading(true);
-        const data = await getDemographicInsights(campaign.id, datePreset);
-        setDemographics(data);
-      } catch (err: any) {
-        console.error('Error fetching demographics:', err);
-        setDemographics([]);
-      } finally {
-        setDemographicsLoading(false);
-      }
-    };
-
-    fetchDemographics();
-  }, [activeTab, campaign?.id, datePreset]);
-
-  // Fetch placements and locations when placements tab is active
-  useEffect(() => {
-    if (activeTab !== 'placements' || !campaign?.id) return;
-
-    const fetchPlacementsAndLocations = async () => {
-      try {
-        setPlacementsLoading(true);
-        setLocationsLoading(true);
-        
-        const [placementData, locationData] = await Promise.all([
-          getPlacementInsights(campaign.id, datePreset),
-          getLocationInsights(campaign.id, datePreset)
+        // Fetch all data in parallel for better performance
+        const [demographicData, placementData, locationData] = await Promise.all([
+          getDemographicInsights(campaign.id, datePreset).catch(() => []),
+          getPlacementInsights(campaign.id, datePreset).catch(() => []),
+          getLocationInsights(campaign.id, datePreset).catch(() => [])
         ]);
-        
+
+        setDemographics(demographicData);
         setPlacements(placementData);
         setLocations(locationData);
       } catch (err: any) {
-        console.error('Error fetching placements/locations:', err);
-        setPlacements([]);
-        setLocations([]);
+        console.error('Error fetching supplementary data:', err);
       } finally {
+        setDemographicsLoading(false);
         setPlacementsLoading(false);
         setLocationsLoading(false);
       }
     };
 
-    fetchPlacementsAndLocations();
-  }, [activeTab, campaign?.id, datePreset]);
+    fetchAllSupplementaryData();
+  }, [campaign?.id, datePreset]);
   
   const displayCampaign = campaign || {
       id: '',
@@ -444,13 +429,13 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
     };
   }, [displayCampaign, selectedDateLabel, budgetProgress, insights, pageLikes, pageEngagement, postReactions, postShares, linkClicks, videoViews, video25, video50, video75, video100, processedDemographics, processedPlacements, processedLocations]);
 
-  // Update global campaign context when data changes
+  // Update global campaign context when data changes (including demographics, placements, locations)
   React.useEffect(() => {
     if (onUpdateCampaignContext && insights) {
       const context = buildCampaignContext();
       onUpdateCampaignContext(context);
     }
-  }, [onUpdateCampaignContext, insights, buildCampaignContext]);
+  }, [onUpdateCampaignContext, insights, buildCampaignContext, demographics, placements, locations]);
 
   // ==================== RENDER DATE DROPDOWN ====================
   const renderDateDropdown = () => (
@@ -1056,7 +1041,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
       {showAnalysis && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => !analysisLoading && setShowAnalysis(false)} />
-          <div className="relative bg-[#0f172a] border-4 border-brutal-yellow w-full sm:max-w-md max-h-[85vh] overflow-hidden shadow-[8px_8px_0px_0px_rgba(250,204,21,0.3)] sm:rounded-none">
+          <div className="relative bg-[#0f172a] border-4 border-brutal-yellow w-full sm:max-w-md max-h-[90vh] overflow-hidden shadow-[8px_8px_0px_0px_rgba(250,204,21,0.3)] sm:rounded-none flex flex-col">
             
             {/* Header - Brutalist */}
             <div className="bg-brutal-yellow p-4 border-b-4 border-black">
@@ -1085,7 +1070,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
             </div>
             
             {/* Content */}
-            <div className="overflow-y-auto max-h-[calc(85vh-140px)] p-4">
+            <div className="flex-1 overflow-y-auto p-4">
               {analysisLoading ? (
                 <div className="text-center py-12">
                   {/* Brutalist Loading Animation */}

@@ -10,9 +10,24 @@
  * Cấu hình: OPENROUTER_API_KEY trong .env
  */
 
+import { getCurrencySettings } from '../utils/currency';
+
 // ===================== CONFIG =====================
 const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
 const FREE_MODEL = 'mistralai/devstral-2512:free';
+
+// Helper: Format currency based on user settings (for AI prompts)
+const formatCurrencyForPrompt = (valueInUSDCents: number, decimals: number = 2): string => {
+  const settings = getCurrencySettings();
+  const usdValue = valueInUSDCents / 100; // Convert cents to dollars
+  
+  if (settings.currency === 'VND') {
+    const vndValue = usdValue * settings.rate;
+    return `${vndValue.toLocaleString('vi-VN', { maximumFractionDigits: 0 })} VND`;
+  } else {
+    return `$${usdValue.toFixed(decimals)} USD`;
+  }
+};
 
 // ===================== TYPES =====================
 export interface CampaignAnalysisData {
@@ -90,16 +105,16 @@ THÔNG TIN CHIẾN DỊCH:
 - Tên: ${data.campaignName}
 - Trạng thái: ${data.status === 'active' ? 'Đang chạy' : 'Tạm dừng'}
 - Mục tiêu: ${data.objective}
-- Ngân sách: ${data.budget.toLocaleString('vi-VN')} VND
-- Đã chi tiêu: ${data.spent.toLocaleString('vi-VN')} VND (${data.budgetProgress}%)
+- Ngân sách: ${formatCurrencyForPrompt(data.budget)}
+- Đã chi tiêu: ${formatCurrencyForPrompt(data.spent)} (${data.budgetProgress}%)
 
 CHỈ SỐ HIỆU SUẤT (${data.dateRange}):
 - Lượt hiển thị: ${data.impressions.toLocaleString()}
 - Lượt click: ${data.clicks.toLocaleString()}
 - Tiếp cận: ${data.reach.toLocaleString()}
 - CTR (tỷ lệ click): ${data.ctr.toFixed(2)}%
-- CPC (chi phí/click): ${data.cpc.toLocaleString('vi-VN')} VND
-- CPM (chi phí/1000 hiển thị): ${data.cpm.toLocaleString('vi-VN')} VND
+- CPC (chi phí/click): ${formatCurrencyForPrompt(data.cpc * 100, 4)}
+- CPM (chi phí/1000 hiển thị): ${formatCurrencyForPrompt(data.cpm * 100)}
 - Tần suất: ${data.frequency.toFixed(2)}
 
 Hãy đánh giá:
@@ -116,16 +131,16 @@ CAMPAIGN INFO:
 - Name: ${data.campaignName}
 - Status: ${data.status === 'active' ? 'Active' : 'Paused'}
 - Objective: ${data.objective}
-- Budget: $${(data.budget / 25000).toFixed(2)} (${data.budget.toLocaleString()} VND)
-- Spent: $${(data.spent / 25000).toFixed(2)} (${data.budgetProgress}%)
+- Budget: ${formatCurrencyForPrompt(data.budget)}
+- Spent: ${formatCurrencyForPrompt(data.spent)} (${data.budgetProgress}%)
 
 PERFORMANCE METRICS (${data.dateRange}):
 - Impressions: ${data.impressions.toLocaleString()}
 - Clicks: ${data.clicks.toLocaleString()}
 - Reach: ${data.reach.toLocaleString()}
 - CTR: ${data.ctr.toFixed(2)}%
-- CPC: $${(data.cpc / 25000).toFixed(2)}
-- CPM: $${(data.cpm / 25000).toFixed(2)}
+- CPC: ${formatCurrencyForPrompt(data.cpc * 100, 4)}
+- CPM: ${formatCurrencyForPrompt(data.cpm * 100)}
 - Frequency: ${data.frequency.toFixed(2)}
 
 Please evaluate:
@@ -270,17 +285,17 @@ THÔNG TIN CƠ BẢN:
 - Mục tiêu: ${context.objective}
 
 NGÂN SÁCH:
-- Tổng ngân sách: ${context.budget.toLocaleString('vi-VN')} VND
-- Đã chi tiêu: ${context.spent.toLocaleString('vi-VN')} VND (${context.budgetProgress}%)
-- Còn lại: ${context.remaining.toLocaleString('vi-VN')} VND
+- Tổng ngân sách: ${formatCurrencyForPrompt(context.budget)}
+- Đã chi tiêu: ${formatCurrencyForPrompt(context.spent)} (${context.budgetProgress}%)
+- Còn lại: ${formatCurrencyForPrompt(context.remaining)}
 
 HIỆU SUẤT:
 - Lượt hiển thị: ${context.impressions.toLocaleString()}
 - Tiếp cận: ${context.reach.toLocaleString()} người
 - Lượt click: ${context.clicks.toLocaleString()}
 - CTR (tỷ lệ click): ${context.ctr.toFixed(2)}%
-- CPC (chi phí/click): ${context.cpc.toLocaleString('vi-VN')} VND
-- CPM (chi phí/1000 hiển thị): ${context.cpm.toLocaleString('vi-VN')} VND
+- CPC (chi phí/click): ${formatCurrencyForPrompt(context.cpc * 100, 4)}
+- CPM (chi phí/1000 hiển thị): ${formatCurrencyForPrompt(context.cpm * 100)}
 - Tần suất hiển thị: ${context.frequency.toFixed(2)} lần/người
 
 TƯƠNG TÁC:
@@ -315,17 +330,17 @@ BASIC INFO:
 - Objective: ${context.objective}
 
 BUDGET:
-- Total Budget: $${(context.budget / 25000).toFixed(2)}
-- Spent: $${(context.spent / 25000).toFixed(2)} (${context.budgetProgress}%)
-- Remaining: $${(context.remaining / 25000).toFixed(2)}
+- Total Budget: ${formatCurrencyForPrompt(context.budget)}
+- Spent: ${formatCurrencyForPrompt(context.spent)} (${context.budgetProgress}%)
+- Remaining: ${formatCurrencyForPrompt(context.remaining)}
 
 PERFORMANCE:
 - Impressions: ${context.impressions.toLocaleString()}
 - Reach: ${context.reach.toLocaleString()} people
 - Clicks: ${context.clicks.toLocaleString()}
 - CTR: ${context.ctr.toFixed(2)}%
-- CPC: $${(context.cpc / 25000).toFixed(2)}
-- CPM: $${(context.cpm / 25000).toFixed(2)}
+- CPC: ${formatCurrencyForPrompt(context.cpc * 100, 4)}
+- CPM: ${formatCurrencyForPrompt(context.cpm * 100)}
 - Frequency: ${context.frequency.toFixed(2)} times/person
 
 ENGAGEMENT:

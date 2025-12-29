@@ -2,6 +2,26 @@
 
 Tất cả thay đổi quan trọng của dự án sẽ được ghi lại trong file này.
 
+## [1.5.1] - 2025-12-29
+
+### 🔄 Thay Đổi
+- **Currency linh hoạt theo cài đặt user:**
+  - AI prompts tự động sử dụng đơn vị tiền tệ từ Settings (VND hoặc USD)
+  - Thêm helper `formatCurrencyForPrompt()` trong aiService.ts
+  - Chuyển đổi tự động theo tỷ giá đã cài đặt
+
+- **Tải trước tất cả dữ liệu chiến dịch:**
+  - Demographics, Placements, Locations được tải song song ngay khi vào Chi tiết chiến dịch
+  - AI có thể trả lời câu hỏi về tất cả dữ liệu ngay cả khi ở tab Tổng quan
+  - Chuyển tab không còn phải chờ tải
+
+### 🐛 Sửa Lỗi
+- Fix modal AI "Đóng" button bị cắt ở dưới (tăng max-height lên 90vh, thêm flex layout)
+- Fix markdown **bold** không render trong chat (thêm parseMarkdown helper)
+- Fix currency hiển thị sai (VND thay vì USD) trong AI prompts
+
+---
+
 ## [1.5.0] - 2025-12-29
 
 ### ✨ Thêm Mới

@@ -16,6 +16,44 @@ import SettingsScreen from './screens/CaiDat';
 import CampaignDetailScreen from './screens/ChiTietChienDich';
 import { ScreenView, CampaignData, AccountData, FacebookUserProfile } from './types';
 
+// Simple markdown parser for chat messages
+const parseMarkdown = (text: string): React.ReactNode[] => {
+  const parts: React.ReactNode[] = [];
+  const lines = text.split('\n');
+  
+  lines.forEach((line, lineIdx) => {
+    // Parse bold text (**text**)
+    const boldRegex = /\*\*(.+?)\*\*/g;
+    let lastIndex = 0;
+    let match;
+    const lineParts: React.ReactNode[] = [];
+    
+    while ((match = boldRegex.exec(line)) !== null) {
+      // Add text before the match
+      if (match.index > lastIndex) {
+        lineParts.push(line.substring(lastIndex, match.index));
+      }
+      // Add bold text
+      lineParts.push(<strong key={`bold-${lineIdx}-${match.index}`} className="font-bold">{match[1]}</strong>);
+      lastIndex = match.index + match[0].length;
+    }
+    
+    // Add remaining text
+    if (lastIndex < line.length) {
+      lineParts.push(line.substring(lastIndex));
+    }
+    
+    // If no matches, just add the line
+    if (lineParts.length === 0) {
+      lineParts.push(line);
+    }
+    
+    parts.push(<span key={`line-${lineIdx}`}>{lineParts}{lineIdx < lines.length - 1 && <br />}</span>);
+  });
+  
+  return parts;
+};
+
 const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat('vi-VN', {
     style: 'currency',
@@ -459,7 +497,7 @@ const App = () => {
                                 ? 'bg-brutal-yellow text-black border-2 border-black' 
                                 : 'bg-white/10 text-white border-2 border-white/20'
                             }`}>
-                              <p className="whitespace-pre-wrap">{msg.content}</p>
+                              <div className="whitespace-pre-wrap">{parseMarkdown(msg.content)}</div>
                             </div>
                           </div>
                         ))
@@ -742,7 +780,7 @@ const App = () => {
                         ? 'bg-brutal-yellow text-black border-2 border-black' 
                         : 'bg-white/10 text-white border-2 border-white/20'
                     }`}>
-                      <p className="whitespace-pre-wrap">{msg.content}</p>
+                      <div className="whitespace-pre-wrap">{parseMarkdown(msg.content)}</div>
                     </div>
                   </div>
                 ))
