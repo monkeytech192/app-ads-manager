@@ -5,6 +5,7 @@ import BottomNav from '../shared/BottomNav';
 import { ScreenView, CampaignData, AccountData } from '../types';
 import { formatCurrency } from '../services/apiService';
 import { useTranslation } from '../services/i18n';
+import { getObjectiveName } from '../utils/objective';
 
 interface ManagementScreenProps {
   onBack: () => void;
@@ -234,7 +235,7 @@ const ManagementScreen: React.FC<ManagementScreenProps> = ({
                                          <div className="flex flex-col">
                                             <h3 className="font-display font-bold text-xl uppercase leading-tight mb-1">{camp.title}</h3>
                                             <span className={`${camp.status === 'active' ? 'bg-[#3B82F6] text-white' : 'bg-brutal-yellow text-black'} px-1 text-sm font-bold block w-fit mb-1`}>
-                                                {lang === 'vi' ? 'MỤC TIÊU' : 'OBJECTIVE'}: {camp.objective}
+                                                {lang === 'vi' ? 'MỤC TIÊU' : 'OBJECTIVE'}: {getObjectiveName(camp.objective, lang)}
                                             </span>
                                             <p className="font-bold text-sm text-gray-600">{lang === 'vi' ? 'NGÂN SÁCH' : 'BUDGET'}: {camp.budget}</p>
                                          </div>

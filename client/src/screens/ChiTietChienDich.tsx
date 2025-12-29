@@ -6,6 +6,7 @@ import { getCampaignInsights, getDemographicInsights, getPlacementInsights, getL
 import { formatCurrencyWithSettings, getCurrencySettings } from '../utils/currency';
 import { useTranslation } from '../services/i18n';
 import { analyzeCampaign, type CampaignAnalysisData, type CampaignContext } from '../services/aiService';
+import { getObjectiveName } from '../utils/objective';
 
 interface CampaignDetailScreenProps {
   onBack: () => void;
@@ -988,7 +989,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
             </div>
             <div className="flex justify-between py-3 border-b-2 border-white/10">
               <span className="text-gray-400 uppercase text-sm">{lang === 'vi' ? 'Mục tiêu' : 'Objective'}</span>
-              <span className="font-bold">{displayCampaign.objective}</span>
+              <span className="font-bold">{getObjectiveName(displayCampaign.objective, lang)}</span>
             </div>
           </div>
         </div>
@@ -1046,7 +1047,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
                     {getStatusText()}
                 </span>
                 <span className="text-gray-500">•</span>
-                <span className="text-gray-400 uppercase">{displayCampaign.objective}</span>
+                <span className="text-gray-400 uppercase">{getObjectiveName(displayCampaign.objective, lang)}</span>
               </div>
             </div>
 

@@ -11,6 +11,7 @@
  */
 
 import { getCurrencySettings } from '../utils/currency';
+import { getObjectiveName } from '../utils/objective';
 
 // ===================== CONFIG =====================
 const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
@@ -104,7 +105,7 @@ const buildAnalysisPrompt = (data: CampaignAnalysisData, language: 'vi' | 'en'):
 THÔNG TIN CHIẾN DỊCH:
 - Tên: ${data.campaignName}
 - Trạng thái: ${data.status === 'active' ? 'Đang chạy' : 'Tạm dừng'}
-- Mục tiêu: ${data.objective}
+- Mục tiêu: ${getObjectiveName(data.objective, 'vi')}
 - Ngân sách: ${formatCurrencyForPrompt(data.budget)}
 - Đã chi tiêu: ${formatCurrencyForPrompt(data.spent)} (${data.budgetProgress}%)
 
@@ -130,7 +131,7 @@ Trả lời bằng tiếng Việt, ngắn gọn, dễ hiểu.`;
 CAMPAIGN INFO:
 - Name: ${data.campaignName}
 - Status: ${data.status === 'active' ? 'Active' : 'Paused'}
-- Objective: ${data.objective}
+- Objective: ${getObjectiveName(data.objective, 'en')}
 - Budget: ${formatCurrencyForPrompt(data.budget)}
 - Spent: ${formatCurrencyForPrompt(data.spent)} (${data.budgetProgress}%)
 
@@ -282,7 +283,7 @@ export const askAssistantWithContext = async (
 THÔNG TIN CƠ BẢN:
 - Tên chiến dịch: ${context.campaignName}
 - Trạng thái: ${context.status === 'active' ? '🟢 Đang chạy' : '⏸️ Tạm dừng'}
-- Mục tiêu: ${context.objective}
+- Mục tiêu: ${getObjectiveName(context.objective, 'vi')}
 
 NGÂN SÁCH:
 - Tổng ngân sách: ${formatCurrencyForPrompt(context.budget)}
@@ -327,7 +328,7 @@ Hãy trả lời dựa trên dữ liệu thực tế ở trên. Nếu câu hỏi
 BASIC INFO:
 - Campaign Name: ${context.campaignName}
 - Status: ${context.status === 'active' ? '🟢 Active' : '⏸️ Paused'}
-- Objective: ${context.objective}
+- Objective: ${getObjectiveName(context.objective, 'en')}
 
 BUDGET:
 - Total Budget: ${formatCurrencyForPrompt(context.budget)}
