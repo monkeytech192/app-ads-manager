@@ -226,18 +226,28 @@ const App = () => {
   // AI Helper State
   const [isAiOpen, setIsAiOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [response, setResponse] = useState('');
+  const [chatMessages, setChatMessages] = useState<Array<{role: 'user' | 'assistant', content: string}>>([]);
   const [loading, setLoading] = useState(false);
+  const chatContainerRef = React.useRef<HTMLDivElement>(null);
+
+  // Auto scroll to bottom when new messages arrive
+  React.useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [chatMessages, loading]);
 
   const handleAiAsk = async () => {
     if (!query.trim()) return;
+    const userMessage = query.trim();
+    setQuery(''); // Reset input immediately
+    setChatMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setLoading(true);
-    setResponse('');
     try {
-      const result = await askAssistant(query);
-      setResponse(result);
+      const result = await askAssistant(userMessage);
+      setChatMessages(prev => [...prev, { role: 'assistant', content: result }]);
     } catch (e) {
-      setResponse("Lỗi kết nối.");
+      setChatMessages(prev => [...prev, { role: 'assistant', content: lang === 'vi' ? 'Lỗi kết nối.' : 'Connection error.' }]);
     } finally {
       setLoading(false);
     }
@@ -358,40 +368,88 @@ const App = () => {
                 </button>
              </div>
 
-              {/* Shared AI Modal - Centered in viewport */}
+              {/* Shared AI Modal - Chat Interface */}
               {isAiOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                  <div className="w-full max-w-sm bg-white border-4 border-black shadow-hard p-4 relative animate-in fade-in zoom-in duration-200">
-                    <button 
-                      onClick={() => setIsAiOpen(false)}
-                      className="absolute top-2 right-2 p-1 hover:bg-gray-200 border-2 border-transparent hover:border-black transition-colors"
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm">
+                  <div className="w-full sm:max-w-md bg-[#1a1a2e] border-4 border-black shadow-hard flex flex-col max-h-[85vh] sm:max-h-[70vh] animate-in slide-in-from-bottom sm:slide-in-from-bottom-0 sm:zoom-in duration-200">
+                    {/* Header */}
+                    <div className="flex items-center justify-between p-3 border-b-4 border-black bg-black">
+                      <h3 className="font-display font-bold text-lg uppercase text-white">{t('assistant.title')}</h3>
+                      <button 
+                        onClick={() => setIsAiOpen(false)}
+                        className="p-1 text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
+                    
+                    {/* Chat Messages Area */}
+                    <div 
+                      ref={chatContainerRef}
+                      className="flex-1 overflow-y-auto p-4 space-y-3 min-h-[200px] max-h-[50vh]"
                     >
-                      <X size={24} />
-                    </button>
-                    <h3 className="font-display font-bold text-2xl mb-4 uppercase">{t('assistant.title')}</h3>
-                    <div className="bg-gray-100 border-2 border-black p-3 h-48 overflow-y-auto mb-4 font-mono text-sm">
-                      {response ? (
-                        <p>{response}</p>
+                      {chatMessages.length === 0 ? (
+                        <div className="text-center py-8">
+                          <div className="w-12 h-12 mx-auto mb-3 bg-brutal-yellow/20 border-2 border-brutal-yellow flex items-center justify-center">
+                            <MessageCircleQuestion size={24} className="text-brutal-yellow" />
+                          </div>
+                          <p className="text-gray-400 text-sm">
+                            {lang === 'vi' ? 'Xin chào! Tôi có thể giúp gì cho bạn?' : 'Hello! How can I help you?'}
+                          </p>
+                        </div>
                       ) : (
-                        <p className="text-gray-500 italic">{lang === 'vi' ? 'Tôi có thể giúp gì cho bạn?' : 'How can I help you?'}</p>
+                        chatMessages.map((msg, idx) => (
+                          <div 
+                            key={idx} 
+                            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                          >
+                            <div className={`max-w-[85%] p-3 text-sm ${
+                              msg.role === 'user' 
+                                ? 'bg-brutal-yellow text-black border-2 border-black' 
+                                : 'bg-white/10 text-white border-2 border-white/20'
+                            }`}>
+                              <p className="whitespace-pre-wrap">{msg.content}</p>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                      {/* Loading indicator */}
+                      {loading && (
+                        <div className="flex justify-start">
+                          <div className="bg-white/10 border-2 border-white/20 p-3">
+                            <div className="flex items-center gap-2">
+                              <div className="flex gap-1">
+                                <span className="w-2 h-2 bg-brutal-yellow rounded-full animate-bounce" style={{animationDelay: '0ms'}}></span>
+                                <span className="w-2 h-2 bg-brutal-yellow rounded-full animate-bounce" style={{animationDelay: '150ms'}}></span>
+                                <span className="w-2 h-2 bg-brutal-yellow rounded-full animate-bounce" style={{animationDelay: '300ms'}}></span>
+                              </div>
+                              <span className="text-xs text-gray-400">{lang === 'vi' ? 'Đang trả lời...' : 'Typing...'}</span>
+                            </div>
+                          </div>
+                        </div>
                       )}
                     </div>
-                    <div className="flex gap-2">
-                      <input 
-                        type="text"
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        placeholder={lang === 'vi' ? 'Hỏi trợ lý...' : 'Ask assistant...'}
-                        className="flex-1 border-2 border-black p-2 font-mono text-sm focus:outline-none focus:bg-yellow-50"
-                        onKeyDown={(e) => e.key === 'Enter' && handleAiAsk()}
-                      />
-                      <button 
-                        onClick={handleAiAsk}
-                        disabled={loading}
-                        className="bg-brutal-yellow border-2 border-black px-4 font-bold uppercase text-sm hover:bg-yellow-400 disabled:opacity-50"
-                      >
-                        {loading ? '...' : (lang === 'vi' ? 'Gửi' : 'Send')}
-                      </button>
+                    
+                    {/* Input Area */}
+                    <div className="p-3 border-t-4 border-black bg-black/50">
+                      <div className="flex gap-2">
+                        <input 
+                          type="text"
+                          value={query}
+                          onChange={(e) => setQuery(e.target.value)}
+                          placeholder={lang === 'vi' ? 'Nhập tin nhắn...' : 'Type a message...'}
+                          className="flex-1 bg-white/10 border-2 border-white/20 p-3 text-white text-sm focus:outline-none focus:border-brutal-yellow placeholder-gray-500"
+                          onKeyDown={(e) => e.key === 'Enter' && !loading && handleAiAsk()}
+                          disabled={loading}
+                        />
+                        <button 
+                          onClick={handleAiAsk}
+                          disabled={loading || !query.trim()}
+                          className="bg-brutal-yellow border-2 border-black px-4 font-bold uppercase text-sm text-black hover:bg-yellow-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          {lang === 'vi' ? 'Gửi' : 'Send'}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -593,43 +651,88 @@ const App = () => {
           </button>
       </div>
 
-      {/* AI Modal (Auth View) */}
+      {/* AI Modal (Auth View) - Chat Interface */}
       {isAiOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-sm bg-white border-4 border-black shadow-hard p-4 relative animate-in fade-in zoom-in duration-200">
-            <button 
-              onClick={() => setIsAiOpen(false)}
-              className="absolute top-2 right-2 p-1 hover:bg-gray-200 border-2 border-transparent hover:border-black transition-colors"
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="w-full sm:max-w-md bg-[#1a1a2e] border-4 border-black shadow-hard flex flex-col max-h-[85vh] sm:max-h-[70vh] animate-in slide-in-from-bottom sm:slide-in-from-bottom-0 sm:zoom-in duration-200">
+            {/* Header */}
+            <div className="flex items-center justify-between p-3 border-b-4 border-black bg-black">
+              <h3 className="font-display font-bold text-lg uppercase text-white">{t('assistant.title')}</h3>
+              <button 
+                onClick={() => setIsAiOpen(false)}
+                className="p-1 text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            {/* Chat Messages Area */}
+            <div 
+              ref={chatContainerRef}
+              className="flex-1 overflow-y-auto p-4 space-y-3 min-h-[200px] max-h-[50vh]"
             >
-              <X size={24} />
-            </button>
-            
-            <h3 className="font-display font-bold text-2xl mb-4 uppercase">{t('assistant.title')}</h3>
-            
-            <div className="bg-gray-100 border-2 border-black p-3 h-48 overflow-y-auto mb-4 font-mono text-sm">
-              {response ? (
-                <p>{response}</p>
+              {chatMessages.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="w-12 h-12 mx-auto mb-3 bg-brutal-yellow/20 border-2 border-brutal-yellow flex items-center justify-center">
+                    <MessageCircleQuestion size={24} className="text-brutal-yellow" />
+                  </div>
+                  <p className="text-gray-400 text-sm">
+                    {lang === 'vi' ? 'Xin chào! Tôi có thể giúp gì cho bạn?' : 'Hello! How can I help you?'}
+                  </p>
+                </div>
               ) : (
-                <p className="text-gray-500 italic">{lang === 'vi' ? 'Tôi có thể giúp gì cho bạn về việc đăng nhập hoặc kết nối?' : 'How can I help you with login or connection?'}</p>
+                chatMessages.map((msg, idx) => (
+                  <div 
+                    key={idx} 
+                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div className={`max-w-[85%] p-3 text-sm ${
+                      msg.role === 'user' 
+                        ? 'bg-brutal-yellow text-black border-2 border-black' 
+                        : 'bg-white/10 text-white border-2 border-white/20'
+                    }`}>
+                      <p className="whitespace-pre-wrap">{msg.content}</p>
+                    </div>
+                  </div>
+                ))
+              )}
+              {/* Loading indicator */}
+              {loading && (
+                <div className="flex justify-start">
+                  <div className="bg-white/10 border-2 border-white/20 p-3">
+                    <div className="flex items-center gap-2">
+                      <div className="flex gap-1">
+                        <span className="w-2 h-2 bg-brutal-yellow rounded-full animate-bounce" style={{animationDelay: '0ms'}}></span>
+                        <span className="w-2 h-2 bg-brutal-yellow rounded-full animate-bounce" style={{animationDelay: '150ms'}}></span>
+                        <span className="w-2 h-2 bg-brutal-yellow rounded-full animate-bounce" style={{animationDelay: '300ms'}}></span>
+                      </div>
+                      <span className="text-xs text-gray-400">{lang === 'vi' ? 'Đang trả lời...' : 'Typing...'}</span>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
-
-            <div className="flex gap-2">
-              <input 
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder={lang === 'vi' ? 'Hỏi trợ lý...' : 'Ask assistant...'}
-                className="flex-1 border-2 border-black p-2 font-mono text-sm focus:outline-none focus:bg-yellow-50"
-                onKeyDown={(e) => e.key === 'Enter' && handleAiAsk()}
-              />
-              <button 
-                onClick={handleAiAsk}
-                disabled={loading}
-                className="bg-brutal-yellow border-2 border-black px-4 font-bold uppercase text-sm hover:bg-yellow-400 disabled:opacity-50"
-              >
-                {loading ? '...' : (lang === 'vi' ? 'Gửi' : 'Send')}
-              </button>
+            
+            {/* Input Area */}
+            <div className="p-3 border-t-4 border-black bg-black/50">
+              <div className="flex gap-2">
+                <input 
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder={lang === 'vi' ? 'Nhập tin nhắn...' : 'Type a message...'}
+                  className="flex-1 bg-white/10 border-2 border-white/20 p-3 text-white text-sm focus:outline-none focus:border-brutal-yellow placeholder-gray-500"
+                  onKeyDown={(e) => e.key === 'Enter' && !loading && handleAiAsk()}
+                  disabled={loading}
+                />
+                <button 
+                  onClick={handleAiAsk}
+                  disabled={loading || !query.trim()}
+                  className="bg-brutal-yellow border-2 border-black px-4 font-bold uppercase text-sm text-black hover:bg-yellow-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {lang === 'vi' ? 'Gửi' : 'Send'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -989,71 +989,170 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
 
       </div>
 
-      {/* AI Analysis Modal */}
+      {/* AI Analysis Modal - Brutalist Style */}
       {showAnalysis && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70" onClick={() => !analysisLoading && setShowAnalysis(false)} />
-          <div className="relative bg-[#1e293b] border-4 border-black w-full max-w-lg max-h-[80vh] overflow-y-auto shadow-hard">
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b-4 border-black bg-gradient-to-r from-purple-600 to-indigo-600">
-              <div className="flex items-center gap-2">
-                <Sparkles size={24} className="text-white" />
-                <h3 className="font-bold text-lg uppercase text-white">
-                  {lang === 'vi' ? 'Kết Luận AI' : 'AI Conclusion'}
-                </h3>
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => !analysisLoading && setShowAnalysis(false)} />
+          <div className="relative bg-[#0f172a] border-4 border-brutal-yellow w-full sm:max-w-md max-h-[85vh] overflow-hidden shadow-[8px_8px_0px_0px_rgba(250,204,21,0.3)] sm:rounded-none">
+            
+            {/* Header - Brutalist */}
+            <div className="bg-brutal-yellow p-4 border-b-4 border-black">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="bg-black p-2">
+                    <Sparkles size={20} className="text-brutal-yellow" />
+                  </div>
+                  <div>
+                    <h3 className="font-display font-bold text-lg uppercase text-black tracking-tight">
+                      {lang === 'vi' ? 'Kết Luận AI' : 'AI Conclusion'}
+                    </h3>
+                    <p className="text-xs font-medium text-black/70 uppercase">
+                      {displayCampaign.title.substring(0, 30)}{displayCampaign.title.length > 30 ? '...' : ''}
+                    </p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setShowAnalysis(false)}
+                  disabled={analysisLoading}
+                  className="bg-black text-brutal-yellow p-2 border-2 border-black hover:bg-gray-900 disabled:opacity-50 transition-colors"
+                >
+                  <X size={18} />
+                </button>
               </div>
-              <button 
-                onClick={() => setShowAnalysis(false)}
-                disabled={analysisLoading}
-                className="text-white hover:text-gray-300 disabled:opacity-50"
-              >
-                <X size={24} />
-              </button>
             </div>
             
             {/* Content */}
-            <div className="p-4">
+            <div className="overflow-y-auto max-h-[calc(85vh-140px)] p-4">
               {analysisLoading ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-                  <p className="text-gray-400 font-bold uppercase">
-                    {lang === 'vi' ? 'AI đang phân tích dữ liệu...' : 'AI is analyzing data...'}
+                <div className="text-center py-12">
+                  {/* Brutalist Loading Animation */}
+                  <div className="relative w-16 h-16 mx-auto mb-6">
+                    <div className="absolute inset-0 border-4 border-brutal-yellow animate-ping opacity-30"></div>
+                    <div className="absolute inset-2 border-4 border-white animate-pulse"></div>
+                    <div className="absolute inset-4 bg-brutal-yellow animate-bounce"></div>
+                  </div>
+                  <p className="font-bold text-lg uppercase text-white tracking-wide">
+                    {lang === 'vi' ? 'Đang Phân Tích' : 'Analyzing'}
+                  </p>
+                  <p className="text-gray-500 text-sm mt-2">
+                    {lang === 'vi' ? 'AI đang xử lý dữ liệu chiến dịch...' : 'AI is processing campaign data...'}
                   </p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {/* Campaign Summary */}
-                  <div className="bg-black/30 border-2 border-white/10 p-3">
-                    <p className="text-xs text-gray-400 uppercase mb-1">
-                      {lang === 'vi' ? 'Chiến dịch' : 'Campaign'}
-                    </p>
-                    <p className="font-bold text-white">{displayCampaign.title}</p>
-                    <p className="text-xs text-gray-500 mt-1">{selectedDateLabel}</p>
+                  {/* Quick Stats Row */}
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="bg-black border-2 border-white/20 p-3 text-center">
+                      <p className="text-brutal-yellow text-lg font-bold">{ctr}</p>
+                      <p className="text-[10px] text-gray-500 uppercase">CTR</p>
+                    </div>
+                    <div className="bg-black border-2 border-white/20 p-3 text-center">
+                      <p className="text-green-400 text-lg font-bold">{cpc}</p>
+                      <p className="text-[10px] text-gray-500 uppercase">CPC</p>
+                    </div>
+                    <div className="bg-black border-2 border-white/20 p-3 text-center">
+                      <p className="text-blue-400 text-lg font-bold">{budgetProgress.percentage}%</p>
+                      <p className="text-[10px] text-gray-500 uppercase">{lang === 'vi' ? 'Ngân sách' : 'Budget'}</p>
+                    </div>
                   </div>
-                  
-                  {/* AI Analysis Result */}
-                  <div className="bg-purple-900/20 border-2 border-purple-500/30 p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Sparkles size={16} className="text-purple-400" />
-                      <span className="text-xs font-bold uppercase text-purple-400">
-                        {lang === 'vi' ? 'Phân Tích AI' : 'AI Analysis'}
+
+                  {/* AI Analysis Result - Formatted */}
+                  <div className="bg-black border-4 border-white/10">
+                    <div className="bg-white/5 px-4 py-2 border-b-2 border-white/10 flex items-center gap-2">
+                      <Sparkles size={14} className="text-brutal-yellow" />
+                      <span className="text-xs font-bold uppercase text-brutal-yellow tracking-wider">
+                        {lang === 'vi' ? 'Phân Tích' : 'Analysis'}
                       </span>
                     </div>
-                    <div className="text-gray-200 text-sm leading-relaxed whitespace-pre-wrap">
-                      {analysisResult}
+                    <div className="p-4">
+                      {/* Parse and format the AI result */}
+                      {analysisResult.split('\n').map((line, idx) => {
+                        // Check for numbered items (1. 2. 3.)
+                        const numberedMatch = line.match(/^(\d+)\.\s*\*\*(.+?)\*\*(.*)$/);
+                        if (numberedMatch) {
+                          return (
+                            <div key={idx} className="mb-4 last:mb-0">
+                              <div className="flex items-start gap-3">
+                                <span className="bg-brutal-yellow text-black w-6 h-6 flex items-center justify-center font-bold text-sm shrink-0">
+                                  {numberedMatch[1]}
+                                </span>
+                                <div className="flex-1">
+                                  <p className="font-bold text-white text-sm">{numberedMatch[2]}</p>
+                                  <p className="text-gray-400 text-sm mt-1">{numberedMatch[3].replace(/^\s*[-–]\s*/, '')}</p>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        }
+                        
+                        // Check for bullet points
+                        if (line.trim().startsWith('-') || line.trim().startsWith('•')) {
+                          const content = line.replace(/^[\s-•]+/, '').trim();
+                          return (
+                            <div key={idx} className="flex items-start gap-2 mb-2 ml-9">
+                              <span className="text-brutal-yellow mt-1">→</span>
+                              <p className="text-gray-300 text-sm">{content}</p>
+                            </div>
+                          );
+                        }
+                        
+                        // Check for bold text with **
+                        if (line.includes('**')) {
+                          const parts = line.split(/\*\*(.+?)\*\*/g);
+                          return (
+                            <p key={idx} className="text-gray-300 text-sm mb-2">
+                              {parts.map((part, i) => 
+                                i % 2 === 1 
+                                  ? <span key={i} className="font-bold text-white">{part}</span>
+                                  : part
+                              )}
+                            </p>
+                          );
+                        }
+                        
+                        // Check for note/warning lines
+                        if (line.startsWith('*') && line.endsWith('*')) {
+                          return (
+                            <div key={idx} className="mt-4 p-3 bg-brutal-yellow/10 border-l-4 border-brutal-yellow">
+                              <p className="text-brutal-yellow text-xs font-medium">{line.replace(/^\*|\*$/g, '')}</p>
+                            </div>
+                          );
+                        }
+                        
+                        // Regular text
+                        if (line.trim()) {
+                          return <p key={idx} className="text-gray-300 text-sm mb-2">{line}</p>;
+                        }
+                        
+                        return null;
+                      })}
                     </div>
                   </div>
                   
-                  {/* Action Button */}
-                  <button
-                    onClick={() => setShowAnalysis(false)}
-                    className="w-full bg-brutal-yellow text-black border-4 border-black font-bold py-3 uppercase shadow-hard active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
-                  >
-                    {lang === 'vi' ? 'Đóng' : 'Close'}
-                  </button>
+                  {/* Time & Date Range Badge */}
+                  <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
+                    <span className="bg-white/5 px-2 py-1 border border-white/10">
+                      📅 {selectedDateLabel}
+                    </span>
+                    <span className="bg-white/5 px-2 py-1 border border-white/10">
+                      🤖 Mistral AI
+                    </span>
+                  </div>
                 </div>
               )}
             </div>
+            
+            {/* Footer - Action Button */}
+            {!analysisLoading && (
+              <div className="p-4 border-t-4 border-black bg-black/50">
+                <button
+                  onClick={() => setShowAnalysis(false)}
+                  className="w-full bg-brutal-yellow text-black border-4 border-black font-bold py-3 uppercase tracking-wider shadow-hard active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
+                >
+                  {lang === 'vi' ? 'Đóng' : 'Close'}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
