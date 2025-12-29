@@ -14,11 +14,11 @@ interface CampaignDetailScreenProps {
   onUpdateCampaignContext?: (context: CampaignContext | null) => void;
 }
 
-// Brutalist style stat card
+// Brutalist style stat card - Light theme
 const StatCard = ({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) => (
-  <div className="border-4 border-black bg-[#1e293b] p-3 flex flex-col justify-between h-24 sm:h-28 shadow-hard">
-    <span className="text-gray-400 text-xs sm:text-sm font-bold uppercase tracking-wide">{label}</span>
-    <span className={`text-2xl sm:text-3xl font-bold font-display tracking-tight ${highlight ? 'text-brutal-yellow' : 'text-white'}`}>{value}</span>
+  <div className="border-4 border-black bg-white p-3 flex flex-col justify-between h-24 sm:h-28 shadow-hard">
+    <span className="text-gray-600 text-xs sm:text-sm font-bold uppercase tracking-wide">{label}</span>
+    <span className={`text-2xl sm:text-3xl font-bold font-display tracking-tight ${highlight ? 'text-blue-600' : 'text-black'}`}>{value}</span>
   </div>
 );
 
@@ -513,7 +513,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
     <div className="relative">
       <button
         onClick={() => setShowDateDropdown(!showDateDropdown)}
-        className="flex items-center gap-1 bg-black border-2 border-white px-3 py-1.5 text-xs font-bold uppercase"
+        className="flex items-center gap-1 bg-brutal-yellow border-4 border-black px-3 py-1.5 text-xs font-bold uppercase text-black shadow-hard"
       >
         <span>{selectedDateLabel}</span>
         <ChevronDown size={14} className={`transition-transform ${showDateDropdown ? 'rotate-180' : ''}`} />
@@ -522,7 +522,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
       {showDateDropdown && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setShowDateDropdown(false)} />
-          <div className="absolute right-0 top-full mt-1 bg-black border-4 border-white z-50 min-w-[140px] shadow-hard">
+          <div className="absolute right-0 top-full mt-1 bg-white border-4 border-black z-50 min-w-[140px] shadow-hard">
             {dateOptions.map(option => (
               <button
                 key={option.value}
@@ -531,7 +531,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
                   setShowDateDropdown(false);
                 }}
                 className={`w-full text-left px-3 py-2 text-sm font-bold uppercase transition-colors ${
-                  datePreset === option.value ? 'bg-brutal-yellow text-black' : 'text-white hover:bg-white/10'
+                  datePreset === option.value ? 'bg-brutal-yellow text-black' : 'text-black hover:bg-gray-100'
                 }`}
               >
                 {option.label}
@@ -560,30 +560,30 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
       </div>
 
       {insights && (
-        <div className="border-4 border-black bg-[#1e293b] p-4 shadow-hard">
-          <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-brutal-yellow">{lang === 'vi' ? 'Metrics Bổ Sung' : 'Additional Metrics'}</h3>
+        <div className="border-4 border-brutal-yellow bg-white p-4 shadow-hard">
+          <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-black">{lang === 'vi' ? 'Metrics Bổ Sung' : 'Additional Metrics'}</h3>
           <div className="grid grid-cols-2 gap-3">
-            <div className="border-2 border-white/20 p-3 bg-black/20">
-              <span className="text-gray-400 text-xs uppercase">{t('dashboard.reach')}</span>
-              <div className="font-bold text-xl">{reach}</div>
+            <div className="border-4 border-black p-3 bg-gray-50">
+              <span className="text-gray-600 text-xs uppercase">{t('dashboard.reach')}</span>
+              <div className="font-bold text-xl text-black">{reach}</div>
             </div>
-            <div className="border-2 border-white/20 p-3 bg-black/20">
-              <span className="text-gray-400 text-xs uppercase">{t('detail.frequency')}</span>
-              <div className="font-bold text-xl">{frequency}</div>
+            <div className="border-4 border-black p-3 bg-gray-50">
+              <span className="text-gray-600 text-xs uppercase">{t('detail.frequency')}</span>
+              <div className="font-bold text-xl text-black">{frequency}</div>
             </div>
-            <div className="border-2 border-white/20 p-3 bg-black/20">
-              <span className="text-gray-400 text-xs uppercase">{t('dashboard.ctr')}</span>
-              <div className="font-bold text-xl">{ctr}</div>
+            <div className="border-4 border-black p-3 bg-gray-50">
+              <span className="text-gray-600 text-xs uppercase">{t('dashboard.ctr')}</span>
+              <div className="font-bold text-xl text-black">{ctr}</div>
             </div>
-            <div className="border-2 border-white/20 p-3 bg-black/20">
-              <span className="text-gray-400 text-xs uppercase">{t('detail.cpm')}</span>
-              <div className="font-bold text-xl">{cpm}</div>
+            <div className="border-4 border-black p-3 bg-gray-50">
+              <span className="text-gray-600 text-xs uppercase">{t('detail.cpm')}</span>
+              <div className="font-bold text-xl text-black">{cpm}</div>
             </div>
           </div>
           
           {/* Show actual date range from API */}
           {insights.date_start && insights.date_stop && (
-            <div className="mt-4 pt-3 border-t-2 border-white/10 text-center text-xs text-gray-500">
+            <div className="mt-4 pt-3 border-t-2 border-black/20 text-center text-xs text-gray-500">
               {lang === 'vi' ? 'Dữ liệu thực tế' : 'Actual data'}: {new Date(insights.date_start).toLocaleDateString(lang === 'vi' ? 'vi-VN' : 'en-US')} - {new Date(insights.date_stop).toLocaleDateString(lang === 'vi' ? 'vi-VN' : 'en-US')}
             </div>
           )}
@@ -592,45 +592,45 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
 
       {/* Engagement & Actions Metrics */}
       {insights?.actions && insights.actions.length > 0 && (
-        <div className="border-4 border-black bg-[#1e293b] p-4 shadow-hard">
-          <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-brutal-yellow">
+        <div className="border-4 border-brutal-yellow bg-white p-4 shadow-hard">
+          <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-black">
             {lang === 'vi' ? 'Tương Tác & Kết Quả' : 'Engagement & Results'}
           </h3>
           <div className="grid grid-cols-2 gap-3">
             {pageLikes !== '0' && (
-              <div className="border-2 border-blue-400/30 p-3 bg-blue-900/10">
-                <span className="text-gray-400 text-xs uppercase">{lang === 'vi' ? 'Lượt thích trang' : 'Page Likes'}</span>
-                <div className="font-bold text-xl text-blue-400">{formatNumber(parseInt(pageLikes))}</div>
+              <div className="border-4 border-blue-500 p-3 bg-blue-50">
+                <span className="text-gray-600 text-xs uppercase">{lang === 'vi' ? 'Lượt thích trang' : 'Page Likes'}</span>
+                <div className="font-bold text-xl text-blue-600">{formatNumber(parseInt(pageLikes))}</div>
               </div>
             )}
             {pageEngagement !== '0' && (
-              <div className="border-2 border-purple-400/30 p-3 bg-purple-900/10">
-                <span className="text-gray-400 text-xs uppercase">{lang === 'vi' ? 'Tương tác trang' : 'Page Engagement'}</span>
-                <div className="font-bold text-xl text-purple-400">{formatNumber(parseInt(pageEngagement))}</div>
+              <div className="border-4 border-purple-500 p-3 bg-purple-50">
+                <span className="text-gray-600 text-xs uppercase">{lang === 'vi' ? 'Tương tác trang' : 'Page Engagement'}</span>
+                <div className="font-bold text-xl text-purple-600">{formatNumber(parseInt(pageEngagement))}</div>
               </div>
             )}
             {postReactions !== '0' && (
-              <div className="border-2 border-pink-400/30 p-3 bg-pink-900/10">
-                <span className="text-gray-400 text-xs uppercase">{lang === 'vi' ? 'Cảm xúc bài viết' : 'Post Reactions'}</span>
-                <div className="font-bold text-xl text-pink-400">{formatNumber(parseInt(postReactions))}</div>
+              <div className="border-4 border-pink-500 p-3 bg-pink-50">
+                <span className="text-gray-600 text-xs uppercase">{lang === 'vi' ? 'Cảm xúc bài viết' : 'Post Reactions'}</span>
+                <div className="font-bold text-xl text-pink-600">{formatNumber(parseInt(postReactions))}</div>
               </div>
             )}
             {linkClicks !== '0' && (
-              <div className="border-2 border-green-400/30 p-3 bg-green-900/10">
-                <span className="text-gray-400 text-xs uppercase">{lang === 'vi' ? 'Click liên kết' : 'Link Clicks'}</span>
-                <div className="font-bold text-xl text-green-400">{formatNumber(parseInt(linkClicks as string))}</div>
+              <div className="border-4 border-green-500 p-3 bg-green-50">
+                <span className="text-gray-600 text-xs uppercase">{lang === 'vi' ? 'Click liên kết' : 'Link Clicks'}</span>
+                <div className="font-bold text-xl text-green-600">{formatNumber(parseInt(linkClicks as string))}</div>
               </div>
             )}
             {postSaves !== '0' && (
-              <div className="border-2 border-yellow-400/30 p-3 bg-yellow-900/10">
-                <span className="text-gray-400 text-xs uppercase">{lang === 'vi' ? 'Lượt lưu' : 'Post Saves'}</span>
-                <div className="font-bold text-xl text-yellow-400">{formatNumber(parseInt(postSaves))}</div>
+              <div className="border-4 border-yellow-500 p-3 bg-yellow-50">
+                <span className="text-gray-600 text-xs uppercase">{lang === 'vi' ? 'Lượt lưu' : 'Post Saves'}</span>
+                <div className="font-bold text-xl text-yellow-600">{formatNumber(parseInt(postSaves))}</div>
               </div>
             )}
             {postShares !== '0' && (
-              <div className="border-2 border-orange-400/30 p-3 bg-orange-900/10">
-                <span className="text-gray-400 text-xs uppercase">{lang === 'vi' ? 'Lượt chia sẻ' : 'Post Shares'}</span>
-                <div className="font-bold text-xl text-orange-400">{formatNumber(parseInt(postShares))}</div>
+              <div className="border-4 border-orange-500 p-3 bg-orange-50">
+                <span className="text-gray-600 text-xs uppercase">{lang === 'vi' ? 'Lượt chia sẻ' : 'Post Shares'}</span>
+                <div className="font-bold text-xl text-orange-600">{formatNumber(parseInt(postShares))}</div>
               </div>
             )}
           </div>
@@ -639,31 +639,31 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
 
       {/* Video Metrics */}
       {videoViews !== '0' && (
-        <div className="border-4 border-black bg-[#1e293b] p-4 shadow-hard">
-          <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-brutal-yellow">
+        <div className="border-4 border-brutal-yellow bg-white p-4 shadow-hard">
+          <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-black">
             {lang === 'vi' ? 'Số Liệu Video' : 'Video Metrics'}
           </h3>
           <div className="space-y-3">
-            <div className="border-2 border-red-400/30 p-3 bg-red-900/10">
-              <span className="text-gray-400 text-xs uppercase">{lang === 'vi' ? 'Lượt xem video' : 'Video Views'}</span>
-              <div className="font-bold text-2xl text-red-400">{formatNumber(parseInt(videoViews))}</div>
+            <div className="border-4 border-red-500 p-3 bg-red-50">
+              <span className="text-gray-600 text-xs uppercase">{lang === 'vi' ? 'Lượt xem video' : 'Video Views'}</span>
+              <div className="font-bold text-2xl text-red-600">{formatNumber(parseInt(videoViews))}</div>
             </div>
             <div className="grid grid-cols-4 gap-2">
-              <div className="border-2 border-white/10 p-2 text-center bg-black/20">
+              <div className="border-4 border-black p-2 text-center bg-gray-50">
                 <div className="text-xs text-gray-500">25%</div>
-                <div className="font-bold text-sm">{formatNumber(parseInt(video25))}</div>
+                <div className="font-bold text-sm text-black">{formatNumber(parseInt(video25))}</div>
               </div>
-              <div className="border-2 border-white/10 p-2 text-center bg-black/20">
+              <div className="border-4 border-black p-2 text-center bg-gray-50">
                 <div className="text-xs text-gray-500">50%</div>
-                <div className="font-bold text-sm">{formatNumber(parseInt(video50))}</div>
+                <div className="font-bold text-sm text-black">{formatNumber(parseInt(video50))}</div>
               </div>
-              <div className="border-2 border-white/10 p-2 text-center bg-black/20">
+              <div className="border-4 border-black p-2 text-center bg-gray-50">
                 <div className="text-xs text-gray-500">75%</div>
-                <div className="font-bold text-sm">{formatNumber(parseInt(video75))}</div>
+                <div className="font-bold text-sm text-black">{formatNumber(parseInt(video75))}</div>
               </div>
-              <div className="border-2 border-white/10 p-2 text-center bg-black/20">
+              <div className="border-4 border-black p-2 text-center bg-gray-50">
                 <div className="text-xs text-gray-500">100%</div>
-                <div className="font-bold text-sm">{formatNumber(parseInt(video100))}</div>
+                <div className="font-bold text-sm text-black">{formatNumber(parseInt(video100))}</div>
               </div>
             </div>
             <div className="text-xs text-gray-500 text-center mt-2">
@@ -677,26 +677,26 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
 
   const renderPerformanceTab = () => (
     <div className="space-y-4">
-      <div className="border-4 border-black bg-[#1e293b] p-4 shadow-hard">
+      <div className="border-4 border-brutal-yellow bg-white p-4 shadow-hard">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold text-lg uppercase tracking-wide text-brutal-yellow">{lang === 'vi' ? 'Chi Tiết Hiệu Quả' : 'Performance Details'}</h3>
+          <h3 className="font-bold text-lg uppercase tracking-wide text-black">{lang === 'vi' ? 'Chi Tiết Hiệu Quả' : 'Performance Details'}</h3>
           {renderDateDropdown()}
         </div>
 
         {insights ? (
           <div className="space-y-4">
             <div className="grid grid-cols-3 gap-2">
-              <div className="border-2 border-blue-500 bg-blue-500/10 p-3 text-center">
-                <div className="text-2xl font-bold text-blue-400">{impressions}</div>
-                <div className="text-xs text-gray-400 uppercase">{t('dashboard.impressions')}</div>
+              <div className="border-4 border-blue-500 bg-blue-50 p-3 text-center">
+                <div className="text-2xl font-bold text-blue-600">{impressions}</div>
+                <div className="text-xs text-gray-600 uppercase">{t('dashboard.impressions')}</div>
               </div>
-              <div className="border-2 border-green-500 bg-green-500/10 p-3 text-center">
-                <div className="text-2xl font-bold text-green-400">{clicks}</div>
-                <div className="text-xs text-gray-400 uppercase">{t('dashboard.clicks')}</div>
+              <div className="border-4 border-green-500 bg-green-50 p-3 text-center">
+                <div className="text-2xl font-bold text-green-600">{clicks}</div>
+                <div className="text-xs text-gray-600 uppercase">{t('dashboard.clicks')}</div>
               </div>
-              <div className="border-2 border-yellow-500 bg-yellow-500/10 p-3 text-center">
-                <div className="text-2xl font-bold text-yellow-400">{reach}</div>
-                <div className="text-xs text-gray-400 uppercase">{t('dashboard.reach')}</div>
+              <div className="border-4 border-yellow-500 bg-yellow-50 p-3 text-center">
+                <div className="text-2xl font-bold text-yellow-600">{reach}</div>
+                <div className="text-xs text-gray-600 uppercase">{t('dashboard.reach')}</div>
               </div>
             </div>
 
@@ -708,15 +708,15 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
                 { label: lang === 'vi' ? 'Tần suất (Frequency)' : 'Frequency', value: frequency },
                 { label: lang === 'vi' ? 'Tổng chi tiêu' : 'Total Spend', value: spend, highlight: true },
               ].map((item, i) => (
-                <div key={i} className="flex justify-between items-center py-2 border-b-2 border-white/10">
-                  <span className="text-gray-400 uppercase text-sm">{item.label}</span>
-                  <span className={`font-bold text-lg ${item.highlight ? 'text-brutal-yellow' : ''}`}>{item.value}</span>
+                <div key={i} className="flex justify-between items-center py-2 border-b-2 border-black/10">
+                  <span className="text-gray-600 uppercase text-sm">{item.label}</span>
+                  <span className={`font-bold text-lg ${item.highlight ? 'text-blue-600' : 'text-black'}`}>{item.value}</span>
                 </div>
               ))}
             </div>
 
             {insights.date_start && insights.date_stop && (
-              <div className="text-center text-xs text-gray-500 mt-4 pt-3 border-t-2 border-white/10 uppercase">
+              <div className="text-center text-xs text-gray-500 mt-4 pt-3 border-t-2 border-black/10 uppercase">
                 {lang === 'vi' ? 'Dữ liệu' : 'Data'}: {new Date(insights.date_start).toLocaleDateString(lang === 'vi' ? 'vi-VN' : 'en-US')} - {new Date(insights.date_stop).toLocaleDateString(lang === 'vi' ? 'vi-VN' : 'en-US')}
               </div>
             )}
@@ -733,28 +733,28 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
   const renderAudienceTab = () => (
     <div className="space-y-4">
       {demographicsLoading ? (
-        <div className="border-4 border-black bg-[#1e293b] p-6 text-center shadow-hard">
+        <div className="border-4 border-black bg-white p-6 text-center shadow-hard">
           <div className="animate-pulse space-y-3">
-            <div className="h-4 bg-white/20 w-3/4 mx-auto"></div>
-            <div className="h-4 bg-white/20 w-1/2 mx-auto"></div>
+            <div className="h-4 bg-gray-300 w-3/4 mx-auto"></div>
+            <div className="h-4 bg-gray-300 w-1/2 mx-auto"></div>
           </div>
-          <p className="mt-3 font-bold uppercase">{t('common.loading')}</p>
+          <p className="mt-3 font-bold uppercase text-black">{t('common.loading')}</p>
         </div>
       ) : demographics.length > 0 ? (
         <>
           {/* Gender Distribution */}
-          <div className="border-4 border-black bg-[#1e293b] p-4 shadow-hard">
-            <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-brutal-yellow">{lang === 'vi' ? 'Phân Bổ Giới Tính' : 'Gender Distribution'}</h3>
+          <div className="border-4 border-brutal-yellow bg-white p-4 shadow-hard">
+            <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-black">{lang === 'vi' ? 'Phân Bổ Giới Tính' : 'Gender Distribution'}</h3>
             <div className="space-y-4">
               {processedDemographics.byGender.map((g) => {
                 const percentage = totalImpressions > 0 ? (g.impressions / totalImpressions * 100) : 0;
                 return (
                   <div key={g.gender} className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="font-bold uppercase">{g.gender}</span>
-                      <span className="text-gray-400">{percentage.toFixed(1)}% • {formatNumber(g.impressions)}</span>
+                      <span className="font-bold uppercase text-black">{g.gender}</span>
+                      <span className="text-gray-600">{percentage.toFixed(1)}% • {formatNumber(g.impressions)}</span>
                     </div>
-                    <div className="h-4 bg-black border-2 border-white/20 overflow-hidden">
+                    <div className="h-4 bg-gray-200 border-4 border-black overflow-hidden">
                       <div 
                         className={`h-full ${g.gender === (lang === 'vi' ? 'Nam' : 'Male') ? 'bg-blue-500' : 'bg-pink-500'}`}
                         style={{ width: `${percentage}%` }}
@@ -770,18 +770,18 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
           </div>
 
           {/* Age Distribution */}
-          <div className="border-4 border-black bg-[#1e293b] p-4 shadow-hard">
-            <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-brutal-yellow">{lang === 'vi' ? 'Phân Bổ Độ Tuổi' : 'Age Distribution'}</h3>
+          <div className="border-4 border-brutal-yellow bg-white p-4 shadow-hard">
+            <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-black">{lang === 'vi' ? 'Phân Bổ Độ Tuổi' : 'Age Distribution'}</h3>
             <div className="space-y-3">
               {processedDemographics.byAge.map((a) => {
                 const percentage = totalImpressions > 0 ? (a.impressions / totalImpressions * 100) : 0;
                 return (
                   <div key={a.age} className="space-y-1">
                     <div className="flex justify-between text-sm">
-                      <span className="font-bold">{a.age}</span>
-                      <span className="text-gray-400">{percentage.toFixed(1)}%</span>
+                      <span className="font-bold text-black">{a.age}</span>
+                      <span className="text-gray-600">{percentage.toFixed(1)}%</span>
                     </div>
-                    <div className="h-3 bg-black border-2 border-white/20 overflow-hidden">
+                    <div className="h-3 bg-gray-200 border-4 border-black overflow-hidden">
                       <div 
                         className="h-full bg-gradient-to-r from-blue-500 to-purple-500"
                         style={{ width: `${percentage}%` }}
@@ -797,10 +797,10 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
           </div>
         </>
       ) : (
-        <div className="border-4 border-black bg-[#1e293b] p-6 text-center shadow-hard">
-          <Users size={48} className="mx-auto text-gray-600 mb-3" />
-          <h3 className="font-bold text-lg mb-2 uppercase">Chưa Có Dữ Liệu</h3>
-          <p className="text-gray-400 text-sm">
+        <div className="border-4 border-black bg-white p-6 text-center shadow-hard">
+          <Users size={48} className="mx-auto text-gray-400 mb-3" />
+          <h3 className="font-bold text-lg mb-2 uppercase text-black">Chưa Có Dữ Liệu</h3>
+          <p className="text-gray-500 text-sm">
             {lang === 'vi' ? 'Dữ liệu demographic sẽ hiển thị khi chiến dịch có đủ lượt hiển thị.' : 'Demographic data will be displayed when the campaign has enough impressions.'}
           </p>
         </div>
@@ -815,20 +815,20 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
     return (
       <div className="space-y-4">
         {isLoading ? (
-          <div className="border-4 border-black bg-[#1e293b] p-6 text-center shadow-hard">
+          <div className="border-4 border-black bg-white p-6 text-center shadow-hard">
             <div className="animate-pulse space-y-3">
-              <div className="h-4 bg-white/20 w-3/4 mx-auto"></div>
-              <div className="h-4 bg-white/20 w-1/2 mx-auto"></div>
+              <div className="h-4 bg-gray-300 w-3/4 mx-auto"></div>
+              <div className="h-4 bg-gray-300 w-1/2 mx-auto"></div>
             </div>
-            <p className="mt-3 font-bold uppercase">{t('common.loading')}</p>
+            <p className="mt-3 font-bold uppercase text-black">{t('common.loading')}</p>
           </div>
         ) : (
           <>
             {/* Placement Breakdown */}
-            <div className="border-4 border-black bg-[#1e293b] p-4 shadow-hard">
+            <div className="border-4 border-brutal-yellow bg-white p-4 shadow-hard">
               <div className="flex items-center gap-2 mb-4">
-                <Layout size={20} className="text-brutal-yellow" />
-                <h3 className="font-bold text-lg uppercase tracking-wide text-brutal-yellow">
+                <Layout size={20} className="text-black" />
+                <h3 className="font-bold text-lg uppercase tracking-wide text-black">
                   {lang === 'vi' ? 'Vị Trí Quảng Cáo' : 'Ad Placements'}
                 </h3>
               </div>
@@ -842,10 +842,10 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
                     return (
                       <div key={i} className="space-y-1">
                         <div className="flex justify-between text-sm">
-                          <span className="font-bold truncate flex-1">{p.name}</span>
-                          <span className="text-gray-400 ml-2">{formatNumber(p.impressions)}</span>
+                          <span className="font-bold truncate flex-1 text-black">{p.name}</span>
+                          <span className="text-gray-600 ml-2">{formatNumber(p.impressions)}</span>
                         </div>
-                        <div className="h-4 bg-black border-2 border-white/20 overflow-hidden">
+                        <div className="h-4 bg-gray-200 border-4 border-black overflow-hidden">
                           <div 
                             className="h-full bg-gradient-to-r from-teal-500 to-cyan-500"
                             style={{ width: `${Math.max(percentage, 1)}%` }}
@@ -866,10 +866,10 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
             </div>
 
             {/* Location Breakdown */}
-            <div className="border-4 border-black bg-[#1e293b] p-4 shadow-hard">
+            <div className="border-4 border-brutal-yellow bg-white p-4 shadow-hard">
               <div className="flex items-center gap-2 mb-4">
-                <MapPin size={20} className="text-brutal-yellow" />
-                <h3 className="font-bold text-lg uppercase tracking-wide text-brutal-yellow">
+                <MapPin size={20} className="text-black" />
+                <h3 className="font-bold text-lg uppercase tracking-wide text-black">
                   {lang === 'vi' ? 'Vị Trí Địa Lý' : 'Geographic Locations'}
                 </h3>
               </div>
@@ -883,10 +883,10 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
                     return (
                       <div key={i} className="space-y-1">
                         <div className="flex justify-between text-sm">
-                          <span className="font-bold truncate flex-1">{l.region}</span>
-                          <span className="text-gray-400 ml-2">{formatNumber(l.impressions)}</span>
+                          <span className="font-bold truncate flex-1 text-black">{l.region}</span>
+                          <span className="text-gray-600 ml-2">{formatNumber(l.impressions)}</span>
                         </div>
-                        <div className="h-3 bg-black border-2 border-white/20 overflow-hidden">
+                        <div className="h-3 bg-gray-200 border-4 border-black overflow-hidden">
                           <div 
                             className="h-full bg-gradient-to-r from-emerald-500 to-green-500"
                             style={{ width: `${Math.max(percentage, 1)}%` }}
@@ -915,18 +915,18 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
     
     return (
       <div className="space-y-4">
-        <div className="border-4 border-black bg-[#1e293b] p-4 shadow-hard">
-          <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-brutal-yellow">{lang === 'vi' ? 'Thông Tin Ngân Sách' : 'Budget Information'}</h3>
+        <div className="border-4 border-brutal-yellow bg-white p-4 shadow-hard">
+          <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-black">{lang === 'vi' ? 'Thông Tin Ngân Sách' : 'Budget Information'}</h3>
           
           <div className="space-y-3">
-            <div className="flex justify-between items-center py-3 border-b-2 border-white/10">
-              <span className="text-gray-400 uppercase text-sm">{lang === 'vi' ? 'Loại ngân sách' : 'Budget Type'}</span>
-              <span className="font-bold">{lifetimeBudget ? t('detail.lifetime') : dailyBudget ? t('detail.daily') : 'N/A'}</span>
+            <div className="flex justify-between items-center py-3 border-b-2 border-black/20">
+              <span className="text-gray-600 uppercase text-sm">{lang === 'vi' ? 'Loại ngân sách' : 'Budget Type'}</span>
+              <span className="font-bold text-black">{lifetimeBudget ? t('detail.lifetime') : dailyBudget ? t('detail.daily') : 'N/A'}</span>
             </div>
 
-            <div className="flex justify-between items-center py-3 border-b-2 border-white/10">
-              <span className="text-gray-400 uppercase text-sm">{t('detail.budgetTotal')}</span>
-              <span className="font-bold text-xl">
+            <div className="flex justify-between items-center py-3 border-b-2 border-black/20">
+              <span className="text-gray-600 uppercase text-sm">{t('detail.budgetTotal')}</span>
+              <span className="font-bold text-xl text-black">
                 {currencySettings.currency === 'VND' 
                   ? `${budgetProgress.budget.toLocaleString('vi-VN')} ₫`
                   : `$${budgetProgress.budget.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
@@ -934,9 +934,9 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
               </span>
             </div>
 
-            <div className="flex justify-between items-center py-3 border-b-2 border-white/10">
-              <span className="text-gray-400 uppercase text-sm">{t('detail.spentTotal')} ({t('detail.lifetime')})</span>
-              <span className="font-bold text-xl text-green-400">
+            <div className="flex justify-between items-center py-3 border-b-2 border-black/20">
+              <span className="text-gray-600 uppercase text-sm">{t('detail.spentTotal')} ({t('detail.lifetime')})</span>
+              <span className="font-bold text-xl text-green-600">
                 {currencySettings.currency === 'VND'
                   ? `${budgetProgress.spent.toLocaleString('vi-VN')} ₫`
                   : `$${budgetProgress.spent.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
@@ -945,9 +945,9 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
             </div>
 
             {lifetimeBudget && (
-              <div className="flex justify-between items-center py-3 border-b-2 border-white/10">
-                <span className="text-gray-400 uppercase text-sm">{t('detail.remaining')}</span>
-                <span className="font-bold text-xl text-blue-400">
+              <div className="flex justify-between items-center py-3 border-b-2 border-black/20">
+                <span className="text-gray-600 uppercase text-sm">{t('detail.remaining')}</span>
+                <span className="font-bold text-xl text-blue-600">
                   {currencySettings.currency === 'VND'
                     ? `${budgetProgress.remaining.toLocaleString('vi-VN')} ₫`
                     : `$${budgetProgress.remaining.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
@@ -960,10 +960,10 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
             {lifetimeBudget && (
               <div className="mt-4 pt-2">
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-gray-400 uppercase">{lang === 'vi' ? 'Tiến độ chi tiêu' : 'Spend Progress'}</span>
-                  <span className="font-bold">{budgetProgress.percentage}%</span>
+                  <span className="text-gray-600 uppercase">{lang === 'vi' ? 'Tiến độ chi tiêu' : 'Spend Progress'}</span>
+                  <span className="font-bold text-black">{budgetProgress.percentage}%</span>
                 </div>
-                <div className="h-6 bg-black border-4 border-white/30 overflow-hidden">
+                <div className="h-6 bg-gray-200 border-4 border-black overflow-hidden">
                   <div 
                     className={`h-full transition-all ${
                       budgetProgress.percentage >= 90 ? 'bg-red-500' : 
@@ -978,18 +978,18 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
         </div>
 
         {/* Campaign Info */}
-        <div className="border-4 border-black bg-[#1e293b] p-4 shadow-hard">
-          <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-brutal-yellow">{lang === 'vi' ? 'Thông Tin Chiến Dịch' : 'Campaign Info'}</h3>
+        <div className="border-4 border-brutal-yellow bg-white p-4 shadow-hard">
+          <h3 className="font-bold text-lg mb-4 uppercase tracking-wide text-black">{lang === 'vi' ? 'Thông Tin Chiến Dịch' : 'Campaign Info'}</h3>
           <div className="space-y-3">
-            <div className="flex justify-between py-3 border-b-2 border-white/10">
-              <span className="text-gray-400 uppercase text-sm">{t('management.status')}</span>
+            <div className="flex justify-between py-3 border-b-2 border-black/20">
+              <span className="text-gray-600 uppercase text-sm">{t('management.status')}</span>
               <span className={`font-bold ${getStatusColorClass()}`}>
                 {getStatusText()}
               </span>
             </div>
-            <div className="flex justify-between py-3 border-b-2 border-white/10">
-              <span className="text-gray-400 uppercase text-sm">{lang === 'vi' ? 'Mục tiêu' : 'Objective'}</span>
-              <span className="font-bold">{getObjectiveName(displayCampaign.objective, lang)}</span>
+            <div className="flex justify-between py-3 border-b-2 border-black/20">
+              <span className="text-gray-600 uppercase text-sm">{lang === 'vi' ? 'Mục tiêu' : 'Objective'}</span>
+              <span className="font-bold text-black">{getObjectiveName(displayCampaign.objective, lang)}</span>
             </div>
           </div>
         </div>
@@ -998,33 +998,32 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-retro-dark text-white font-sans">
+    <div className="flex flex-col h-full w-full bg-retro text-black font-sans">
       
       <BrutalistHeader 
         title={t('detail.title')} 
         onBack={onBack}
-        variant="dark"
       />
 
       <div className="flex-1 overflow-y-auto no-scrollbar p-4 space-y-4">
         
         {loading && (
-          <div className="border-4 border-black bg-[#1e293b] p-6 text-center shadow-hard">
+          <div className="border-4 border-black bg-white p-6 text-center shadow-hard">
             <div className="animate-pulse space-y-3">
-              <div className="h-4 bg-white/20 w-3/4 mx-auto"></div>
-              <div className="h-4 bg-white/20 w-1/2 mx-auto"></div>
+              <div className="h-4 bg-gray-300 w-3/4 mx-auto"></div>
+              <div className="h-4 bg-gray-300 w-1/2 mx-auto"></div>
             </div>
-            <p className="mt-3 font-bold uppercase">{t('common.loading')}</p>
+            <p className="mt-3 font-bold uppercase text-black">{t('common.loading')}</p>
           </div>
         )}
 
         {error && !loading && (
-          <div className="border-4 border-red-600 bg-red-900/20 p-6 shadow-hard">
+          <div className="border-4 border-red-600 bg-red-50 p-6 shadow-hard">
             <div className="flex items-start gap-3">
-              <AlertCircle size={24} className="text-red-400 shrink-0" />
+              <AlertCircle size={24} className="text-red-600 shrink-0" />
               <div>
-                <h3 className="font-bold text-lg text-red-400 mb-2 uppercase">{t('error.loadFailed')}</h3>
-                <p className="text-sm text-gray-300 mb-3">{error}</p>
+                <h3 className="font-bold text-lg text-red-600 mb-2 uppercase">{t('error.loadFailed')}</h3>
+                <p className="text-sm text-gray-700 mb-3">{error}</p>
                 <button 
                   onClick={() => window.location.reload()}
                   className="bg-red-600 text-white border-4 border-black font-bold px-4 py-2 uppercase shadow-hard active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
@@ -1039,28 +1038,28 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
         {!loading && (
           <>
             {/* Title & Status */}
-            <div className="border-4 border-black bg-black p-4 shadow-hard">
-              <h2 className="font-display font-bold text-2xl mb-2">{displayCampaign.title}</h2>
+            <div className="border-4 border-brutal-yellow bg-white p-4 shadow-hard">
+              <h2 className="font-display font-bold text-2xl mb-2 text-black">{displayCampaign.title}</h2>
               <div className="flex items-center gap-2 text-sm">
                 <span className={`w-3 h-3 ${getStatusDotClass()}`}></span>
                 <span className={`font-bold uppercase ${getStatusColorClass()}`}>
                     {getStatusText()}
                 </span>
-                <span className="text-gray-500">•</span>
-                <span className="text-gray-400 uppercase">{getObjectiveName(displayCampaign.objective, lang)}</span>
+                <span className="text-gray-400">•</span>
+                <span className="text-gray-600 uppercase">{getObjectiveName(displayCampaign.objective, lang)}</span>
               </div>
             </div>
 
             {/* Navigation Tabs - Brutalist Style */}
-            <div className="flex border-4 border-black bg-black overflow-x-auto">
+            <div className="flex border-4 border-black bg-white overflow-x-auto">
               {tabs.map((tab) => (
                 <button 
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-3 px-2 text-xs font-bold uppercase tracking-wide transition-colors border-r-2 border-white/20 last:border-r-0 ${
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-3 px-2 text-xs font-bold uppercase tracking-wide transition-colors border-r-2 border-black/20 last:border-r-0 ${
                     activeTab === tab.id 
                       ? 'bg-brutal-yellow text-black' 
-                      : 'text-gray-400 hover:bg-white/10 hover:text-white'
+                      : 'text-gray-600 hover:bg-gray-100 hover:text-black'
                   }`}
                 >
                   {tab.icon}
@@ -1111,8 +1110,8 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
       {/* AI Analysis Modal - Brutalist Style */}
       {showAnalysis && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => !analysisLoading && setShowAnalysis(false)} />
-          <div className="relative bg-retro-dark border-4 border-brutal-yellow w-full sm:max-w-md max-h-[90vh] overflow-hidden shadow-[8px_8px_0px_0px_rgba(250,204,21,0.3)] sm:rounded-none flex flex-col">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !analysisLoading && setShowAnalysis(false)} />
+          <div className="relative bg-white border-4 border-brutal-yellow w-full sm:max-w-md max-h-[90vh] overflow-hidden shadow-hard sm:rounded-none flex flex-col">
             
             {/* Header - Brutalist */}
             <div className="bg-brutal-yellow p-4 border-b-4 border-black">
@@ -1141,19 +1140,19 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
             </div>
             
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto p-4 bg-white">
               {analysisLoading ? (
                 <div className="text-center py-12">
                   {/* Brutalist Loading Animation */}
                   <div className="relative w-16 h-16 mx-auto mb-6">
                     <div className="absolute inset-0 border-4 border-brutal-yellow animate-ping opacity-30"></div>
-                    <div className="absolute inset-2 border-4 border-white animate-pulse"></div>
+                    <div className="absolute inset-2 border-4 border-black animate-pulse"></div>
                     <div className="absolute inset-4 bg-brutal-yellow animate-bounce"></div>
                   </div>
-                  <p className="font-bold text-lg uppercase text-white tracking-wide">
+                  <p className="font-bold text-lg uppercase text-black tracking-wide">
                     {lang === 'vi' ? 'Đang Phân Tích' : 'Analyzing'}
                   </p>
-                  <p className="text-gray-500 text-sm mt-2">
+                  <p className="text-gray-600 text-sm mt-2">
                     {lang === 'vi' ? 'AI đang xử lý dữ liệu chiến dịch...' : 'AI is processing campaign data...'}
                   </p>
                 </div>
@@ -1161,29 +1160,29 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
                 <div className="space-y-4">
                   {/* Quick Stats Row */}
                   <div className="grid grid-cols-3 gap-2">
-                    <div className="bg-black border-2 border-white/20 p-3 text-center">
-                      <p className="text-brutal-yellow text-lg font-bold">{ctr}</p>
-                      <p className="text-[10px] text-gray-500 uppercase">CTR</p>
+                    <div className="bg-gray-100 border-4 border-black p-3 text-center">
+                      <p className="text-black text-lg font-bold">{ctr}</p>
+                      <p className="text-[10px] text-gray-600 uppercase">CTR</p>
                     </div>
-                    <div className="bg-black border-2 border-white/20 p-3 text-center">
-                      <p className="text-green-400 text-lg font-bold">{cpc}</p>
-                      <p className="text-[10px] text-gray-500 uppercase">CPC</p>
+                    <div className="bg-gray-100 border-4 border-black p-3 text-center">
+                      <p className="text-green-600 text-lg font-bold">{cpc}</p>
+                      <p className="text-[10px] text-gray-600 uppercase">CPC</p>
                     </div>
-                    <div className="bg-black border-2 border-white/20 p-3 text-center">
-                      <p className="text-blue-400 text-lg font-bold">{budgetProgress.percentage}%</p>
-                      <p className="text-[10px] text-gray-500 uppercase">{lang === 'vi' ? 'Ngân sách' : 'Budget'}</p>
+                    <div className="bg-gray-100 border-4 border-black p-3 text-center">
+                      <p className="text-blue-600 text-lg font-bold">{budgetProgress.percentage}%</p>
+                      <p className="text-[10px] text-gray-600 uppercase">{lang === 'vi' ? 'Ngân sách' : 'Budget'}</p>
                     </div>
                   </div>
 
                   {/* AI Analysis Result - Formatted */}
-                  <div className="bg-black border-4 border-white/10">
-                    <div className="bg-white/5 px-4 py-2 border-b-2 border-white/10 flex items-center gap-2">
-                      <Sparkles size={14} className="text-brutal-yellow" />
-                      <span className="text-xs font-bold uppercase text-brutal-yellow tracking-wider">
+                  <div className="bg-white border-4 border-black">
+                    <div className="bg-brutal-yellow px-4 py-2 border-b-4 border-black flex items-center gap-2">
+                      <Sparkles size={14} className="text-black" />
+                      <span className="text-xs font-bold uppercase text-black tracking-wider">
                         {lang === 'vi' ? 'Phân Tích' : 'Analysis'}
                       </span>
                     </div>
-                    <div className="p-4">
+                    <div className="p-4 bg-white">
                       {/* Parse and format the AI result */}
                       {analysisResult.split('\n').map((line, idx) => {
                         // Check for numbered items (1. 2. 3.)
@@ -1192,12 +1191,12 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
                           return (
                             <div key={idx} className="mb-4 last:mb-0">
                               <div className="flex items-start gap-3">
-                                <span className="bg-brutal-yellow text-black w-6 h-6 flex items-center justify-center font-bold text-sm shrink-0">
+                                <span className="bg-brutal-yellow text-black w-6 h-6 flex items-center justify-center font-bold text-sm shrink-0 border-2 border-black">
                                   {numberedMatch[1]}
                                 </span>
                                 <div className="flex-1">
-                                  <p className="font-bold text-white text-sm">{numberedMatch[2]}</p>
-                                  <p className="text-gray-400 text-sm mt-1">{numberedMatch[3].replace(/^\s*[-–]\s*/, '')}</p>
+                                  <p className="font-bold text-black text-sm">{numberedMatch[2]}</p>
+                                  <p className="text-gray-600 text-sm mt-1">{numberedMatch[3].replace(/^\s*[-–]\s*/, '')}</p>
                                 </div>
                               </div>
                             </div>
@@ -1209,8 +1208,8 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
                           const content = line.replace(/^[\s-•]+/, '').trim();
                           return (
                             <div key={idx} className="flex items-start gap-2 mb-2 ml-9">
-                              <span className="text-brutal-yellow mt-1">→</span>
-                              <p className="text-gray-300 text-sm">{content}</p>
+                              <span className="text-black mt-1">→</span>
+                              <p className="text-gray-700 text-sm">{content}</p>
                             </div>
                           );
                         }
@@ -1219,10 +1218,10 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
                         if (line.includes('**')) {
                           const parts = line.split(/\*\*(.+?)\*\*/g);
                           return (
-                            <p key={idx} className="text-gray-300 text-sm mb-2">
+                            <p key={idx} className="text-gray-700 text-sm mb-2">
                               {parts.map((part, i) => 
                                 i % 2 === 1 
-                                  ? <span key={i} className="font-bold text-white">{part}</span>
+                                  ? <span key={i} className="font-bold text-black">{part}</span>
                                   : part
                               )}
                             </p>
@@ -1232,15 +1231,15 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
                         // Check for note/warning lines
                         if (line.startsWith('*') && line.endsWith('*')) {
                           return (
-                            <div key={idx} className="mt-4 p-3 bg-brutal-yellow/10 border-l-4 border-brutal-yellow">
-                              <p className="text-brutal-yellow text-xs font-medium">{line.replace(/^\*|\*$/g, '')}</p>
+                            <div key={idx} className="mt-4 p-3 bg-brutal-yellow/20 border-l-4 border-brutal-yellow">
+                              <p className="text-black text-xs font-medium">{line.replace(/^\*|\*$/g, '')}</p>
                             </div>
                           );
                         }
                         
                         // Regular text
                         if (line.trim()) {
-                          return <p key={idx} className="text-gray-300 text-sm mb-2">{line}</p>;
+                          return <p key={idx} className="text-gray-700 text-sm mb-2">{line}</p>;
                         }
                         
                         return null;
@@ -1249,11 +1248,11 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
                   </div>
                   
                   {/* Time & Date Range Badge */}
-                  <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
-                    <span className="bg-white/5 px-2 py-1 border border-white/10">
+                  <div className="flex items-center justify-center gap-2 text-xs text-gray-600">
+                    <span className="bg-gray-100 px-2 py-1 border-2 border-black">
                       📅 {selectedDateLabel}
                     </span>
-                    <span className="bg-white/5 px-2 py-1 border border-white/10">
+                    <span className="bg-gray-100 px-2 py-1 border-2 border-black">
                       🤖 Mistral AI
                     </span>
                   </div>
@@ -1263,9 +1262,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
             
             {/* Footer - Action Button */}
             {!analysisLoading && (
-              <div className="p-4 border-t-4 border-black bg-black/50">
-                <button
-                  onClick={() => setShowAnalysis(false)}
+              <div className="p-4 border-t-4 border-black bg-gray-100">
                   className="w-full bg-brutal-yellow text-black border-4 border-black font-bold py-3 uppercase tracking-wider shadow-hard active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
                 >
                   {lang === 'vi' ? 'Đóng' : 'Close'}
