@@ -5,7 +5,7 @@ import { CampaignData } from '../types';
 import { getCampaignInsights, getDemographicInsights, getPlacementInsights, getLocationInsights, formatNumber, type CampaignInsights, type DemographicData, type PlacementData, type LocationData } from '../services/apiService';
 import { formatCurrencyWithSettings, getCurrencySettings } from '../utils/currency';
 import { useTranslation } from '../services/i18n';
-import { analyzeCampaign, type CampaignAnalysisData } from '../services/geminiService';
+import { analyzeCampaign, type CampaignAnalysisData } from '../services/aiService';
 
 interface CampaignDetailScreenProps {
   onBack: () => void;
