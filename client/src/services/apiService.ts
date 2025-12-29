@@ -385,11 +385,16 @@ export interface DashboardMetrics {
   averageCTR: number;
   activeCampaigns: number;
   pausedCampaigns: number;
+  // Demographics aggregated from all active campaigns
+  demographics?: {
+    byGender: Array<{ gender: string; impressions: number; clicks: number; spend: number }>;
+    byAge: Array<{ age: string; impressions: number; clicks: number; spend: number }>;
+  };
 }
 
 /**
  * Get dashboard summary metrics
- * This aggregates data from all campaigns
+ * This aggregates data from ACTIVE campaigns only
  */
 export async function getDashboardMetrics(): Promise<DashboardMetrics> {
   try {
@@ -412,33 +417,74 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
     const campaignsArrays = await Promise.all(campaignsPromises);
     const allCampaigns = campaignsArrays.flat();
 
-    // Get insights for all campaigns
-    const insightsPromises = allCampaigns.map(campaign => 
+    // Count active and paused campaigns
+    const activeCampaigns = allCampaigns.filter(c => c.status === 'ACTIVE').length;
+    const pausedCampaigns = allCampaigns.filter(c => c.status === 'PAUSED').length;
+    
+    // Filter only ACTIVE campaigns for metrics
+    const activeCampaignsList = allCampaigns.filter(c => c.status === 'ACTIVE');
+
+    // Get insights for ACTIVE campaigns only
+    const insightsPromises = activeCampaignsList.map(campaign => 
       getCampaignInsights(campaign.id).catch(() => ({} as CampaignInsights))
     );
     const allInsights = await Promise.all(insightsPromises);
 
-    // Aggregate metrics
+    // Get demographics for ACTIVE campaigns
+    const demographicsPromises = activeCampaignsList.map(campaign => 
+      getDemographicInsights(campaign.id).catch(() => [] as DemographicData[])
+    );
+    const allDemographics = await Promise.all(demographicsPromises);
+
+    // Aggregate metrics from ACTIVE campaigns
     let totalSpend = 0;
     let totalImpressions = 0;
     let totalClicks = 0;
-    let activeCampaigns = 0;
-    let pausedCampaigns = 0;
 
-    allCampaigns.forEach((campaign, index) => {
-      const insights = allInsights[index];
-      
+    allInsights.forEach((insights) => {
       totalSpend += parseFloat(insights.spend || '0');
       totalImpressions += parseInt(insights.impressions || '0');
       totalClicks += parseInt(insights.clicks || '0');
-      
-      if (campaign.status === 'ACTIVE') activeCampaigns++;
-      if (campaign.status === 'PAUSED') pausedCampaigns++;
     });
 
     const averageCTR = totalImpressions > 0 
       ? (totalClicks / totalImpressions) * 100 
       : 0;
+
+    // Aggregate demographics
+    const genderMap = new Map<string, { impressions: number; clicks: number; spend: number }>();
+    const ageMap = new Map<string, { impressions: number; clicks: number; spend: number }>();
+    
+    allDemographics.flat().forEach(d => {
+      // Aggregate by gender
+      const genderKey = d.gender || 'unknown';
+      const genderExisting = genderMap.get(genderKey) || { impressions: 0, clicks: 0, spend: 0 };
+      genderMap.set(genderKey, {
+        impressions: genderExisting.impressions + parseInt(d.impressions || '0'),
+        clicks: genderExisting.clicks + parseInt(d.clicks || '0'),
+        spend: genderExisting.spend + parseFloat(d.spend || '0'),
+      });
+
+      // Aggregate by age
+      const ageKey = d.age || 'unknown';
+      const ageExisting = ageMap.get(ageKey) || { impressions: 0, clicks: 0, spend: 0 };
+      ageMap.set(ageKey, {
+        impressions: ageExisting.impressions + parseInt(d.impressions || '0'),
+        clicks: ageExisting.clicks + parseInt(d.clicks || '0'),
+        spend: ageExisting.spend + parseFloat(d.spend || '0'),
+      });
+    });
+
+    const demographics = {
+      byGender: Array.from(genderMap.entries()).map(([gender, data]) => ({ gender, ...data })),
+      byAge: Array.from(ageMap.entries())
+        .map(([age, data]) => ({ age, ...data }))
+        .sort((a, b) => {
+          // Sort by age range
+          const ageOrder = ['13-17', '18-24', '25-34', '35-44', '45-54', '55-64', '65+'];
+          return ageOrder.indexOf(a.age) - ageOrder.indexOf(b.age);
+        }),
+    };
 
     return {
       totalSpend,
@@ -447,6 +493,7 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
       averageCTR,
       activeCampaigns,
       pausedCampaigns,
+      demographics: demographics.byGender.length > 0 || demographics.byAge.length > 0 ? demographics : undefined,
     };
   } catch (error) {
     console.error('Error fetching dashboard metrics:', error);

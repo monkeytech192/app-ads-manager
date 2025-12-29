@@ -227,7 +227,7 @@ const ManagementScreen: React.FC<ManagementScreenProps> = ({
                            filteredCampaigns.map((camp) => (
                                <BrutalistCard key={camp.id} variant="white" className="!p-0 overflow-hidden relative mb-4">
                                   <div className="p-3 border-b-4 border-black flex justify-between items-start bg-white">
-                                      <div className="flex gap-3 flex-1 pr-2">
+                                      <div className="flex gap-2 flex-1 pr-2">
                                          <div className="border-4 border-black p-2 bg-white h-fit shrink-0">
                                             <Target size={28} />
                                          </div>

@@ -96,7 +96,7 @@ export const BrutalistToggle: React.FC<{ checked: boolean; onChange: () => void;
   <div 
     onClick={onChange}
     className={`
-      cursor-pointer flex items-center justify-between w-24 h-10 border-4 border-black p-1 relative transition-colors
+      cursor-pointer flex items-center justify-between w-20 h-10 border-4 border-black p-1 relative transition-colors
       ${checked ? 'bg-[#22c55e]' : 'bg-brutal-yellow'} 
     `}
   >

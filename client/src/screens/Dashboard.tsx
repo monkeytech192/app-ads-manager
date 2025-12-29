@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DollarSign, Eye, MousePointer2, TrendingUp, Activity, LogOut, AlertCircle } from 'lucide-react';
+import { DollarSign, Eye, MousePointer2, TrendingUp, Activity, LogOut, AlertCircle, Users } from 'lucide-react';
 import { BrutalistCard, BrutalistHeader } from '../shared/UIComponents';
 import BottomNav from '../shared/BottomNav';
 import { ScreenView, FacebookUserProfile } from '../types';
@@ -25,70 +25,99 @@ const StatBox = ({ label, value, icon: Icon, fullWidth = false }: any) => (
   </div>
 );
 
-const BarChart = () => {
-  const data = [
-    { m: 'Jan', c: 60 },
-    { m: 'Feb', c: 70 },
-    { m: 'Mar', c: 65 },
-    { m: 'Apr', c: 80 },
-    { m: 'May', c: 85 },
-    { m: 'Jun', c: 90 },
-    { m: 'Jul', c: 95 },
-    { m: 'Aug', c: 98 },
-    { m: 'Sep', c: 70 },
-    { m: 'Oct', c: 75 },
-    { m: 'Nov', c: 85 },
-    { m: 'Dec', c: 60 },
-  ];
+// Pie Chart Component for Demographics
+interface PieChartData {
+  label: string;
+  value: number;
+  color: string;
+}
+
+const PieChart = ({ data, title, lang }: { data: PieChartData[]; title: string; lang: string }) => {
+  const total = data.reduce((sum, item) => sum + item.value, 0);
+  if (total === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500 text-sm">{lang === 'vi' ? 'Chưa có dữ liệu' : 'No data available'}</p>
+      </div>
+    );
+  }
+
+  let cumulativePercent = 0;
+  
+  const getCoordinatesForPercent = (percent: number) => {
+    const x = Math.cos(2 * Math.PI * percent);
+    const y = Math.sin(2 * Math.PI * percent);
+    return [x, y];
+  };
 
   return (
-    <div className="h-48 sm:h-56 w-full flex items-end justify-between gap-1 pt-6 pb-2 px-1 relative">
-      <div className="absolute inset-0 flex flex-col justify-between pointer-events-none pb-6 opacity-30">
-         <div className="border-t border-black w-full h-0"></div>
-         <div className="border-t border-black w-full h-0"></div>
-         <div className="border-t border-black w-full h-0"></div>
-         <div className="border-t border-black w-full h-0"></div>
+    <div className="flex flex-col items-center">
+      <h3 className="font-bold text-sm mb-3 uppercase">{title}</h3>
+      <div className="flex items-center gap-4">
+        <svg width="120" height="120" viewBox="-1 -1 2 2" style={{ transform: 'rotate(-90deg)' }}>
+          {data.map((item, idx) => {
+            const percent = item.value / total;
+            const [startX, startY] = getCoordinatesForPercent(cumulativePercent);
+            cumulativePercent += percent;
+            const [endX, endY] = getCoordinatesForPercent(cumulativePercent);
+            const largeArcFlag = percent > 0.5 ? 1 : 0;
+            
+            const pathData = [
+              `M ${startX} ${startY}`,
+              `A 1 1 0 ${largeArcFlag} 1 ${endX} ${endY}`,
+              'L 0 0',
+            ].join(' ');
+            
+            return (
+              <path key={idx} d={pathData} fill={item.color} stroke="black" strokeWidth="0.02" />
+            );
+          })}
+        </svg>
+        <div className="flex flex-col gap-1">
+          {data.map((item, idx) => (
+            <div key={idx} className="flex items-center gap-2 text-xs">
+              <div className="w-3 h-3 border border-black" style={{ backgroundColor: item.color }}></div>
+              <span className="font-bold">{item.label}: {((item.value / total) * 100).toFixed(1)}%</span>
+            </div>
+          ))}
+        </div>
       </div>
-      
+    </div>
+  );
+};
+
+// Horizontal Bar Chart for Age Distribution
+const AgeBarChart = ({ data, lang }: { data: Array<{ age: string; impressions: number }>; lang: string }) => {
+  const maxValue = Math.max(...data.map(d => d.impressions), 1);
+  
+  if (data.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500 text-sm">{lang === 'vi' ? 'Chưa có dữ liệu' : 'No data available'}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      <h3 className="font-bold text-sm mb-3 uppercase text-center">
+        {lang === 'vi' ? 'PHÂN BỐ ĐỘ TUỔI' : 'AGE DISTRIBUTION'}
+      </h3>
       {data.map((item, idx) => (
-        <div key={idx} className="flex flex-col items-center gap-0.5 w-full h-full justify-end z-10 group relative">
-          <div className="flex items-end gap-[1px] w-full justify-center h-full">
-            <div style={{ height: `${item.c}%` }} className="w-3 sm:w-4 bg-black hover:bg-blue-600 transition-colors"></div>
+        <div key={idx} className="flex items-center gap-2">
+          <span className="text-xs font-bold w-12 text-right">{item.age}</span>
+          <div className="flex-1 h-5 bg-gray-200 border-2 border-black relative overflow-hidden">
+            <div 
+              className="h-full bg-blue-500 transition-all duration-500"
+              style={{ width: `${(item.impressions / maxValue) * 100}%` }}
+            ></div>
           </div>
-          <span className="text-[10px] sm:text-xs font-bold uppercase rotate-0">{item.m}</span>
+          <span className="text-xs font-bold w-14 text-right">{formatNumber(item.impressions)}</span>
         </div>
       ))}
     </div>
   );
 };
-
-const AdSetCard = ({ title, budget, clicks, ctr }: any) => (
-  <div className="relative mb-4 last:mb-0">
-    <div className="absolute top-1 left-1 w-full h-full bg-black rounded-sm z-0"></div>
-    <div className="relative bg-[#f5f5f4] border-4 border-black p-3 z-10 flex flex-col gap-2">
-      <h3 className="font-display font-bold text-xl uppercase truncate">{title}</h3>
-      <div className="flex justify-between items-end">
-         <div className="grid grid-cols-3 gap-x-4 gap-y-1 text-sm">
-            <div>
-               <p className="text-gray-500 text-xs">Tổng Ngân sách</p>
-               <p className="font-bold">{budget}</p>
-            </div>
-            <div>
-               <p className="text-gray-500 text-xs">Số lần nhấp</p>
-               <p className="font-bold">{clicks}</p>
-            </div>
-            <div>
-               <p className="text-gray-500 text-xs">CTR</p>
-               <p className="font-bold">{ctr}</p>
-            </div>
-         </div>
-         <button className="bg-blue-600 text-white border-2 border-black font-bold uppercase text-sm py-1 px-4 hover:bg-blue-700 shadow-hard-sm active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all">
-            XEM
-         </button>
-      </div>
-    </div>
-  </div>
-);
 
 const DashboardScreen: React.FC<DashboardScreenProps> = ({ onBack, onNavigate, userProfile }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -247,15 +276,46 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ onBack, onNavigate, u
               </div>
             </BrutalistCard>
 
-            <BrutalistCard variant="white" className="!p-3 sm:!p-5">
-              <h2 className="font-display font-bold text-xl mb-1 border-b-4 border-black inline-block bg-[#e5e5e5] px-2">
-                {lang === 'vi' ? 'CHI PHÍ QUẢNG CÁO THEO THÁNG' : 'MONTHLY AD SPEND'}
-              </h2>
-              <BarChart />
-              <p className="text-xs text-gray-500 mt-2 text-center italic">
-                * {lang === 'vi' ? 'Dữ liệu demo - Sẽ được cập nhật với insights thực tế' : 'Demo data - Will be updated with real insights'}
-              </p>
-            </BrutalistCard>
+            {/* Demographics Charts - Only from ACTIVE campaigns */}
+            {metrics.demographics && (metrics.demographics.byGender.length > 0 || metrics.demographics.byAge.length > 0) && (
+              <BrutalistCard variant="white" className="!p-3 sm:!p-5">
+                <h2 className="font-display font-bold text-xl mb-4 border-b-4 border-black inline-block bg-[#e5e5e5] px-2">
+                  <Users size={18} className="inline mr-2" />
+                  {lang === 'vi' ? 'ĐỐI TƯỢNG CHIẾN DỊCH ĐANG CHẠY' : 'ACTIVE CAMPAIGN AUDIENCE'}
+                </h2>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {/* Gender Pie Chart */}
+                  {metrics.demographics.byGender.length > 0 && (
+                    <PieChart 
+                      data={metrics.demographics.byGender.map(g => ({
+                        label: g.gender === 'male' ? (lang === 'vi' ? 'Nam' : 'Male') : 
+                               g.gender === 'female' ? (lang === 'vi' ? 'Nữ' : 'Female') : g.gender,
+                        value: g.impressions,
+                        color: g.gender === 'male' ? '#3B82F6' : g.gender === 'female' ? '#EC4899' : '#9CA3AF'
+                      }))}
+                      title={lang === 'vi' ? 'GIỚI TÍNH' : 'GENDER'}
+                      lang={lang}
+                    />
+                  )}
+                  
+                  {/* Age Bar Chart */}
+                  {metrics.demographics.byAge.length > 0 && (
+                    <AgeBarChart 
+                      data={metrics.demographics.byAge.map(a => ({
+                        age: a.age,
+                        impressions: a.impressions
+                      }))}
+                      lang={lang}
+                    />
+                  )}
+                </div>
+                
+                <p className="text-xs text-gray-500 mt-4 text-center">
+                  * {lang === 'vi' ? 'Chỉ tính từ chiến dịch đang hoạt động' : 'Only from active campaigns'}
+                </p>
+              </BrutalistCard>
+            )}
 
             <div>
                 <h2 className="font-display font-bold text-xl mb-3 uppercase pl-1">

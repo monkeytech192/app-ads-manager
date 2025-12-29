@@ -6,6 +6,27 @@ import { ScreenView } from '../types';
 import { useToast } from '../shared/Toast';
 import { useTranslation, type Language } from '../services/i18n';
 
+// SVG Flag Components for reliable display
+const VietnamFlag = () => (
+  <svg width="24" height="16" viewBox="0 0 900 600" className="border border-black/20">
+    <rect fill="#da251d" width="900" height="600"/>
+    <polygon fill="#ffff00" points="450,120 526,356 310,217 590,217 374,356"/>
+  </svg>
+);
+
+const USFlag = () => (
+  <svg width="24" height="16" viewBox="0 0 7410 3900" className="border border-black/20">
+    <rect fill="#bf0a30" width="7410" height="3900"/>
+    <rect fill="#fff" y="300" width="7410" height="300"/>
+    <rect fill="#fff" y="900" width="7410" height="300"/>
+    <rect fill="#fff" y="1500" width="7410" height="300"/>
+    <rect fill="#fff" y="2100" width="7410" height="300"/>
+    <rect fill="#fff" y="2700" width="7410" height="300"/>
+    <rect fill="#fff" y="3300" width="7410" height="300"/>
+    <rect fill="#002868" width="2964" height="2100"/>
+  </svg>
+);
+
 interface SettingsScreenProps {
   onBack: () => void;
   onNavigate: (view: ScreenView) => void;
@@ -65,7 +86,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, onNavigate }) =
                             lang === 'vi' ? 'bg-brutal-yellow' : 'bg-white hover:bg-gray-50'
                         }`}
                     >
-                        🇻🇳 {t('settings.vietnamese')}
+                        <VietnamFlag /> {t('settings.vietnamese')}
                     </button>
                     <button
                         onClick={() => handleLanguageChange('en')}
@@ -73,7 +94,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, onNavigate }) =
                             lang === 'en' ? 'bg-brutal-yellow' : 'bg-white hover:bg-gray-50'
                         }`}
                     >
-                        🇺🇸 {t('settings.english')}
+                        <USFlag /> {t('settings.english')}
                     </button>
                 </div>
             </div>
