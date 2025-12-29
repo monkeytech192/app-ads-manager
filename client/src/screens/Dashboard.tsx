@@ -149,11 +149,11 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ onBack, onNavigate, u
   const avatarUrl = userProfile?.picture?.data?.url || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=150&q=80";
   const userName = userProfile?.name || "Admin User";
 
-  // Avatar Component
-  const UserAvatar = () => (
+  // Avatar Component - Memoized to prevent unnecessary re-renders
+  const userAvatarElement = React.useMemo(() => (
     <div className="relative">
         <button 
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            onClick={() => setIsMenuOpen(prev => !prev)}
             className="w-10 h-10 border-2 border-black rounded-full overflow-hidden focus:outline-none hover:opacity-90 transition-opacity bg-gray-300"
         >
             <img 
@@ -162,39 +162,40 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ onBack, onNavigate, u
                 className="w-full h-full object-cover"
             />
         </button>
-
-        {isMenuOpen && (
-            <>
-                <div 
-                    className="fixed inset-0 z-40" 
-                    onClick={() => setIsMenuOpen(false)}
-                ></div>
-                <div className="absolute right-0 top-12 z-50 w-56 bg-white border-4 border-black shadow-hard p-1 animate-in fade-in zoom-in-95 duration-100">
-                    <div className="px-4 py-2 border-b-2 border-black mb-1">
-                        <p className="text-xs font-bold text-gray-500">{lang === 'vi' ? 'ĐĂNG NHẬP LÀ' : 'LOGGED IN AS'}</p>
-                        <p className="font-display font-bold text-lg truncate">{userName}</p>
-                    </div>
-                    <button 
-                        onClick={onBack} // Logout action
-                        className="w-full text-left px-4 py-2 font-bold hover:bg-red-50 hover:text-red-600 flex items-center gap-2 transition-colors"
-                    >
-                        <LogOut size={18} />
-                        {lang === 'vi' ? 'ĐĂNG XUẤT' : 'LOGOUT'}
-                    </button>
-                </div>
-            </>
-        )}
     </div>
-  );
+  ), [avatarUrl, userName]);
 
   return (
     <div className="flex flex-col h-full w-full"> 
+      
+      {/* User menu dropdown - Rendered outside header to prevent re-renders */}
+      {isMenuOpen && (
+        <>
+          <div 
+            className="fixed inset-0 z-40" 
+            onClick={() => setIsMenuOpen(false)}
+          ></div>
+          <div className="fixed right-4 top-14 z-50 w-56 bg-white border-4 border-black shadow-hard p-1 animate-in fade-in zoom-in-95 duration-100">
+            <div className="px-4 py-2 border-b-2 border-black mb-1">
+              <p className="text-xs font-bold text-gray-500">{lang === 'vi' ? 'ĐĂNG NHẬP LÀ' : 'LOGGED IN AS'}</p>
+              <p className="font-display font-bold text-lg truncate">{userName}</p>
+            </div>
+            <button 
+              onClick={onBack} // Logout action
+              className="w-full text-left px-4 py-2 font-bold hover:bg-red-50 hover:text-red-600 flex items-center gap-2 transition-colors"
+            >
+              <LogOut size={18} />
+              {lang === 'vi' ? 'ĐĂNG XUẤT' : 'LOGOUT'}
+            </button>
+          </div>
+        </>
+      )}
       
       <BrutalistHeader 
         title={lang === 'vi' ? 'Tổng quan Chiến dịch' : 'Campaign Overview'} 
         onBack={() => {}} 
         showBack={false} 
-        rightElement={<UserAvatar />}
+        rightElement={userAvatarElement}
       />
 
       <div className="flex-1 overflow-y-auto no-scrollbar p-2 sm:p-4 space-y-6">
