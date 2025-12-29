@@ -52,3 +52,19 @@ input, button, select, textarea {
   font-family: inherit;
   font-size: inherit;
 }
+
+/* Retro Background Classes */
+.bg-retro {
+  background-color: #d6d3d1;
+  background-image: url("https://www.transparenttextures.com/patterns/concrete-wall.png");
+}
+
+.bg-retro-dark {
+  background-color: #292524;
+  background-image: url("https://www.transparenttextures.com/patterns/concrete-wall.png");
+}
+
+.bg-retro-light {
+  background-color: #e7e5e4;
+  background-image: url("https://www.transparenttextures.com/patterns/concrete-wall.png");
+}

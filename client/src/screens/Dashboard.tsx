@@ -166,7 +166,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ onBack, onNavigate, u
   ), [avatarUrl, userName]);
 
   return (
-    <div className="flex flex-col h-full w-full"> 
+    <div className="flex flex-col h-full w-full bg-retro"> 
       
       {/* User menu dropdown - Rendered outside header to prevent re-renders */}
       {isMenuOpen && (

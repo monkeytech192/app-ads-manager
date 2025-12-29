@@ -162,7 +162,7 @@ const ComparisonScreen: React.FC<ComparisonScreenProps> = ({ onBack, onNavigate,
   const adSetBName = adSetsB.find(a => a.id === adSetB)?.name || '';
 
   return (
-    <div className="flex flex-col h-full w-full bg-[url('https://www.transparenttextures.com/patterns/graphy.png')]">
+    <div className="flex flex-col h-full w-full bg-retro">
       
       <BrutalistHeader 
         title={t('comparison.title')} 

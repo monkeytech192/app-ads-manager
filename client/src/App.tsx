@@ -393,14 +393,10 @@ const App = () => {
   // Authenticated Wrapper
   if (!isAuthScreen) {
     return (
-      <div className="fixed inset-0 w-full bg-[#1c1917] font-sans text-black overflow-hidden flex flex-col items-center justify-center">
-         {/* Background pattern for the desktop area */}
-         <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-[#1c1917] via-[#292524] to-[#1c1917] z-0"></div>
+      <div className="fixed inset-0 w-full bg-retro-dark font-sans text-black overflow-hidden flex flex-col items-center justify-center">
          
-         {/* Main App Shell - Fixed Size, Scroll happens INSIDE components */}}
-         <div className="relative z-10 w-full max-w-xl h-[100dvh] bg-[#d6d3d1] shadow-[0_0_50px_rgba(0,0,0,0.5)] border-x-4 border-black flex flex-col overflow-hidden">
-             {/* Inner texture for the app area */}
-             <div className="absolute inset-0 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/concrete-wall.png')] opacity-50 z-0 mix-blend-multiply h-full"></div>
+         {/* Main App Shell - Fixed Size, Scroll happens INSIDE components */}
+         <div className="relative z-10 w-full max-w-xl h-[100dvh] bg-retro shadow-[0_0_50px_rgba(0,0,0,0.5)] border-x-4 border-black flex flex-col overflow-hidden">
              
              {/* Content Area - Flex Grow to fill space */}
              <div className="flex-1 w-full h-full overflow-hidden relative z-10">
@@ -551,10 +547,9 @@ const App = () => {
 
   // Auth View (Login / Register)
   return (
-    <div className="fixed inset-0 w-full flex flex-col items-center justify-center bg-[#1c1917] font-sans text-black py-4">
-      <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-[#1c1917] via-[#292524] to-[#1c1917] z-0"></div>
+    <div className="fixed inset-0 w-full flex flex-col items-center justify-center bg-retro-dark font-sans text-black py-4">
 
-      <div className="h-full overflow-y-auto w-full max-w-md z-10 space-y-2 bg-[#e5e5e5] p-4 border-4 border-black shadow-[10px_10px_0px_0px_rgba(255,255,255,0.1)]">
+      <div className="h-full overflow-y-auto w-full max-w-md z-10 space-y-2 bg-retro p-4 border-4 border-black shadow-[10px_10px_0px_0px_rgba(255,255,255,0.1)]">
         <TextureOverlay />
         
         {/* Header */}

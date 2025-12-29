@@ -64,7 +64,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, onNavigate }) =
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-[#f5f5f4] bg-[url('https://www.transparenttextures.com/patterns/dust.png')]">
+    <div className="flex flex-col h-full w-full bg-retro">
       
       <BrutalistHeader 
         title={t('settings.title')} 

@@ -83,7 +83,7 @@ const ManagementScreen: React.FC<ManagementScreenProps> = ({
   const { t, lang } = useTranslation();
 
   return (
-    <div className="flex flex-col h-full w-full bg-[#e5e5e5]">
+    <div className="flex flex-col h-full w-full bg-retro">
       
       <BrutalistHeader 
         title={lang === 'vi' ? 'Quản Lý Tài Khoản & CD' : 'Account & Campaign Mgmt'} 

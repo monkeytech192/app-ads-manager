@@ -998,7 +998,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-[#0f172a] text-white font-sans">
+    <div className="flex flex-col h-full w-full bg-retro-dark text-white font-sans">
       
       <BrutalistHeader 
         title={t('detail.title')} 
@@ -1112,7 +1112,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
       {showAnalysis && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => !analysisLoading && setShowAnalysis(false)} />
-          <div className="relative bg-[#0f172a] border-4 border-brutal-yellow w-full sm:max-w-md max-h-[90vh] overflow-hidden shadow-[8px_8px_0px_0px_rgba(250,204,21,0.3)] sm:rounded-none flex flex-col">
+          <div className="relative bg-retro-dark border-4 border-brutal-yellow w-full sm:max-w-md max-h-[90vh] overflow-hidden shadow-[8px_8px_0px_0px_rgba(250,204,21,0.3)] sm:rounded-none flex flex-col">
             
             {/* Header - Brutalist */}
             <div className="bg-brutal-yellow p-4 border-b-4 border-black">

@@ -13,7 +13,7 @@ const RecommendationsScreen: React.FC<RecommendationsScreenProps> = ({ onNavigat
   const { t, lang } = useTranslation();
   
   return (
-    <div className="flex flex-col h-full w-full bg-[url('https://www.transparenttextures.com/patterns/graphy.png')]"> 
+    <div className="flex flex-col h-full w-full bg-retro"> 
       
       <BrutalistHeader 
         title={t('recommendations.title')} 
