@@ -5,7 +5,7 @@ import { CampaignData } from '../types';
 import { getCampaignInsights, getDemographicInsights, getPlacementInsights, getLocationInsights, formatNumber, type CampaignInsights, type DemographicData, type PlacementData, type LocationData } from '../services/apiService';
 import { formatCurrencyWithSettings, getCurrencySettings } from '../utils/currency';
 import { useTranslation } from '../services/i18n';
-import { analyzeCampaign, type CampaignAnalysisData } from '../services/aiService';
+import { analyzeCampaign, askAssistantWithContext, type CampaignAnalysisData, type CampaignContext } from '../services/aiService';
 
 interface CampaignDetailScreenProps {
   onBack: () => void;
@@ -42,6 +42,20 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [analysisLoading, setAnalysisLoading] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<string>('');
+  
+  // AI Chat state (with campaign context)
+  const [showAiChat, setShowAiChat] = useState(false);
+  const [chatQuery, setChatQuery] = useState('');
+  const [chatMessages, setChatMessages] = useState<Array<{role: 'user' | 'assistant', content: string}>>([]);
+  const [chatLoading, setChatLoading] = useState(false);
+  const chatContainerRef = React.useRef<HTMLDivElement>(null);
+  
+  // Auto scroll chat to bottom
+  React.useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [chatMessages, chatLoading]);
   
   const dateOptions = [
     { value: 'last_7d', label: t('detail.last7days') },
@@ -387,6 +401,82 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
     const result = await analyzeCampaign(analysisData, lang);
     setAnalysisResult(result);
     setAnalysisLoading(false);
+  };
+
+  // ==================== AI CHAT WITH CONTEXT ====================
+  const buildCampaignContext = (): CampaignContext => {
+    return {
+      // Thông tin cơ bản
+      campaignName: displayCampaign.title,
+      status: displayCampaign.status,
+      objective: displayCampaign.objective,
+      dateRange: selectedDateLabel,
+      
+      // Ngân sách
+      budget: budgetProgress.budget,
+      spent: budgetProgress.spent,
+      budgetProgress: budgetProgress.percentage,
+      remaining: budgetProgress.remaining,
+      
+      // Hiệu suất
+      impressions: parseInt(insights?.impressions || '0'),
+      clicks: parseInt(insights?.clicks || '0'),
+      reach: parseInt(insights?.reach || '0'),
+      ctr: parseFloat(insights?.ctr || '0'),
+      cpc: parseFloat(insights?.cpc || '0'),
+      cpm: parseFloat(insights?.cpm || '0'),
+      frequency: parseFloat(insights?.frequency || '0'),
+      
+      // Engagement
+      pageLikes,
+      pageEngagement,
+      postReactions,
+      postShares,
+      linkClicks: linkClicks?.toString(),
+      
+      // Video metrics
+      videoViews: videoViews?.toString(),
+      video25: video25?.toString(),
+      video50: video50?.toString(),
+      video75: video75?.toString(),
+      video100: video100?.toString(),
+      
+      // Demographics
+      demographics: processedDemographics.byGender.length > 0 ? processedDemographics : undefined,
+      
+      // Placements
+      placements: processedPlacements.length > 0 ? processedPlacements : undefined,
+      
+      // Locations
+      locations: processedLocations.length > 0 ? processedLocations.map(l => ({
+        country: 'VN',
+        region: l.region,
+        impressions: l.impressions,
+        clicks: l.clicks
+      })) : undefined,
+    };
+  };
+
+  const handleAiChat = async () => {
+    if (!chatQuery.trim()) return;
+    
+    const userMessage = chatQuery.trim();
+    setChatQuery(''); // Reset input immediately
+    setChatMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    setChatLoading(true);
+    
+    try {
+      const context = buildCampaignContext();
+      const result = await askAssistantWithContext(userMessage, context, lang);
+      setChatMessages(prev => [...prev, { role: 'assistant', content: result }]);
+    } catch (e) {
+      setChatMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: lang === 'vi' ? 'Lỗi kết nối. Vui lòng thử lại.' : 'Connection error. Please try again.' 
+      }]);
+    } finally {
+      setChatLoading(false);
+    }
   };
 
   // ==================== RENDER DATE DROPDOWN ====================
@@ -959,30 +1049,43 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
 
             {/* AI Analysis Button - Only on Overview */}
             {activeTab === 'overview' && insights && (
-              <button 
-                onClick={handleAIAnalysis}
-                disabled={analysisLoading}
-                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 border-4 border-black p-4 flex items-center justify-between shadow-hard active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all disabled:opacity-50"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="bg-black p-2">
-                    <Sparkles size={20} className="text-purple-400" />
+              <div className="flex gap-2">
+                <button 
+                  onClick={handleAIAnalysis}
+                  disabled={analysisLoading}
+                  className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 border-4 border-black p-4 flex items-center justify-between shadow-hard active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all disabled:opacity-50"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="bg-black p-2">
+                      <Sparkles size={20} className="text-purple-400" />
+                    </div>
+                    <div className="text-left text-white">
+                      <p className="font-bold text-sm uppercase">
+                        {lang === 'vi' ? 'Kết Luận AI' : 'AI Conclusion'}
+                      </p>
+                      <p className="text-xs font-medium opacity-80">
+                        {lang === 'vi' ? 'Phân tích tự động' : 'Auto analysis'}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-left text-white">
-                    <p className="font-bold text-sm uppercase">
-                      {lang === 'vi' ? 'Kết Luận AI' : 'AI Conclusion'}
-                    </p>
-                    <p className="text-xs font-medium opacity-80">
-                      {lang === 'vi' ? 'Phân tích hiệu quả chiến dịch bằng AI' : 'Analyze campaign effectiveness with AI'}
-                    </p>
+                  <div className="bg-black text-purple-400 px-3 py-1 text-xs font-bold uppercase">
+                    {analysisLoading 
+                      ? (lang === 'vi' ? '...' : '...') 
+                      : (lang === 'vi' ? 'Phân tích' : 'Analyze')}
                   </div>
-                </div>
-                <div className="bg-black text-purple-400 px-3 py-1 text-xs font-bold uppercase">
-                  {analysisLoading 
-                    ? (lang === 'vi' ? 'Đang phân tích...' : 'Analyzing...') 
-                    : (lang === 'vi' ? 'Phân tích' : 'Analyze')}
-                </div>
-              </button>
+                </button>
+                
+                {/* AI Chat Button */}
+                <button 
+                  onClick={() => setShowAiChat(true)}
+                  className="bg-brutal-yellow border-4 border-black p-4 flex flex-col items-center justify-center shadow-hard active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-black">
+                    <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>
+                  </svg>
+                  <span className="text-xs font-bold uppercase mt-1">{lang === 'vi' ? 'Hỏi AI' : 'Ask AI'}</span>
+                </button>
+              </div>
             )}
           </>
         )}
@@ -1153,6 +1256,131 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
                 </button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* AI Chat Modal with Campaign Context */}
+      {showAiChat && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="w-full sm:max-w-md bg-[#1a1a2e] border-4 border-black shadow-hard flex flex-col max-h-[85vh] sm:max-h-[70vh] animate-in slide-in-from-bottom duration-200">
+            {/* Header */}
+            <div className="flex items-center justify-between p-3 border-b-4 border-black bg-brutal-yellow">
+              <div className="flex items-center gap-2">
+                <div className="bg-black p-1.5">
+                  <Sparkles size={16} className="text-brutal-yellow" />
+                </div>
+                <div>
+                  <h3 className="font-display font-bold text-sm uppercase text-black">
+                    {lang === 'vi' ? 'Hỏi AI về chiến dịch' : 'Ask AI about campaign'}
+                  </h3>
+                  <p className="text-[10px] text-black/70 font-medium truncate max-w-[200px]">
+                    {displayCampaign.title}
+                  </p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowAiChat(false)}
+                className="bg-black text-brutal-yellow p-1.5 hover:bg-gray-800 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            
+            {/* Quick Questions */}
+            {chatMessages.length === 0 && (
+              <div className="p-3 border-b border-white/10 bg-black/30">
+                <p className="text-xs text-gray-400 mb-2 uppercase font-bold">{lang === 'vi' ? 'Gợi ý câu hỏi:' : 'Suggested questions:'}</p>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    lang === 'vi' ? 'Chiến dịch này hiệu quả không?' : 'Is this campaign effective?',
+                    lang === 'vi' ? 'Đối tượng nào tương tác nhiều nhất?' : 'Which audience engages most?',
+                    lang === 'vi' ? 'Nên tối ưu gì?' : 'What should I optimize?',
+                  ].map((q, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        setChatQuery(q);
+                      }}
+                      className="text-xs bg-white/10 text-gray-300 px-2 py-1 border border-white/20 hover:bg-white/20 hover:text-white transition-colors"
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Chat Messages Area */}
+            <div 
+              ref={chatContainerRef}
+              className="flex-1 overflow-y-auto p-4 space-y-3 min-h-[200px] max-h-[50vh]"
+            >
+              {chatMessages.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="w-14 h-14 mx-auto mb-3 bg-brutal-yellow/20 border-2 border-brutal-yellow flex items-center justify-center">
+                    <Sparkles size={28} className="text-brutal-yellow" />
+                  </div>
+                  <p className="text-gray-400 text-sm">
+                    {lang === 'vi' 
+                      ? 'Hỏi bất cứ điều gì về chiến dịch này!\nAI sẽ trả lời dựa trên dữ liệu thực tế.' 
+                      : 'Ask anything about this campaign!\nAI will answer based on real data.'}
+                  </p>
+                </div>
+              ) : (
+                chatMessages.map((msg, idx) => (
+                  <div 
+                    key={idx} 
+                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div className={`max-w-[85%] p-3 text-sm ${
+                      msg.role === 'user' 
+                        ? 'bg-brutal-yellow text-black border-2 border-black' 
+                        : 'bg-white/10 text-white border-2 border-white/20'
+                    }`}>
+                      <p className="whitespace-pre-wrap">{msg.content}</p>
+                    </div>
+                  </div>
+                ))
+              )}
+              {/* Loading indicator */}
+              {chatLoading && (
+                <div className="flex justify-start">
+                  <div className="bg-white/10 border-2 border-white/20 p-3">
+                    <div className="flex items-center gap-2">
+                      <div className="flex gap-1">
+                        <span className="w-2 h-2 bg-brutal-yellow rounded-full animate-bounce"></span>
+                        <span className="w-2 h-2 bg-brutal-yellow rounded-full animate-bounce [animation-delay:150ms]"></span>
+                        <span className="w-2 h-2 bg-brutal-yellow rounded-full animate-bounce [animation-delay:300ms]"></span>
+                      </div>
+                      <span className="text-xs text-gray-400">{lang === 'vi' ? 'Đang phân tích dữ liệu...' : 'Analyzing data...'}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Input Area */}
+            <div className="p-3 border-t-4 border-black bg-black/50">
+              <div className="flex gap-2">
+                <input 
+                  type="text"
+                  value={chatQuery}
+                  onChange={(e) => setChatQuery(e.target.value)}
+                  placeholder={lang === 'vi' ? 'Hỏi về chiến dịch này...' : 'Ask about this campaign...'}
+                  className="flex-1 bg-white/10 border-2 border-white/20 p-3 text-white text-sm focus:outline-none focus:border-brutal-yellow placeholder-gray-500"
+                  onKeyDown={(e) => e.key === 'Enter' && !chatLoading && handleAiChat()}
+                  disabled={chatLoading}
+                />
+                <button 
+                  onClick={handleAiChat}
+                  disabled={chatLoading || !chatQuery.trim()}
+                  className="bg-brutal-yellow border-2 border-black px-4 font-bold uppercase text-sm text-black hover:bg-yellow-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {lang === 'vi' ? 'Gửi' : 'Send'}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -32,6 +32,55 @@ export interface CampaignAnalysisData {
   dateRange: string;
 }
 
+export interface CampaignContext {
+  // Thông tin cơ bản
+  campaignName: string;
+  status: string;
+  objective: string;
+  dateRange: string;
+  
+  // Ngân sách
+  budget: number;
+  spent: number;
+  budgetProgress: number;
+  remaining: number;
+  
+  // Hiệu suất
+  impressions: number;
+  clicks: number;
+  reach: number;
+  ctr: number;
+  cpc: number;
+  cpm: number;
+  frequency: number;
+  
+  // Engagement
+  pageLikes?: string;
+  pageEngagement?: string;
+  postReactions?: string;
+  postShares?: string;
+  linkClicks?: string;
+  
+  // Video metrics
+  videoViews?: string;
+  video25?: string;
+  video50?: string;
+  video75?: string;
+  video100?: string;
+  
+  // Demographics (tóm tắt)
+  demographics?: {
+    byGender: Array<{ gender: string; impressions: number; clicks: number; spend: number }>;
+    byAge: Array<{ age: string; impressions: number; clicks: number; spend: number }>;
+  };
+  
+  // Placements (tóm tắt)
+  placements?: Array<{ name: string; impressions: number; clicks: number; spend: number }>;
+  
+  // Locations (tóm tắt)
+  locations?: Array<{ country: string; region?: string; impressions: number; clicks: number }>;
+}
+
 // ===================== PROMPTS =====================
 const buildAnalysisPrompt = (data: CampaignAnalysisData, language: 'vi' | 'en'): string => {
   if (language === 'vi') {
@@ -152,7 +201,7 @@ export const analyzeCampaign = async (
 };
 
 /**
- * Hỏi trợ lý AI
+ * Hỏi trợ lý AI (không có context)
  */
 export const askAssistant = async (question: string): Promise<string> => {
   const prompt = `Bạn là trợ lý ảo hữu ích cho ứng dụng 'Quản Lý Ads FB'. 
@@ -169,5 +218,144 @@ Câu hỏi: ${question}`;
   } catch (error: any) {
     console.error('OpenRouter Assistant Error:', error);
     return `❌ Lỗi kết nối: ${error.message}`;
+  }
+};
+
+/**
+ * Hỏi trợ lý AI với context chiến dịch
+ */
+export const askAssistantWithContext = async (
+  question: string, 
+  context: CampaignContext,
+  language: 'vi' | 'en' = 'vi'
+): Promise<string> => {
+  // Build demographics summary
+  let demographicsSummary = '';
+  if (context.demographics) {
+    const genderData = context.demographics.byGender.map(g => 
+      `${g.gender}: ${g.impressions.toLocaleString()} lượt hiển thị, ${g.clicks} clicks`
+    ).join('; ');
+    const ageData = context.demographics.byAge.slice(0, 5).map(a => 
+      `${a.age}: ${a.impressions.toLocaleString()} lượt hiển thị`
+    ).join('; ');
+    demographicsSummary = `
+- Theo giới tính: ${genderData || 'Chưa có dữ liệu'}
+- Theo độ tuổi: ${ageData || 'Chưa có dữ liệu'}`;
+  }
+
+  // Build placements summary
+  let placementsSummary = '';
+  if (context.placements && context.placements.length > 0) {
+    placementsSummary = context.placements.slice(0, 5).map(p => 
+      `${p.name}: ${p.impressions.toLocaleString()} hiển thị, ${p.clicks} clicks`
+    ).join('; ');
+  }
+
+  // Build locations summary
+  let locationsSummary = '';
+  if (context.locations && context.locations.length > 0) {
+    locationsSummary = context.locations.slice(0, 5).map(l => 
+      `${l.region || l.country}: ${l.impressions.toLocaleString()} hiển thị`
+    ).join('; ');
+  }
+
+  const prompt = language === 'vi' 
+    ? `Bạn là trợ lý AI chuyên về quảng cáo Facebook. Người dùng đang xem chiến dịch và hỏi bạn câu hỏi.
+
+📊 DỮ LIỆU CHIẾN DỊCH HIỆN TẠI (${context.dateRange}):
+
+THÔNG TIN CƠ BẢN:
+- Tên chiến dịch: ${context.campaignName}
+- Trạng thái: ${context.status === 'active' ? '🟢 Đang chạy' : '⏸️ Tạm dừng'}
+- Mục tiêu: ${context.objective}
+
+NGÂN SÁCH:
+- Tổng ngân sách: ${context.budget.toLocaleString('vi-VN')} VND
+- Đã chi tiêu: ${context.spent.toLocaleString('vi-VN')} VND (${context.budgetProgress}%)
+- Còn lại: ${context.remaining.toLocaleString('vi-VN')} VND
+
+HIỆU SUẤT:
+- Lượt hiển thị: ${context.impressions.toLocaleString()}
+- Tiếp cận: ${context.reach.toLocaleString()} người
+- Lượt click: ${context.clicks.toLocaleString()}
+- CTR (tỷ lệ click): ${context.ctr.toFixed(2)}%
+- CPC (chi phí/click): ${context.cpc.toLocaleString('vi-VN')} VND
+- CPM (chi phí/1000 hiển thị): ${context.cpm.toLocaleString('vi-VN')} VND
+- Tần suất hiển thị: ${context.frequency.toFixed(2)} lần/người
+
+TƯƠNG TÁC:
+- Like trang: ${context.pageLikes || '0'}
+- Tương tác trang: ${context.pageEngagement || '0'}
+- Reactions bài viết: ${context.postReactions || '0'}
+- Chia sẻ: ${context.postShares || '0'}
+- Click liên kết: ${context.linkClicks || '0'}
+
+VIDEO (nếu có):
+- Lượt xem video: ${context.videoViews || '0'}
+- Xem 25%: ${context.video25 || '0'} | 50%: ${context.video50 || '0'} | 75%: ${context.video75 || '0'} | 100%: ${context.video100 || '0'}
+
+ĐỐI TƯỢNG:${demographicsSummary || '\n- Chưa có dữ liệu demographics'}
+
+VỊ TRÍ HIỂN THỊ: ${placementsSummary || 'Chưa có dữ liệu'}
+
+ĐỊA ĐIỂM: ${locationsSummary || 'Chưa có dữ liệu'}
+
+---
+CÂU HỎI CỦA NGƯỜI DÙNG: ${question}
+
+Hãy trả lời dựa trên dữ liệu thực tế ở trên. Nếu câu hỏi liên quan đến chiến dịch, hãy dùng số liệu cụ thể. Trả lời ngắn gọn, dễ hiểu bằng tiếng Việt. Thân thiện nhưng chuyên nghiệp.`
+
+    : `You are an AI assistant specialized in Facebook advertising. The user is viewing a campaign and asking you questions.
+
+📊 CURRENT CAMPAIGN DATA (${context.dateRange}):
+
+BASIC INFO:
+- Campaign Name: ${context.campaignName}
+- Status: ${context.status === 'active' ? '🟢 Active' : '⏸️ Paused'}
+- Objective: ${context.objective}
+
+BUDGET:
+- Total Budget: $${(context.budget / 25000).toFixed(2)}
+- Spent: $${(context.spent / 25000).toFixed(2)} (${context.budgetProgress}%)
+- Remaining: $${(context.remaining / 25000).toFixed(2)}
+
+PERFORMANCE:
+- Impressions: ${context.impressions.toLocaleString()}
+- Reach: ${context.reach.toLocaleString()} people
+- Clicks: ${context.clicks.toLocaleString()}
+- CTR: ${context.ctr.toFixed(2)}%
+- CPC: $${(context.cpc / 25000).toFixed(2)}
+- CPM: $${(context.cpm / 25000).toFixed(2)}
+- Frequency: ${context.frequency.toFixed(2)} times/person
+
+ENGAGEMENT:
+- Page Likes: ${context.pageLikes || '0'}
+- Page Engagement: ${context.pageEngagement || '0'}
+- Post Reactions: ${context.postReactions || '0'}
+- Shares: ${context.postShares || '0'}
+- Link Clicks: ${context.linkClicks || '0'}
+
+VIDEO (if applicable):
+- Video Views: ${context.videoViews || '0'}
+- 25%: ${context.video25 || '0'} | 50%: ${context.video50 || '0'} | 75%: ${context.video75 || '0'} | 100%: ${context.video100 || '0'}
+
+---
+USER QUESTION: ${question}
+
+Answer based on the actual data above. If the question relates to the campaign, use specific numbers. Be concise and professional.`;
+
+  if (!OPENROUTER_API_KEY) {
+    return language === 'vi' 
+      ? "⚠️ Chưa cấu hình OpenRouter API Key.\n\n👉 Đăng ký miễn phí: https://openrouter.ai/keys"
+      : "⚠️ OpenRouter API Key not configured.";
+  }
+  
+  try {
+    return await callOpenRouter(prompt);
+  } catch (error: any) {
+    console.error('OpenRouter Assistant Error:', error);
+    return language === 'vi' 
+      ? `❌ Lỗi kết nối: ${error.message}`
+      : `❌ Connection error: ${error.message}`;
   }
 };

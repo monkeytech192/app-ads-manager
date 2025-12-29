@@ -2,6 +2,36 @@
 
 Tất cả thay đổi quan trọng của dự án sẽ được ghi lại trong file này.
 
+## [1.5.0] - 2025-12-29
+
+### ✨ Thêm Mới
+- **AI Chat với Context Chiến Dịch:**
+  - Nút "Hỏi AI" trong màn hình Chi tiết chiến dịch
+  - AI trả lời dựa trên dữ liệu thực tế của chiến dịch đang xem
+  - Hỗ trợ hỏi về demographics, placements, locations, budget, performance
+  - Gợi ý câu hỏi nhanh cho người dùng mới
+  - Lịch sử chat được lưu trong session
+
+- **Cải thiện Trợ Lý AI (App.tsx):**
+  - Chat interface mới với message bubbles
+  - Lịch sử tin nhắn (không mất sau khi gửi)
+  - Input reset ngay lập tức khi gửi tin
+  - Auto-scroll xuống tin nhắn mới
+  - Loading animation với 3 chấm nhảy
+  - Responsive: slide-up trên mobile, centered trên desktop
+
+### 🔄 Thay Đổi
+- Chuyển từ Gemini API sang OpenRouter API (ổn định hơn)
+- Sử dụng model `mistralai/devstral-2512:free` (miễn phí, không rate limit)
+- Cải thiện UI modal "Kết Luận AI" theo phong cách Brutalist
+- Format AI response với numbered items, bullets, bold text
+
+### 🐛 Sửa Lỗi
+- Fix chat không hiển thị tin nhắn user sau khi gửi
+- Fix input không reset sau khi gửi tin nhắn
+
+---
+
 ## [1.4.0] - 2025-12-29
 
 ### ✨ Thêm Mới
