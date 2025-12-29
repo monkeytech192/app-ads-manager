@@ -7,14 +7,16 @@
  * - qwen/qwen-2-7b-instruct:free
  * 
  * Đăng ký: https://openrouter.ai/keys
- * Cấu hình: OPENROUTER_API_KEY trong .env
+ * Cấu hình: Qua màn hình Cài đặt hoặc OPENROUTER_API_KEY trong .env
  */
 
 import { getCurrencySettings } from '../utils/currency';
 import { getObjectiveName } from '../utils/objective';
+import { getOpenRouterApiKey } from '../utils/aiSettings';
 
 // ===================== CONFIG =====================
-const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
+// Sử dụng API key từ settings hoặc fallback về env
+const getApiKey = () => getOpenRouterApiKey();
 const FREE_MODEL = 'mistralai/devstral-2512:free';
 
 // Helper: Format currency based on user settings (for AI prompts)
@@ -154,14 +156,15 @@ Answer in English, concise and clear.`;
 
 // ===================== OPENROUTER API CALL =====================
 const callOpenRouter = async (prompt: string): Promise<string> => {
-  if (!OPENROUTER_API_KEY) {
+  const apiKey = getApiKey();
+  if (!apiKey) {
     throw new Error('OPENROUTER_API_KEY not configured');
   }
   
   const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+      'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
       'HTTP-Referer': window.location.origin,
       'X-Title': 'FB Ads Manager'
@@ -191,11 +194,12 @@ export const analyzeCampaign = async (
   language: 'vi' | 'en'
 ): Promise<string> => {
   const prompt = buildAnalysisPrompt(data, language);
+  const apiKey = getApiKey();
   
-  if (!OPENROUTER_API_KEY) {
+  if (!apiKey) {
     return language === 'vi'
-      ? "⚠️ Chưa cấu hình OpenRouter API Key.\n\n👉 Đăng ký miễn phí tại: https://openrouter.ai/keys\n👉 Thêm OPENROUTER_API_KEY vào biến môi trường"
-      : "⚠️ OpenRouter API Key not configured.\n\n👉 Get free key at: https://openrouter.ai/keys\n👉 Add OPENROUTER_API_KEY to environment variables";
+      ? "⚠️ Chưa cấu hình API Key.\n\n👉 Vào Cài đặt → Bật AI → Nhập API Key"
+      : "⚠️ API Key not configured.\n\n👉 Go to Settings → Enable AI → Enter API Key";
   }
   
   try {
@@ -225,8 +229,9 @@ Trả lời ngắn gọn, súc tích bằng tiếng Việt.
 Phong cách trả lời: Thân thiện nhưng chuyên nghiệp.
 Câu hỏi: ${question}`;
 
-  if (!OPENROUTER_API_KEY) {
-    return "⚠️ Chưa cấu hình OpenRouter API Key.\n\n👉 Đăng ký miễn phí: https://openrouter.ai/keys";
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    return "⚠️ Chưa cấu hình API Key.\n\n👉 Vào Cài đặt → Bật AI → Nhập API Key";
   }
   
   try {
@@ -360,10 +365,11 @@ USER QUESTION: ${question}
 
 Answer based on the actual data above. If the question relates to the campaign, use specific numbers. Be concise and professional.`;
 
-  if (!OPENROUTER_API_KEY) {
+  const apiKey = getApiKey();
+  if (!apiKey) {
     return language === 'vi' 
-      ? "⚠️ Chưa cấu hình OpenRouter API Key.\n\n👉 Đăng ký miễn phí: https://openrouter.ai/keys"
-      : "⚠️ OpenRouter API Key not configured.";
+      ? "⚠️ Chưa cấu hình API Key.\n\n👉 Vào Cài đặt → Bật AI → Nhập API Key"
+      : "⚠️ API Key not configured.\n\n👉 Go to Settings → Enable AI → Enter API Key";
   }
   
   try {

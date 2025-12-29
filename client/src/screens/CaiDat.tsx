@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Eye, EyeOff, ExternalLink } from 'lucide-react';
 import { BrutalistButton, BrutalistToggle, BrutalistSlider, BrutalistHeader } from '../shared/UIComponents';
 import BottomNav from '../shared/BottomNav';
 import { ScreenView } from '../types';
 import { useToast } from '../shared/Toast';
 import { useTranslation, type Language } from '../services/i18n';
+import { getAISettings, saveAISettings, maskApiKey } from '../utils/aiSettings';
 
 // SVG Flag Components for reliable display
 const VietnamFlag = () => (
@@ -47,6 +48,21 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, onNavigate }) =
     return saved ? JSON.parse(saved).rate : 25000;
   });
 
+  // AI settings
+  const [aiEnabled, setAiEnabled] = useState(() => getAISettings().enabled);
+  const [aiApiKey, setAiApiKey] = useState(() => getAISettings().apiKey);
+  const [showApiKey, setShowApiKey] = useState(false);
+
+  // Listen for AI settings changes from other components
+  useEffect(() => {
+    const handleAiSettingsChange = (e: CustomEvent) => {
+      setAiEnabled(e.detail.enabled);
+      setAiApiKey(e.detail.apiKey);
+    };
+    window.addEventListener('aiSettingsChanged', handleAiSettingsChange as EventListener);
+    return () => window.removeEventListener('aiSettingsChanged', handleAiSettingsChange as EventListener);
+  }, []);
+
   // Save currency settings to localStorage
   const saveCurrencySettings = () => {
     const settings = {
@@ -55,6 +71,33 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, onNavigate }) =
     };
     localStorage.setItem('currencySettings', JSON.stringify(settings));
     showToast(t('settings.savedCurrency'), 'success');
+  };
+
+  // Handle AI toggle
+  const handleAiToggle = () => {
+    const newEnabled = !aiEnabled;
+    setAiEnabled(newEnabled);
+    if (!newEnabled) {
+      // If disabling, clear API key
+      setAiApiKey('');
+      saveAISettings({ enabled: false, apiKey: '' });
+      showToast(lang === 'vi' ? 'Đã tắt AI' : 'AI disabled', 'info');
+    } else {
+      saveAISettings({ enabled: true, apiKey: aiApiKey });
+      if (!aiApiKey) {
+        showToast(lang === 'vi' ? 'Bật AI - Nhập API Key để sử dụng' : 'AI enabled - Enter API Key to use', 'info');
+      }
+    }
+  };
+
+  // Save AI API Key
+  const saveAiApiKey = () => {
+    if (!aiApiKey.trim()) {
+      showToast(lang === 'vi' ? 'Vui lòng nhập API Key' : 'Please enter API Key', 'error');
+      return;
+    }
+    saveAISettings({ enabled: aiEnabled, apiKey: aiApiKey.trim() });
+    showToast(lang === 'vi' ? 'Đã lưu API Key' : 'API Key saved', 'success');
   };
 
   // Handle language change
@@ -189,6 +232,89 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, onNavigate }) =
                 >
                     {t('settings.saveCurrency')}
                 </BrutalistButton>
+            </div>
+        </div>
+
+        <hr className="border-2 border-black" />
+
+        {/* Section 4: AI Settings */}
+        <div>
+            <h2 className="font-display font-bold text-2xl uppercase mb-4">
+              {lang === 'vi' ? 'Trợ Lý AI' : 'AI Assistant'}
+            </h2>
+            
+            <div className="space-y-4">
+                {/* AI Toggle */}
+                <div className="flex items-center gap-4">
+                    <BrutalistToggle 
+                        checked={aiEnabled} 
+                        onChange={handleAiToggle}
+                        labelOn="ON"
+                        labelOff="OFF"
+                    />
+                    <span className="font-bold text-lg leading-tight">
+                      {lang === 'vi' ? 'Sử dụng AI' : 'Use AI'}
+                    </span>
+                </div>
+                
+                {/* API Key input - only show when AI is enabled */}
+                {aiEnabled && (
+                    <div className="space-y-3 p-4 border-4 border-black bg-white shadow-hard">
+                        <div>
+                            <label className="font-bold text-sm block mb-2 uppercase">
+                              OpenRouter API Key
+                            </label>
+                            <div className="flex gap-2">
+                                <div className="flex-1 border-4 border-black bg-white px-3 py-2 flex items-center">
+                                    <input
+                                        type={showApiKey ? "text" : "password"}
+                                        value={aiApiKey}
+                                        onChange={(e) => setAiApiKey(e.target.value)}
+                                        placeholder={lang === 'vi' ? 'Nhập API Key...' : 'Enter API Key...'}
+                                        className="w-full font-mono text-sm focus:outline-none"
+                                    />
+                                    <button
+                                        onClick={() => setShowApiKey(!showApiKey)}
+                                        className="ml-2 text-gray-500 hover:text-black"
+                                    >
+                                        {showApiKey ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    </button>
+                                </div>
+                            </div>
+                            {aiApiKey && (
+                                <p className="text-xs text-gray-500 mt-1 font-mono">
+                                    {lang === 'vi' ? 'Đã lưu' : 'Saved'}: {maskApiKey(aiApiKey)}
+                                </p>
+                            )}
+                        </div>
+
+                        <BrutalistButton 
+                            variant="green" 
+                            fullWidth
+                            onClick={saveAiApiKey}
+                        >
+                            {lang === 'vi' ? 'Lưu API Key' : 'Save API Key'}
+                        </BrutalistButton>
+
+                        <div className="pt-2 border-t-2 border-black/20">
+                            <a 
+                                href="https://openrouter.ai/keys" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 font-bold"
+                            >
+                                <ExternalLink size={14} />
+                                {lang === 'vi' ? 'Đăng ký API Key miễn phí tại OpenRouter' : 'Get free API Key at OpenRouter'}
+                            </a>
+                            <p className="text-xs text-gray-600 mt-1">
+                                {lang === 'vi' 
+                                    ? 'OpenRouter cung cấp nhiều model AI miễn phí. Đăng ký và tạo API key để sử dụng.'
+                                    : 'OpenRouter provides free AI models. Sign up and create an API key to use.'
+                                }
+                            </p>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
 

@@ -7,6 +7,7 @@ import { initFacebookSdk, loginWithFacebook, getFacebookUserProfile } from './se
 import { getAdAccounts, getCampaigns, getCampaignInsights } from './services/apiService';
 import { AdAccount, Campaign } from './services/apiService';
 import { getCurrencySettings } from './utils/currency';
+import { getAISettings, isAIConfigured } from './utils/aiSettings';
 import { useToast } from './shared/Toast';
 import DashboardScreen from './screens/Dashboard';
 import ManagementScreen from './screens/QuanLyChienDich';
@@ -269,6 +270,18 @@ const App = () => {
   const [loading, setLoading] = useState(false);
   const chatContainerRef = React.useRef<HTMLDivElement>(null);
   
+  // AI Settings - track if AI is configured
+  const [aiConfigured, setAiConfigured] = useState(() => isAIConfigured());
+  
+  // Listen for AI settings changes
+  useEffect(() => {
+    const handleAiSettingsChange = () => {
+      setAiConfigured(isAIConfigured());
+    };
+    window.addEventListener('aiSettingsChanged', handleAiSettingsChange);
+    return () => window.removeEventListener('aiSettingsChanged', handleAiSettingsChange);
+  }, []);
+  
   // Last viewed campaign context - persists across screens
   const [lastCampaignContext, setLastCampaignContext] = useState<CampaignContext | null>(null);
 
@@ -403,16 +416,18 @@ const App = () => {
                 {renderAuthenticatedContent()}
              </div>
 
-             {/* AI Button - Positioned absolute relative to app shell */}
-             <div className="absolute bottom-20 right-4 z-40">
-                <button 
-                    onClick={() => setIsAiOpen(true)}
-                    className="bg-black text-white p-3 rounded-full border-4 border-brutal-yellow shadow-hard hover:scale-110 transition-transform"
-                    title={lang === 'vi' ? (lastCampaignContext ? `Trợ lý AI - ${lastCampaignContext.campaignName}` : 'Trợ lý AI') : (lastCampaignContext ? `AI Assistant - ${lastCampaignContext.campaignName}` : 'AI Assistant')}
-                >
-                    <MessageCircleQuestion size={24} />
-                </button>
-             </div>
+             {/* AI Button - Only show when AI is configured */}
+             {aiConfigured && (
+               <div className="absolute bottom-20 right-4 z-40">
+                  <button 
+                      onClick={() => setIsAiOpen(true)}
+                      className="bg-black text-white p-3 rounded-full border-4 border-brutal-yellow shadow-hard hover:scale-110 transition-transform"
+                      title={lang === 'vi' ? (lastCampaignContext ? `Trợ lý AI - ${lastCampaignContext.campaignName}` : 'Trợ lý AI') : (lastCampaignContext ? `AI Assistant - ${lastCampaignContext.campaignName}` : 'AI Assistant')}
+                  >
+                      <MessageCircleQuestion size={24} />
+                  </button>
+               </div>
+             )}
 
               {/* Shared AI Modal - Chat Interface */}
               {isAiOpen && (
@@ -726,15 +741,17 @@ const App = () => {
 
       </div>
 
-      {/* Floating Action Button for AI Help (Auth) */}
-      <div className="fixed bottom-6 w-full max-w-md z-50 px-6 pointer-events-none flex justify-end">
-          <button 
-            onClick={() => setIsAiOpen(true)}
-            className="pointer-events-auto bg-black text-white p-4 rounded-full border-4 border-brutal-yellow shadow-hard hover:scale-110 transition-transform"
-          >
-            <MessageCircleQuestion size={28} />
-          </button>
-      </div>
+      {/* Floating Action Button for AI Help (Auth) - Only show when AI is configured */}
+      {aiConfigured && (
+        <div className="fixed bottom-6 w-full max-w-md z-50 px-6 pointer-events-none flex justify-end">
+            <button 
+              onClick={() => setIsAiOpen(true)}
+              className="pointer-events-auto bg-black text-white p-4 rounded-full border-4 border-brutal-yellow shadow-hard hover:scale-110 transition-transform"
+            >
+              <MessageCircleQuestion size={28} />
+            </button>
+        </div>
+      )}
 
       {/* AI Modal (Auth View) - Chat Interface */}
       {isAiOpen && (

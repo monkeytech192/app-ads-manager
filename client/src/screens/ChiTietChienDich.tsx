@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, AlertCircle, Users, TrendingUp, Wallet, BarChart3, MapPin, Layout, Sparkles, X } from 'lucide-react';
-import { BrutalistCard, BrutalistHeader } from '../shared/UIComponents';
+import { ChevronDown, AlertCircle, Users, TrendingUp, Wallet, BarChart3, MapPin, Layout, Sparkles, X, Eye, EyeOff, ExternalLink } from 'lucide-react';
+import { BrutalistCard, BrutalistHeader, BrutalistToggle, BrutalistButton } from '../shared/UIComponents';
 import { CampaignData } from '../types';
 import { getCampaignInsights, getDemographicInsights, getPlacementInsights, getLocationInsights, formatNumber, type CampaignInsights, type DemographicData, type PlacementData, type LocationData } from '../services/apiService';
 import { formatCurrencyWithSettings, getCurrencySettings } from '../utils/currency';
 import { useTranslation } from '../services/i18n';
 import { analyzeCampaign, type CampaignAnalysisData, type CampaignContext } from '../services/aiService';
 import { getObjectiveName } from '../utils/objective';
+import { getAISettings, saveAISettings, isAIConfigured, maskApiKey } from '../utils/aiSettings';
 
 interface CampaignDetailScreenProps {
   onBack: () => void;
@@ -44,6 +45,12 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [analysisLoading, setAnalysisLoading] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<string>('');
+  
+  // AI Config Modal state
+  const [showAIConfigModal, setShowAIConfigModal] = useState(false);
+  const [aiEnabled, setAiEnabled] = useState(() => getAISettings().enabled);
+  const [aiApiKey, setAiApiKey] = useState(() => getAISettings().apiKey);
+  const [showApiKey, setShowApiKey] = useState(false);
   
   const dateOptions = [
     { value: 'last_7d', label: t('detail.last7days') },
@@ -417,9 +424,41 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
   const totalPlacementImpressions = processedPlacements.reduce((sum, p) => sum + p.impressions, 0);
   const totalLocationImpressions = processedLocations.reduce((sum, l) => sum + l.impressions, 0);
 
+  // ==================== AI CONFIG HANDLERS ====================
+  const handleAiToggle = () => {
+    const newEnabled = !aiEnabled;
+    setAiEnabled(newEnabled);
+    if (!newEnabled) {
+      setAiApiKey('');
+      saveAISettings({ enabled: false, apiKey: '' });
+    } else {
+      saveAISettings({ enabled: true, apiKey: aiApiKey });
+    }
+  };
+
+  const saveAiApiKey = () => {
+    if (!aiApiKey.trim()) return;
+    saveAISettings({ enabled: aiEnabled, apiKey: aiApiKey.trim() });
+    // After saving, close modal and trigger analysis
+    setShowAIConfigModal(false);
+    if (isAIConfigured()) {
+      handleAIAnalysis();
+    }
+  };
+
   // ==================== AI ANALYSIS FUNCTION ====================
   const handleAIAnalysis = async () => {
     if (!insights || !campaign) return;
+    
+    // Check if AI is configured, if not show config modal
+    if (!isAIConfigured()) {
+      // Refresh state from localStorage
+      const settings = getAISettings();
+      setAiEnabled(settings.enabled);
+      setAiApiKey(settings.apiKey);
+      setShowAIConfigModal(true);
+      return;
+    }
     
     setAnalysisLoading(true);
     setShowAnalysis(true);
@@ -1271,6 +1310,118 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
                 </button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* AI Configuration Modal */}
+      {showAIConfigModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowAIConfigModal(false)} />
+          <div className="relative bg-white border-4 border-black w-full max-w-sm mx-4 shadow-hard">
+            
+            {/* Header */}
+            <div className="bg-brutal-yellow p-4 border-b-4 border-black">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="bg-black p-2">
+                    <Sparkles size={20} className="text-brutal-yellow" />
+                  </div>
+                  <h3 className="font-display font-bold text-lg uppercase text-black">
+                    {lang === 'vi' ? 'Cấu Hình AI' : 'AI Configuration'}
+                  </h3>
+                </div>
+                <button 
+                  onClick={() => setShowAIConfigModal(false)}
+                  className="bg-black text-brutal-yellow p-2 hover:bg-gray-900"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+            
+            {/* Content */}
+            <div className="p-4 space-y-4">
+              <p className="text-sm text-gray-700">
+                {lang === 'vi' 
+                  ? 'Để sử dụng tính năng phân tích AI, vui lòng bật AI và nhập API Key từ OpenRouter.'
+                  : 'To use AI analysis, please enable AI and enter your OpenRouter API Key.'
+                }
+              </p>
+
+              {/* AI Toggle */}
+              <div className="flex items-center gap-4 p-3 border-4 border-black bg-gray-50">
+                <BrutalistToggle 
+                  checked={aiEnabled} 
+                  onChange={handleAiToggle}
+                  labelOn="ON"
+                  labelOff="OFF"
+                />
+                <span className="font-bold text-lg">
+                  {lang === 'vi' ? 'Sử dụng AI' : 'Use AI'}
+                </span>
+              </div>
+              
+              {/* API Key input - only show when AI is enabled */}
+              {aiEnabled && (
+                <div className="space-y-3">
+                  <div>
+                    <label className="font-bold text-sm block mb-2 uppercase">
+                      OpenRouter API Key
+                    </label>
+                    <div className="flex gap-2">
+                      <div className="flex-1 border-4 border-black bg-white px-3 py-2 flex items-center">
+                        <input
+                          type={showApiKey ? "text" : "password"}
+                          value={aiApiKey}
+                          onChange={(e) => setAiApiKey(e.target.value)}
+                          placeholder={lang === 'vi' ? 'Nhập API Key...' : 'Enter API Key...'}
+                          className="w-full font-mono text-sm focus:outline-none"
+                        />
+                        <button
+                          onClick={() => setShowApiKey(!showApiKey)}
+                          className="ml-2 text-gray-500 hover:text-black"
+                        >
+                          {showApiKey ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                      </div>
+                    </div>
+                    {aiApiKey && (
+                      <p className="text-xs text-gray-500 mt-1 font-mono">
+                        {maskApiKey(aiApiKey)}
+                      </p>
+                    )}
+                  </div>
+
+                  <a 
+                    href="https://openrouter.ai/keys" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 font-bold"
+                  >
+                    <ExternalLink size={14} />
+                    {lang === 'vi' ? 'Đăng ký API Key miễn phí' : 'Get free API Key'}
+                  </a>
+                </div>
+              )}
+            </div>
+            
+            {/* Footer */}
+            <div className="p-4 border-t-4 border-black bg-gray-100 flex gap-3">
+              <button
+                onClick={() => setShowAIConfigModal(false)}
+                className="flex-1 bg-white text-black border-4 border-black font-bold py-3 uppercase shadow-hard active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+              >
+                {lang === 'vi' ? 'Hủy' : 'Cancel'}
+              </button>
+              <button
+                onClick={saveAiApiKey}
+                disabled={!aiEnabled || !aiApiKey.trim()}
+                className="flex-1 bg-brutal-yellow text-black border-4 border-black font-bold py-3 uppercase shadow-hard active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {lang === 'vi' ? 'Lưu & Phân tích' : 'Save & Analyze'}
+              </button>
+            </div>
           </div>
         </div>
       )}
