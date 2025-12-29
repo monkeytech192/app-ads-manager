@@ -10,9 +10,10 @@
 - 📊 **Dashboard Thời Gian Thực** - Theo dõi hiệu suất chiến dịch 
 - 🎯 **Quản Lý Chiến Dịch** - Tạo, sửa, xóa chiến dịch quảng cáo
 - 📈 **Phân Tích Chi Tiết** - Biểu đồ và số liệu chi tiết
-- 🤖 **Đề Xuất AI** - Tối ưu bằng Google Gemini (optional)
+- 🤖 **Trợ Lý AI** - Phân tích chiến dịch với AI (OpenRouter - miễn phí)
 - 📱 **PWA** - Cài đặt như app mobile
 - 🎨 **Giao diện Brutalist** - Thiết kế táo bạo, tối giản
+- 🌐 **Đa ngôn ngữ** - Hỗ trợ Tiếng Việt & English
 
 ### 🔑 Về Facebook Access Token
 
@@ -44,7 +45,11 @@ App sử dụng **2 loại token riêng biệt**:
 - MongoDB + Mongoose
 - JWT Authentication
 - Facebook Marketing API
-- Google Gemini AI (optional)
+
+### AI (Tùy chọn)
+- OpenRouter API (nhiều model miễn phí)
+- Model mặc định: `mistralai/devstral-2512:free`
+- User tự nhập API key trong Cài đặt
 
 ### Deploy
 - **Frontend & Backend**: Vercel / Railway / Netlify
@@ -82,6 +87,8 @@ App sử dụng **2 loại token riêng biệt**:
 | JWT Secret | `openssl rand -base64 32` |
 
 **LƯU Ý:** `FACEBOOK_ACCESS_TOKEN` là BẮT BUỘC để truy xuất dữ liệu quảng cáo!
+
+> 💡 **Về AI:** User tự nhập OpenRouter API Key trong app Cài đặt. Đăng ký miễn phí tại [openrouter.ai](https://openrouter.ai)
 
 ---
 
@@ -136,10 +143,11 @@ FACEBOOK_ACCESS_TOKEN=your_long_lived_facebook_access_token
 - Pause/Resume campaigns
 - Chi tiết metrics từng campaign
 
-### 4. Đề Xuất AI (Optional)
-- Suggestions từ Google Gemini
-- Tối ưu targeting & bidding
-- Cải thiện ad creative
+### 4. Trợ Lý AI (Tùy chọn)
+- Tự nhập API key OpenRouter trong Cài đặt
+- Chat với AI về chiến dịch đang xem
+- Phân tích hiệu quả và đề xuất cải thiện
+- Đăng ký miễn phí tại [openrouter.ai](https://openrouter.ai)
 
 ---
 
@@ -177,6 +185,18 @@ Mọi đóng góp đều được chào đón!
 ## 📝 License
 
 MIT License - Xem file [LICENSE.md](LICENSE.md)
+
+---
+
+## ☕ Ủng Hộ Dự Án
+
+Nếu ứng dụng này hữu ích với bạn, hãy cân nhắc ủng hộ tác giả một ly cà phê:
+
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/monkeytech)
+
+Hoặc quét mã QR MoMo/VNPay:
+
+> 💡 Mọi đóng góp đều giúp duy trì và phát triển dự án!
 
 ---
 

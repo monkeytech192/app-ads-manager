@@ -2,6 +2,33 @@
 
 Tất cả thay đổi quan trọng của dự án sẽ được ghi lại trong file này.
 
+## [1.5.4] - 2025-12-30
+
+### ✨ Thêm Mới
+- **Quản lý API Key AI trong Cài đặt:**
+  - Toggle bật/tắt sử dụng AI
+  - Input nhập OpenRouter API Key (chỉ hiển thị khi bật AI)
+  - Hiển thị trạng thái "Đã lưu" / "Chưa lưu" rõ ràng
+  - Link đăng ký API key miễn phí tại OpenRouter
+  - Thông báo bảo mật: API key chỉ lưu local, không gửi lên server
+
+- **Điều kiện hiển thị AI:**
+  - Chat bubble chỉ hiển thị khi AI đã được cấu hình
+  - Nút "Kết luận AI" hiển thị modal cấu hình nếu chưa có API key
+  - Không cần cấu hình API key trên Railway/server nữa
+
+### 🔄 Thay Đổi
+- **Chuyển từ server-side sang client-side AI:**
+  - User tự quản lý API key của mình
+  - Request AI gửi trực tiếp từ browser đến OpenRouter
+  - Tăng tính riêng tư và bảo mật cho user
+
+### 📚 Tài Liệu
+- Cập nhật README với thông tin AI mới (OpenRouter thay vì Gemini)
+- Thêm mục "Ủng hộ dự án" (Buy me a coffee)
+
+---
+
 ## [1.5.3] - 2025-12-29
 
 ### ✨ Thêm Mới

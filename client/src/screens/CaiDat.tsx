@@ -335,8 +335,8 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, onNavigate }) =
                             </p>
                             <p className="text-xs text-gray-600 mt-1">
                                 {lang === 'vi' 
-                                    ? '⚠️ Lưu ý: Bất kỳ ai có quyền truy cập vào máy tính của bạn có thể xem API key trong DevTools (F12 → Application → Local Storage).'
-                                    : '⚠️ Note: Anyone with access to your computer can view the API key in DevTools (F12 → Application → Local Storage).'
+                                    ? '⚠️ Lưu ý: Bất kỳ ai có quyền truy cập vào máy tính của bạn đều có thể xem và lấy API key trong DevTools (F12 → Application → Local Storage). Hãy đảm bảo bạn tin tưởng người dùng máy tính này.'
+                                    : '⚠️ Note: Anyone with access to your computer can view the API key in DevTools (F12 → Application → Local Storage). Make sure you trust the users of this computer.'
                                 }
                             </p>
                         </div>

@@ -12,7 +12,8 @@
 
 **Tùy chọn:**
 - `VITE_FB_CONFIG_ID` - Chỉ nếu dùng Business
-- `GEMINI_API_KEY` - Chỉ nếu dùng AI
+
+> 💡 **Về AI:** User tự nhập OpenRouter API Key trong app Cài đặt. Không cần cấu hình trên server.
 
 **LƯU Ý:** `FACEBOOK_ACCESS_TOKEN` là biến mới, BẮT BUỘC để truy xuất dữ liệu quảng cáo. Xem [FACEBOOK_LOGIN.md](docs/FACEBOOK_LOGIN.md) để biết cách lấy.
 
@@ -205,8 +206,10 @@ Xem [FACEBOOK_LOGIN.md - PHẦN 2](docs/FACEBOOK_LOGIN.md#-phần-2-setup-access
 MONGODB_URI=mongodb+srv://admin:jWYoqF3GQkkuMlY@cluster0.mongodb.net/ads-manager
 JWT_SECRET=uF9vQ3kA7L2mZP6D8sX4NwEJcH0R5YbT
 FACEBOOK_APP_SECRET=abc123def456ghi789jkl012mno345pq
-GEMINI_API_KEY=AIzaSy... (optional)
+FACEBOOK_ACCESS_TOKEN=EAAxxxxx_your_long_lived_token
 ```
+
+> 💡 **Lưu ý:** AI (OpenRouter) được cấu hình bởi user trong app Cài đặt, không cần biến môi trường trên server.
 
 ### Vercel Variables (Frontend)
 ```env

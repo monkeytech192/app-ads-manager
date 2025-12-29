@@ -617,7 +617,7 @@ const App = () => {
             <>
                 <BrutalistCard variant="white" className="relative group">
                 <h2 className="font-display font-bold text-5xl sm:text-6xl uppercase leading-[0.9] tracking-tight mb-4">
-                    {lang === 'vi' ? <>Kết nối dữ liệu <br/> quảng cáo.</> : <>Connect your <br/> ad data.</>}
+                    {lang === 'vi' ? <>Kết nối dữ liệu <br/> quảng cáo</> : <>Connect your <br/> ad data.</>}
                 </h2>
                 <p className="text-sm mb-4 border-l-4 border-black pl-3 py-2 bg-gray-100">
                     <strong>{lang === 'vi' ? 'Hỗ trợ cả 2 loại tài khoản:' : 'Support both account types:'}</strong><br/>
