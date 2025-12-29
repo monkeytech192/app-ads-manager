@@ -422,26 +422,32 @@ const App = () => {
           <div className="relative">
             <button 
               onClick={() => setShowLangMenu(!showLangMenu)}
-              className="bg-brutal-yellow border-2 border-black px-2 py-1 flex items-center gap-1 font-bold text-sm sm:text-base shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0.5 hover:shadow-none transition-all"
+              className="bg-brutal-yellow border-4 border-black px-3 py-2 flex items-center gap-2 font-bold text-base shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+              title={lang === 'vi' ? 'Đổi ngôn ngữ' : 'Change language'}
             >
-              <span>{lang === 'vi' ? '🇻🇳 VI' : '🇺🇸 EN'}</span>
-              <ChevronDown size={16} />
+              <span className="text-xl leading-none">{lang === 'vi' ? '🇻🇳' : '🇺🇸'}</span>
+              <ChevronDown size={14} className="text-black" />
             </button>
             {showLangMenu && (
-              <div className="absolute top-full right-0 mt-1 bg-white border-2 border-black shadow-hard z-50 min-w-[120px]">
-                <button
-                  onClick={() => { setLang('vi'); setShowLangMenu(false); }}
-                  className={`w-full px-3 py-2 text-left font-bold text-sm flex items-center gap-2 hover:bg-gray-100 ${lang === 'vi' ? 'bg-brutal-yellow' : ''}`}
-                >
-                  🇻🇳 Tiếng Việt
-                </button>
-                <button
-                  onClick={() => { setLang('en'); setShowLangMenu(false); }}
-                  className={`w-full px-3 py-2 text-left font-bold text-sm flex items-center gap-2 hover:bg-gray-100 ${lang === 'en' ? 'bg-brutal-yellow' : ''}`}
-                >
-                  🇺🇸 English
-                </button>
-              </div>
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowLangMenu(false)} />
+                <div className="absolute top-full right-0 mt-1 bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] z-50 min-w-[140px]">
+                  <button
+                    onClick={() => { setLang('vi'); setShowLangMenu(false); }}
+                    className={`w-full px-3 py-2.5 text-left font-bold text-sm flex items-center gap-3 border-b-2 border-black/20 hover:bg-gray-100 transition-colors ${lang === 'vi' ? 'bg-brutal-yellow' : ''}`}
+                  >
+                    <span className="text-xl">🇻🇳</span>
+                    <span>Tiếng Việt</span>
+                  </button>
+                  <button
+                    onClick={() => { setLang('en'); setShowLangMenu(false); }}
+                    className={`w-full px-3 py-2.5 text-left font-bold text-sm flex items-center gap-3 hover:bg-gray-100 transition-colors ${lang === 'en' ? 'bg-brutal-yellow' : ''}`}
+                  >
+                    <span className="text-xl">🇺🇸</span>
+                    <span>English</span>
+                  </button>
+                </div>
+              </>
             )}
           </div>
         </div>

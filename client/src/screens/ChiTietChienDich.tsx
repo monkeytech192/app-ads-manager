@@ -562,7 +562,51 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
     </div>
   );
 
-  // Render Placements Tab - NEW
+  // Helper function to get display name for placement - MOVED UP before usage
+  const getPlacementDisplayName = (platform: string, position: string, currentLang: string): string => {
+    const names: Record<string, Record<string, string>> = {
+      facebook: {
+        feed: currentLang === 'vi' ? 'Bảng tin Facebook' : 'Facebook Feed',
+        video_feeds: currentLang === 'vi' ? 'Video Feeds' : 'Video Feeds',
+        right_hand_column: currentLang === 'vi' ? 'Cột bên phải' : 'Right Column',
+        instant_article: currentLang === 'vi' ? 'Instant Article' : 'Instant Article',
+        marketplace: 'Marketplace',
+        story: currentLang === 'vi' ? 'Stories Facebook' : 'Facebook Stories',
+        search: currentLang === 'vi' ? 'Tìm kiếm' : 'Search',
+        reels: 'Facebook Reels',
+        facebook_reels: 'Facebook Reels',
+        instream_video: currentLang === 'vi' ? 'Video trong luồng' : 'In-stream Video',
+      },
+      instagram: {
+        stream: currentLang === 'vi' ? 'Bảng tin Instagram' : 'Instagram Feed',
+        story: currentLang === 'vi' ? 'Stories Instagram' : 'Instagram Stories',
+        explore: currentLang === 'vi' ? 'Khám phá' : 'Explore',
+        reels: 'Instagram Reels',
+        profile_feed: currentLang === 'vi' ? 'Profile Feed' : 'Profile Feed',
+      },
+      audience_network: {
+        classic: currentLang === 'vi' ? 'Audience Network' : 'Audience Network',
+        rewarded_video: currentLang === 'vi' ? 'Video có thưởng' : 'Rewarded Video',
+      },
+      messenger: {
+        messenger_inbox: currentLang === 'vi' ? 'Hộp thư Messenger' : 'Messenger Inbox',
+        story: currentLang === 'vi' ? 'Stories Messenger' : 'Messenger Stories',
+      }
+    };
+    
+    const platformNames = names[platform?.toLowerCase()] || {};
+    const positionName = platformNames[position?.toLowerCase()];
+    
+    if (positionName) return positionName;
+    
+    // Fallback: format the raw values
+    const formattedPlatform = platform?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || '';
+    const formattedPosition = position?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || '';
+    
+    return `${formattedPlatform} - ${formattedPosition}`;
+  };
+
+  // Render Placements Tab
   const renderPlacementsTab = () => {
     const isLoading = placementsLoading || locationsLoading;
     
@@ -711,50 +755,6 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
         )}
       </div>
     );
-  };
-
-  // Helper function to get display name for placement
-  const getPlacementDisplayName = (platform: string, position: string, lang: string): string => {
-    const names: Record<string, Record<string, string>> = {
-      facebook: {
-        feed: lang === 'vi' ? 'Bảng tin Facebook' : 'Facebook Feed',
-        video_feeds: lang === 'vi' ? 'Video Feeds' : 'Video Feeds',
-        right_hand_column: lang === 'vi' ? 'Cột bên phải' : 'Right Column',
-        instant_article: lang === 'vi' ? 'Instant Article' : 'Instant Article',
-        marketplace: 'Marketplace',
-        story: lang === 'vi' ? 'Stories Facebook' : 'Facebook Stories',
-        search: lang === 'vi' ? 'Tìm kiếm' : 'Search',
-        reels: 'Facebook Reels',
-        facebook_reels: 'Facebook Reels',
-        instream_video: lang === 'vi' ? 'Video trong luồng' : 'In-stream Video',
-      },
-      instagram: {
-        stream: lang === 'vi' ? 'Bảng tin Instagram' : 'Instagram Feed',
-        story: lang === 'vi' ? 'Stories Instagram' : 'Instagram Stories',
-        explore: lang === 'vi' ? 'Khám phá' : 'Explore',
-        reels: 'Instagram Reels',
-        profile_feed: lang === 'vi' ? 'Profile Feed' : 'Profile Feed',
-      },
-      audience_network: {
-        classic: lang === 'vi' ? 'Audience Network' : 'Audience Network',
-        rewarded_video: lang === 'vi' ? 'Video có thưởng' : 'Rewarded Video',
-      },
-      messenger: {
-        messenger_inbox: lang === 'vi' ? 'Hộp thư Messenger' : 'Messenger Inbox',
-        story: lang === 'vi' ? 'Stories Messenger' : 'Messenger Stories',
-      }
-    };
-    
-    const platformNames = names[platform?.toLowerCase()] || {};
-    const positionName = platformNames[position?.toLowerCase()];
-    
-    if (positionName) return positionName;
-    
-    // Fallback: format the raw values
-    const formattedPlatform = platform?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || '';
-    const formattedPosition = position?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || '';
-    
-    return `${formattedPlatform} - ${formattedPosition}`;
   };
 
   const renderBudgetTab = () => {
