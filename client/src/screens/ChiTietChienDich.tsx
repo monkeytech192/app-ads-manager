@@ -262,6 +262,99 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
 
   const totalImpressions = processedDemographics.byGender.reduce((sum, g) => sum + g.impressions, 0);
 
+  // Helper function to get display name for placement
+  const getPlacementDisplayName = (platform: string, position: string, currentLang: string): string => {
+    const names: Record<string, Record<string, string>> = {
+      facebook: {
+        feed: currentLang === 'vi' ? 'Bảng tin Facebook' : 'Facebook Feed',
+        video_feeds: currentLang === 'vi' ? 'Video Feeds' : 'Video Feeds',
+        right_hand_column: currentLang === 'vi' ? 'Cột bên phải' : 'Right Column',
+        instant_article: currentLang === 'vi' ? 'Instant Article' : 'Instant Article',
+        marketplace: 'Marketplace',
+        story: currentLang === 'vi' ? 'Stories Facebook' : 'Facebook Stories',
+        search: currentLang === 'vi' ? 'Tìm kiếm' : 'Search',
+        reels: 'Facebook Reels',
+        facebook_reels: 'Facebook Reels',
+        instream_video: currentLang === 'vi' ? 'Video trong luồng' : 'In-stream Video',
+      },
+      instagram: {
+        stream: currentLang === 'vi' ? 'Bảng tin Instagram' : 'Instagram Feed',
+        story: currentLang === 'vi' ? 'Stories Instagram' : 'Instagram Stories',
+        explore: currentLang === 'vi' ? 'Khám phá' : 'Explore',
+        reels: 'Instagram Reels',
+        profile_feed: currentLang === 'vi' ? 'Profile Feed' : 'Profile Feed',
+      },
+      audience_network: {
+        classic: currentLang === 'vi' ? 'Audience Network' : 'Audience Network',
+        rewarded_video: currentLang === 'vi' ? 'Video có thưởng' : 'Rewarded Video',
+      },
+      messenger: {
+        messenger_inbox: currentLang === 'vi' ? 'Hộp thư Messenger' : 'Messenger Inbox',
+        story: currentLang === 'vi' ? 'Stories Messenger' : 'Messenger Stories',
+      }
+    };
+    
+    const platformNames = names[platform?.toLowerCase()] || {};
+    const positionName = platformNames[position?.toLowerCase()];
+    
+    if (positionName) return positionName;
+    
+    // Fallback: format the raw values
+    const formattedPlatform = platform?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || '';
+    const formattedPosition = position?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || '';
+    
+    return `${formattedPlatform} - ${formattedPosition}`;
+  };
+
+  // Process placements data - MOVED TO COMPONENT LEVEL
+  type PlacementItem = { name: string; platform: string; position: string; impressions: number; clicks: number; spend: number };
+  
+  const processedPlacements = React.useMemo((): PlacementItem[] => {
+    if (!placements.length) return [];
+    
+    const grouped: Record<string, PlacementItem> = {};
+    
+    placements.forEach(p => {
+      const key = `${p.publisher_platform}_${p.platform_position}`;
+      const displayName = getPlacementDisplayName(p.publisher_platform, p.platform_position, lang);
+      
+      if (!grouped[key]) {
+        grouped[key] = {
+          name: displayName,
+          platform: p.publisher_platform,
+          position: p.platform_position,
+          impressions: 0,
+          clicks: 0,
+          spend: 0
+        };
+      }
+      
+      grouped[key].impressions += parseInt(p.impressions || '0');
+      grouped[key].clicks += parseInt(p.clicks || '0');
+      grouped[key].spend += parseFloat(p.spend || '0');
+    });
+    
+    return Object.values(grouped).sort((a, b) => b.impressions - a.impressions);
+  }, [placements, lang]);
+
+  // Process locations data - MOVED TO COMPONENT LEVEL
+  const processedLocations = React.useMemo(() => {
+    if (!locations.length) return [];
+    
+    return locations
+      .map(l => ({
+        region: l.region,
+        impressions: parseInt(l.impressions || '0'),
+        clicks: parseInt(l.clicks || '0'),
+        spend: parseFloat(l.spend || '0')
+      }))
+      .sort((a, b) => b.impressions - a.impressions)
+      .slice(0, 10);
+  }, [locations]);
+
+  const totalPlacementImpressions = processedPlacements.reduce((sum, p) => sum + p.impressions, 0);
+  const totalLocationImpressions = processedLocations.reduce((sum, l) => sum + l.impressions, 0);
+
   // ==================== RENDER DATE DROPDOWN ====================
   const renderDateDropdown = () => (
     <div className="relative">
@@ -562,104 +655,9 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, onN
     </div>
   );
 
-  // Helper function to get display name for placement - MOVED UP before usage
-  const getPlacementDisplayName = (platform: string, position: string, currentLang: string): string => {
-    const names: Record<string, Record<string, string>> = {
-      facebook: {
-        feed: currentLang === 'vi' ? 'Bảng tin Facebook' : 'Facebook Feed',
-        video_feeds: currentLang === 'vi' ? 'Video Feeds' : 'Video Feeds',
-        right_hand_column: currentLang === 'vi' ? 'Cột bên phải' : 'Right Column',
-        instant_article: currentLang === 'vi' ? 'Instant Article' : 'Instant Article',
-        marketplace: 'Marketplace',
-        story: currentLang === 'vi' ? 'Stories Facebook' : 'Facebook Stories',
-        search: currentLang === 'vi' ? 'Tìm kiếm' : 'Search',
-        reels: 'Facebook Reels',
-        facebook_reels: 'Facebook Reels',
-        instream_video: currentLang === 'vi' ? 'Video trong luồng' : 'In-stream Video',
-      },
-      instagram: {
-        stream: currentLang === 'vi' ? 'Bảng tin Instagram' : 'Instagram Feed',
-        story: currentLang === 'vi' ? 'Stories Instagram' : 'Instagram Stories',
-        explore: currentLang === 'vi' ? 'Khám phá' : 'Explore',
-        reels: 'Instagram Reels',
-        profile_feed: currentLang === 'vi' ? 'Profile Feed' : 'Profile Feed',
-      },
-      audience_network: {
-        classic: currentLang === 'vi' ? 'Audience Network' : 'Audience Network',
-        rewarded_video: currentLang === 'vi' ? 'Video có thưởng' : 'Rewarded Video',
-      },
-      messenger: {
-        messenger_inbox: currentLang === 'vi' ? 'Hộp thư Messenger' : 'Messenger Inbox',
-        story: currentLang === 'vi' ? 'Stories Messenger' : 'Messenger Stories',
-      }
-    };
-    
-    const platformNames = names[platform?.toLowerCase()] || {};
-    const positionName = platformNames[position?.toLowerCase()];
-    
-    if (positionName) return positionName;
-    
-    // Fallback: format the raw values
-    const formattedPlatform = platform?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || '';
-    const formattedPosition = position?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || '';
-    
-    return `${formattedPlatform} - ${formattedPosition}`;
-  };
-
   // Render Placements Tab
   const renderPlacementsTab = () => {
     const isLoading = placementsLoading || locationsLoading;
-    
-    // Process placements data
-    // Define placement item type
-    type PlacementItem = { name: string; platform: string; position: string; impressions: number; clicks: number; spend: number };
-    
-    const processedPlacements = React.useMemo((): PlacementItem[] => {
-      if (!placements.length) return [];
-      
-      // Group by platform and position
-      const grouped: Record<string, PlacementItem> = {};
-      
-      placements.forEach(p => {
-        const key = `${p.publisher_platform}_${p.platform_position}`;
-        const displayName = getPlacementDisplayName(p.publisher_platform, p.platform_position, lang);
-        
-        if (!grouped[key]) {
-          grouped[key] = {
-            name: displayName,
-            platform: p.publisher_platform,
-            position: p.platform_position,
-            impressions: 0,
-            clicks: 0,
-            spend: 0
-          };
-        }
-        
-        grouped[key].impressions += parseInt(p.impressions || '0');
-        grouped[key].clicks += parseInt(p.clicks || '0');
-        grouped[key].spend += parseFloat(p.spend || '0');
-      });
-      
-      return Object.values(grouped).sort((a, b) => b.impressions - a.impressions);
-    }, [placements, lang]);
-
-    // Process locations data
-    const processedLocations = React.useMemo(() => {
-      if (!locations.length) return [];
-      
-      return locations
-        .map(l => ({
-          region: l.region,
-          impressions: parseInt(l.impressions || '0'),
-          clicks: parseInt(l.clicks || '0'),
-          spend: parseFloat(l.spend || '0')
-        }))
-        .sort((a, b) => b.impressions - a.impressions)
-        .slice(0, 10); // Top 10 locations
-    }, [locations]);
-
-    const totalPlacementImpressions = processedPlacements.reduce((sum, p) => sum + p.impressions, 0);
-    const totalLocationImpressions = processedLocations.reduce((sum, l) => sum + l.impressions, 0);
 
     return (
       <div className="space-y-4">
