@@ -12,7 +12,7 @@
 
 // ===================== CONFIG =====================
 const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
-const FREE_MODEL = 'google/gemini-2.0-flash-exp:free';
+const FREE_MODEL = 'mistralai/devstral-2512:free';
 
 // ===================== TYPES =====================
 export interface CampaignAnalysisData {
