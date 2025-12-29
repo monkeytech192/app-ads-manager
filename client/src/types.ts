@@ -35,6 +35,7 @@ export interface CampaignData {
   accountId: string; // Added to link campaign to account
   title: string;
   status: 'active' | 'paused';
+  effectiveStatus?: 'ACTIVE' | 'PAUSED' | 'DELETED' | 'ARCHIVED' | 'IN_PROCESS' | 'WITH_ISSUES' | 'CAMPAIGN_PAUSED';
   budget: string;
   objective: string;
   progress: number;

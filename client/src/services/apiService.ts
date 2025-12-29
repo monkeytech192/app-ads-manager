@@ -88,6 +88,7 @@ export interface Campaign {
   name: string;
   objective: string;
   status: 'ACTIVE' | 'PAUSED' | 'DELETED' | 'ARCHIVED';
+  effective_status?: 'ACTIVE' | 'PAUSED' | 'DELETED' | 'ARCHIVED' | 'IN_PROCESS' | 'WITH_ISSUES' | 'CAMPAIGN_PAUSED';
   daily_budget?: string;
   lifetime_budget?: string;
   spend_cap?: string;

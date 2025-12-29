@@ -193,7 +193,7 @@ export const getCampaigns = async (req: Request, res: Response) => {
       `https://graph.facebook.com/v24.0/${ad_account_id}/campaigns`,
       {
         params: {
-          fields: 'id,name,objective,status,daily_budget,lifetime_budget,start_time,stop_time,created_time,updated_time',
+          fields: 'id,name,objective,status,effective_status,daily_budget,lifetime_budget,start_time,stop_time,created_time,updated_time',
           access_token: FACEBOOK_ACCESS_TOKEN // Dùng token từ .env
         }
       }

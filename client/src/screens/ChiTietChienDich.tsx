@@ -142,6 +142,7 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
       accountId: '',
       title: 'Chiến dịch không xác định',
       status: 'paused' as const,
+      effectiveStatus: undefined,
       budget: '0đ',
       objective: 'N/A',
       progress: 0,
@@ -152,8 +153,6 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
       dailyBudget: undefined,
       lifetimeBudget: undefined,
   };
-
-  const isPaused = displayCampaign.status === 'paused';
 
   // Helper function to get action value from actions array
   const getActionValue = (actionType: string): string => {
@@ -220,6 +219,77 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
   };
 
   const budgetProgress = calculateBudgetProgress();
+
+  // Determine display status based on effective_status and budget progress
+  // - ACTIVE + progress >= 100% = "Đã hoàn tất" (Completed)
+  // - PAUSED by user = "Tạm dừng" (Paused)
+  // - WITH_ISSUES = "Có vấn đề" (Issues)
+  // - ACTIVE = "Đang chạy" (Active)
+  type DisplayStatusType = 'active' | 'paused' | 'completed' | 'issues';
+  
+  const displayStatus = React.useMemo((): { type: DisplayStatusType; color: string } => {
+    const effectiveStatus = displayCampaign.effectiveStatus;
+    
+    // If status is PAUSED by user
+    if (displayCampaign.status === 'paused') {
+      return { type: 'paused', color: 'orange' };
+    }
+    
+    // Check effective_status for issues
+    if (effectiveStatus === 'WITH_ISSUES') {
+      return { type: 'issues', color: 'red' };
+    }
+    
+    // If budget progress is >= 100%, campaign is completed (phân phối đã hoàn tất)
+    if (budgetProgress.percentage >= 100) {
+      return { type: 'completed', color: 'blue' };
+    }
+    
+    // Otherwise, it's active
+    return { type: 'active', color: 'green' };
+  }, [displayCampaign.status, displayCampaign.effectiveStatus, budgetProgress.percentage]);
+  
+  const getStatusText = (): string => {
+    switch (displayStatus.type) {
+      case 'completed':
+        return lang === 'vi' ? 'ĐÃ HOÀN TẤT' : 'COMPLETED';
+      case 'paused':
+        return t('status.paused');
+      case 'issues':
+        return lang === 'vi' ? 'CÓ VẤN ĐỀ' : 'WITH ISSUES';
+      case 'active':
+      default:
+        return t('status.active');
+    }
+  };
+  
+  const getStatusColorClass = (): string => {
+    switch (displayStatus.type) {
+      case 'completed':
+        return 'text-blue-400';
+      case 'paused':
+        return 'text-orange-400';
+      case 'issues':
+        return 'text-red-400';
+      case 'active':
+      default:
+        return 'text-green-400';
+    }
+  };
+  
+  const getStatusDotClass = (): string => {
+    switch (displayStatus.type) {
+      case 'completed':
+        return 'bg-blue-500';
+      case 'paused':
+        return 'bg-orange-500';
+      case 'issues':
+        return 'bg-red-500';
+      case 'active':
+      default:
+        return 'bg-green-500';
+    }
+  };
 
   // Process demographics data
   const processedDemographics = React.useMemo(() => {
@@ -912,8 +982,8 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
           <div className="space-y-3">
             <div className="flex justify-between py-3 border-b-2 border-white/10">
               <span className="text-gray-400 uppercase text-sm">{t('management.status')}</span>
-              <span className={`font-bold ${isPaused ? 'text-orange-400' : 'text-green-400'}`}>
-                {isPaused ? t('status.paused') : t('status.active')}
+              <span className={`font-bold ${getStatusColorClass()}`}>
+                {getStatusText()}
               </span>
             </div>
             <div className="flex justify-between py-3 border-b-2 border-white/10">
@@ -971,9 +1041,9 @@ const CampaignDetailScreen: React.FC<CampaignDetailScreenProps> = ({ onBack, cam
             <div className="border-4 border-black bg-black p-4 shadow-hard">
               <h2 className="font-display font-bold text-2xl mb-2">{displayCampaign.title}</h2>
               <div className="flex items-center gap-2 text-sm">
-                <span className={`w-3 h-3 ${isPaused ? 'bg-orange-500' : 'bg-green-500'}`}></span>
-                <span className={`font-bold uppercase ${isPaused ? 'text-orange-500' : 'text-green-500'}`}>
-                    {isPaused ? t('status.paused') : t('status.active')}
+                <span className={`w-3 h-3 ${getStatusDotClass()}`}></span>
+                <span className={`font-bold uppercase ${getStatusColorClass()}`}>
+                    {getStatusText()}
                 </span>
                 <span className="text-gray-500">•</span>
                 <span className="text-gray-400 uppercase">{displayCampaign.objective}</span>

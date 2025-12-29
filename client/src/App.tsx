@@ -222,6 +222,7 @@ const App = () => {
             accountId: selectedAccounts[0].id,
             title: camp.name,
             status: camp.status.toLowerCase() === 'active' ? 'active' as const : 'paused' as const,
+            effectiveStatus: camp.effective_status,
             budget: formatBudgetDisplay(),
             objective: camp.objective || 'N/A',
             progress: progress,
